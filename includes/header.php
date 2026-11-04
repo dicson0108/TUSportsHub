@@ -6,6 +6,13 @@ $current_user = current_user();
 $current_page = basename($_SERVER['PHP_SELF']);
 $managed_clubs = $current_user ? get_user_managed_clubs($current_user['id']) : [];
 $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['role'] === 'admin');
+
+$css_map = [
+    'index.php' => 'home.css',
+    'login.php' => 'auth.css',
+    'register.php' => 'auth.css',
+];
+$page_css = $css_map[$current_page] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,14 +20,19 @@ $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['rol
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? e($page_title) . " · Taylor's SportsHub" : "Taylor's SportsHub · Student Sports & Club Sessions" ?></title>
+    <link rel="icon" type="image/x-icon" href="<?= APP_BASE_PATH ?>/favicon.ico">
+    <link rel="icon" type="image/png" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.png">
     <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/style.css">
+    <?php if ($page_css && file_exists(__DIR__ . '/../assets/css/' . $page_css)): ?>
+        <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/<?= e($page_css) ?>">
+    <?php endif; ?>
     <style>
         /* Apple-inspired fluid Navigation Bar */
         .site-nav {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.88);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(0, 0, 0, 0.08);
@@ -29,22 +41,57 @@ $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['rol
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0.85rem 1.5rem;
+            padding: 0.75rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        .brand-link {
-            text-decoration: none;
+        .brand-group {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            color: #c8102e;
-            font-size: 1.25rem;
-            font-weight: 700;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .brand-logo-img {
+            height: 38px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+        }
+        .brand-logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #c81e27 0%, #a6161e 100%);
+            color: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "New York", Georgia, serif;
+            font-weight: 900;
+            font-size: 21px;
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(200, 30, 39, 0.25);
+        }
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .brand-title {
+            font-size: 17.5px;
+            font-weight: 800;
+            color: #1d1d1f;
+            line-height: 1.1;
             letter-spacing: -0.02em;
         }
-        .brand-link span { color: #1d1d1f; font-weight: 600; }
+        .brand-subtitle {
+            font-size: 9px;
+            font-weight: 700;
+            color: #6e6e73;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
         .nav-links {
             display: flex;
             align-items: center;
@@ -64,6 +111,34 @@ $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['rol
             display: flex;
             align-items: center;
             gap: 0.75rem;
+        }
+        .nav-inbox-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #f5f5f7;
+            border: 1px solid #e5e5ea;
+            color: #1d1d1f;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .nav-inbox-btn:hover, .nav-inbox-btn.active {
+            background: #e8e8ed;
+            color: #c8102e;
+        }
+        .nav-inbox-dot {
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #c8102e;
+            border: 1.5px solid #fff;
         }
         .btn-nav-login {
             text-decoration: none;
@@ -184,8 +259,12 @@ $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['rol
 
 <header class="site-nav">
     <div class="nav-container">
-        <a href="<?= APP_BASE_PATH ?>/index.php" class="brand-link" aria-label="Taylor's SportsHub home">
-            <strong>Taylor's</strong> <span>SportsHub</span>
+        <a href="<?= APP_BASE_PATH ?>/index.php" class="brand-group" aria-label="Taylor's SportsHub Home">
+            <?= get_site_logo_html() ?>
+            <div class="brand-text">
+                <span class="brand-title">Taylor's</span>
+                <span class="brand-subtitle">SPORTS HUB</span>
+            </div>
         </a>
 
         <nav class="nav-links" aria-label="Main Navigation">
@@ -194,7 +273,6 @@ $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['rol
             <a href="<?= APP_BASE_PATH ?>/clubs.php" class="nav-item <?= in_array($current_page, ['clubs.php', 'club.php']) ? 'active' : '' ?>">Clubs</a>
             <?php if ($current_user): ?>
                 <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="nav-item <?= in_array($current_page, ['my-activities.php', 'payment.php', 'cancel-registration.php']) ? 'active' : '' ?>">My Activities</a>
-                <a href="<?= APP_BASE_PATH ?>/inbox.php" class="nav-item <?= $current_page === 'inbox.php' ? 'active' : '' ?>">Inbox <span style="font-size: 0.75rem; background: #f0f0f2; color: #6e6e73; padding: 2px 6px; border-radius: 980px;">Preview</span></a>
                 <?php if ($is_any_manager): ?>
                     <a href="<?= APP_BASE_PATH ?>/manager/sessions.php" class="nav-item <?= str_contains($_SERVER['SCRIPT_NAME'] ?? '', '/manager/') ? 'active' : '' ?>" style="color: #c8102e; font-weight: 600;">Club Manager</a>
                 <?php endif; ?>
@@ -203,7 +281,12 @@ $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['rol
 
         <div class="nav-auth-actions">
             <?php if ($current_user): ?>
-                <div class="user-pill" tabindex="0">
+                <a href="<?= APP_BASE_PATH ?>/inbox.php" class="nav-inbox-btn <?= $current_page === 'inbox.php' ? 'active' : '' ?>" title="Inbox notifications (Prototype preview)" aria-label="Inbox notifications">
+                    <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                    <span class="nav-inbox-dot" aria-hidden="true"></span>
+                </a>
+
+                <div class="user-pill" tabindex="0" aria-label="User profile menu">
                     <div class="user-avatar-badge"><?= get_initials($current_user['name']) ?></div>
                     <span><?= e($current_user['name']) ?></span>
                     <span style="font-size: 0.75rem; color: #86868b;">▾</span>

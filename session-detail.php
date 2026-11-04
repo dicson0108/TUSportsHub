@@ -38,22 +38,34 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 
     <!-- Main Detail Card -->
-    <div style="background: #fff; border-radius: 24px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 6px 24px rgba(0,0,0,0.04); padding: 2.5rem; margin-bottom: 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #c8102e; background: #fdf2f4; padding: 0.35rem 0.75rem; border-radius: 980px;">
-                    <?= e($session['sport_type']) ?>
-                </span>
-                <span style="font-size: 0.88rem; color: #86868b;">Hosted by <a href="<?= app_url('/club.php?id=' . $session['club_id']) ?>" style="color: #1d1d1f; font-weight: 600; text-decoration: none;"><?= e($session['club_name']) ?></a></span>
-            </div>
-            <div>
-                <?= get_status_badge($session['status']) ?>
+    <div style="background: #fff; border-radius: 24px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 6px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem;">
+        <!-- Session Photographic Hero Banner -->
+        <div style="position: relative; width: 100%; height: 280px; background: #141824; overflow: hidden;">
+            <img src="<?= e(get_session_cover_url($session)) ?>" alt="<?= e($session['title']) ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%); display: flex; align-items: flex-end; padding: 24px;">
+                <div style="color: #fff;">
+                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(200, 16, 46, 0.9); padding: 4px 10px; border-radius: 980px; display: inline-block; margin-bottom: 8px;">
+                        <?= e($session['sport_type']) ?>
+                    </span>
+                    <h2 style="font-size: 1.75rem; font-weight: 800; color: #fff; margin: 0 0 4px; letter-spacing: -0.02em; line-height: 1.2;">
+                        <?= e($session['title']) ?>
+                    </h2>
+                    <div style="font-size: 13.5px; color: #e5e7eb;">
+                        📍 <?= e($session['venue']) ?> · Hosted by <?= e($session['club_name']) ?>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <h1 style="font-size: 2.25rem; font-weight: 800; color: #1d1d1f; margin: 0 0 1.25rem; letter-spacing: -0.02em; line-height: 1.2;">
-            <?= e($session['title']) ?>
-        </h1>
+        <div style="padding: 2.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 0.88rem; color: #86868b;">Club: <a href="<?= app_url('/club.php?id=' . $session['club_id']) ?>" style="color: #1d1d1f; font-weight: 600; text-decoration: none;"><?= e($session['club_name']) ?></a></span>
+                </div>
+                <div>
+                    <?= get_status_badge($session['status']) ?>
+                </div>
+            </div>
 
         <!-- Key Details Grid -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; background: #fafafa; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">

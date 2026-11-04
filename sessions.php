@@ -93,38 +93,44 @@ $sports = $db->query("SELECT DISTINCT sport_type FROM sessions WHERE status = 'p
             <?php foreach ($sessions as $sess): ?>
                 <?php 
                 $seat_info = get_session_seat_info($sess['id']);
+                $cover_url = get_session_cover_url($sess);
                 ?>
-                <a href="<?= app_url('/session-detail.php?id=' . $sess['id']) ?>" style="background: #fff; border-radius: 18px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 18px rgba(0,0,0,0.04); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; color: inherit; transition: transform 0.15s ease, box-shadow 0.15s ease;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <span style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: #c8102e; background: #fdf2f4; padding: 0.3rem 0.65rem; border-radius: 980px;">
+                <a href="<?= app_url('/session-detail.php?id=' . $sess['id']) ?>" style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 18px rgba(0,0,0,0.04); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; color: inherit; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;">
+                    <div style="position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; background: #141824;">
+                        <img src="<?= e($cover_url) ?>" alt="<?= e($sess['title']) ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
+                        <div style="position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); padding: 0.3rem 0.65rem; border-radius: 980px;">
                                 <?= e($sess['sport_type']) ?>
                             </span>
-                            <span style="font-size: 0.95rem; font-weight: 700; color: #1d1d1f;">
+                            <span style="font-size: 0.88rem; font-weight: 700; color: #1d1d1f; background: #fff; padding: 0.3rem 0.75rem; border-radius: 980px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
                                 <?= format_price($sess['price']) ?>
                             </span>
                         </div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem; line-height: 1.3;">
-                            <?= e($sess['title']) ?>
-                        </h3>
-                        <div style="font-size: 0.88rem; color: #86868b; margin-bottom: 1rem;">
-                            Hosted by <?= e($sess['club_name']) ?>
-                        </div>
-                        <div style="font-size: 0.88rem; color: #424245; display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1.25rem;">
-                            <div>📅 <?= format_session_date($sess['session_date']) ?></div>
-                            <div>⏰ <?= format_session_time_range($sess['start_time'], $sess['end_time']) ?></div>
-                            <div>📍 <?= e($sess['venue']) ?></div>
-                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f2; padding-top: 1rem; font-size: 0.88rem;">
-                        <span style="font-weight: 600; color: <?= $seat_info['is_full'] ? '#d70015' : '#248a3d' ?>;">
-                            <?php if ($seat_info['is_full']): ?>
-                                Full (<?= $seat_info['capacity'] ?> / <?= $seat_info['capacity'] ?>)
-                            <?php else: ?>
-                                <?= $seat_info['seats_left'] ?> places left
-                            <?php endif; ?>
-                        </span>
-                        <span style="color: #c8102e; font-weight: 600;">View & Join →</span>
+                    <div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1; justify-content: space-between;">
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.4rem; line-height: 1.3;">
+                                <?= e($sess['title']) ?>
+                            </h3>
+                            <div style="font-size: 0.88rem; color: #86868b; margin-bottom: 0.85rem;">
+                                Hosted by <?= e($sess['club_name']) ?>
+                            </div>
+                            <div style="font-size: 0.88rem; color: #424245; display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1.25rem;">
+                                <div>📅 <?= format_session_date($sess['session_date']) ?></div>
+                                <div>⏰ <?= format_session_time_range($sess['start_time'], $sess['end_time']) ?></div>
+                                <div>📍 <?= e($sess['venue']) ?></div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f2; padding-top: 1rem; font-size: 0.88rem;">
+                            <span style="font-weight: 600; color: <?= $seat_info['is_full'] ? '#d70015' : '#248a3d' ?>;">
+                                <?php if ($seat_info['is_full']): ?>
+                                    Full (<?= $seat_info['capacity'] ?> / <?= $seat_info['capacity'] ?>)
+                                <?php else: ?>
+                                    <?= $seat_info['seats_left'] ?> places left
+                                <?php endif; ?>
+                            </span>
+                            <span style="color: #c8102e; font-weight: 600;">View & Join →</span>
+                        </div>
                     </div>
                 </a>
             <?php endforeach; ?>

@@ -113,3 +113,62 @@ function get_status_badge(string $status): string {
     [$label, $class] = $labels[$status] ?? [ucfirst(str_replace('_', ' ', $status)), 'badge-muted'];
     return '<span class="status-badge ' . $class . '">' . htmlspecialchars($label) . '</span>';
 }
+
+// Brand site logo HTML helper
+function get_site_logo_html(): string {
+    static $logo_html = null;
+    if ($logo_html !== null) {
+        return $logo_html;
+    }
+    $logo_path = '/assets/images/logo/logo.png';
+    if (file_exists(__DIR__ . '/..' . $logo_path)) {
+        $logo_html = '<img src="' . e(app_url($logo_path)) . '" alt="Taylor\'s University" class="brand-logo-img">';
+    } else {
+        $logo_html = '<div class="brand-logo-icon" aria-hidden="true">t</div>';
+    }
+    return $logo_html;
+}
+
+// Session cover image resolver
+function get_session_cover_url(array $session): string {
+    if (!empty($session['image_path'])) {
+        $p = '/' . ltrim($session['image_path'], '/');
+        if (file_exists(__DIR__ . '/..' . $p)) {
+            return app_url($p);
+        }
+    }
+    $id = (int)($session['id'] ?? 0);
+    $sport = strtolower($session['sport_type'] ?? '');
+    if ($sport === 'basketball') {
+        return app_url('/assets/images/sports/basketball-run.svg');
+    }
+    if ($id === 2 || str_contains(strtolower($session['title'] ?? ''), 'footwork')) {
+        return app_url('/assets/images/sports/badminton-footwork.png');
+    }
+    if ($id === 3 || str_contains(strtolower($session['title'] ?? ''), 'rally')) {
+        return app_url('/assets/images/sports/rally-poster.svg');
+    }
+    return app_url('/assets/images/sports/badminton-open-play.png');
+}
+
+// Club banner image resolver
+function get_club_banner_url(array $club): string {
+    if (!empty($club['banner_path'])) {
+        $p = '/' . ltrim($club['banner_path'], '/');
+        if (file_exists(__DIR__ . '/..' . $p)) {
+            return app_url($p);
+        }
+    }
+    $sport = strtolower($club['sport_type'] ?? '');
+    if ($sport === 'basketball') {
+        return app_url('/assets/images/sports/basketball-banner.svg');
+    }
+    return app_url('/assets/images/sports/badminton-banner.svg');
+}
+
+// Validate Taylor's University email domain
+function is_valid_taylors_email(string $email): bool {
+    $email = strtolower(trim($email));
+    return str_ends_with($email, '@sd.taylors.edu.my') || str_ends_with($email, '@taylors.edu.my');
+}
+

@@ -1,310 +1,282 @@
 <?php
-$page_title = "Home";
+$page_title = "Taylor's SportsHub · Student Sports & Club Sessions";
 require_once __DIR__ . '/includes/header.php';
 
 $db = get_db_connection();
 expire_overdue_reservations();
 
-// Fetch upcoming published sessions
-$stmt = $db->query("SELECT s.*, c.name AS club_name, c.slug AS club_slug, c.logo_path AS club_logo 
+// Fetch upcoming published sessions (active dates)
+$stmt = $db->query("SELECT s.*, c.name AS club_name, c.slug AS club_slug, c.logo_path AS club_logo, c.banner_path AS club_banner 
                     FROM sessions s 
                     INNER JOIN clubs c ON s.club_id = c.id 
                     WHERE s.status = 'published' AND CONCAT(s.session_date, ' ', s.start_time) >= NOW() 
-                    ORDER BY s.session_date ASC, s.start_time ASC 
-                    LIMIT 6");
-$upcoming_sessions = $stmt->fetchAll();
+                    ORDER BY s.session_date ASC, s.start_time ASC");
+$all_upcoming = $stmt->fetchAll();
 
-// Fetch active clubs
-$stmt = $db->query("SELECT c.*, (SELECT COUNT(*) FROM sessions s WHERE s.club_id = c.id AND s.status = 'published') AS session_count 
+// If none in the future (demo safe fallback), show published sessions
+if (empty($all_upcoming)) {
+    $stmt = $db->query("SELECT s.*, c.name AS club_name, c.slug AS club_slug, c.logo_path AS club_logo, c.banner_path AS club_banner 
+                        FROM sessions s 
+                        INNER JOIN clubs c ON s.club_id = c.id 
+                        WHERE s.status = 'published' 
+                        ORDER BY s.session_date ASC, s.start_time ASC");
+    $all_upcoming = $stmt->fetchAll();
+}
+
+$spotlight = !empty($all_upcoming) ? $all_upcoming[0] : null;
+$spotlight_seats = $spotlight ? get_session_seat_info((int)$spotlight['id']) : null;
+
+// Display top 3 for the home cards grid
+$upcoming_sessions = array_slice($all_upcoming, 0, 3);
+
+// Fetch active clubs with session count & manager name
+$stmt = $db->query("SELECT c.*, 
+                    (SELECT COUNT(*) FROM sessions s WHERE s.club_id = c.id AND s.status = 'published') AS session_count,
+                    (SELECT u.name FROM club_managers cm INNER JOIN users u ON cm.user_id = u.id WHERE cm.club_id = c.id LIMIT 1) AS manager_name
                     FROM clubs c 
                     WHERE c.status = 'active' 
                     ORDER BY c.name ASC");
 $clubs = $stmt->fetchAll();
 ?>
 
-<style>
-    .hero-section {
-        background: radial-gradient(circle at 80% 20%, rgba(200, 16, 46, 0.08) 0%, rgba(255, 255, 255, 0) 60%), #ffffff;
-        border-bottom: 1px solid rgba(0,0,0,0.06);
-        padding: 5rem 1.5rem 4rem;
-        text-align: center;
-    }
-    .hero-container { max-width: 860px; margin: 0 auto; }
-    .hero-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.4rem 0.9rem;
-        background: #fdf2f4;
-        color: #c8102e;
-        border-radius: 980px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-    }
-    .hero-title {
-        font-size: 3.25rem;
-        line-height: 1.1;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        color: #1d1d1f;
-        margin: 0 0 1.25rem;
-    }
-    .hero-title span { color: #c8102e; }
-    .hero-subtitle {
-        font-size: 1.2rem;
-        color: #6e6e73;
-        line-height: 1.5;
-        max-width: 640px;
-        margin: 0 auto 2.5rem;
-    }
-    .hero-ctas {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-    .btn-hero-primary {
-        background: #c8102e;
-        color: #fff;
-        text-decoration: none;
-        padding: 0.85rem 1.75rem;
-        border-radius: 980px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: transform 0.1s ease, background 0.15s ease;
-    }
-    .btn-hero-primary:hover { background: #a60d26; transform: translateY(-1px); }
-    .btn-hero-secondary {
-        background: #f5f5f7;
-        color: #1d1d1f;
-        text-decoration: none;
-        padding: 0.85rem 1.75rem;
-        border-radius: 980px;
-        font-weight: 600;
-        font-size: 1rem;
-        border: 1px solid #d2d2d7;
-        transition: background 0.15s ease;
-    }
-    .btn-hero-secondary:hover { background: #e8e8ed; }
+<div class="app-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
 
-    /* Content Layout */
-    .section-wrap {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 4rem 1.5rem;
-    }
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 2rem;
-    }
-    .section-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1d1d1f;
-        letter-spacing: -0.02em;
-        margin: 0 0 0.35rem;
-    }
-    .section-desc { font-size: 0.95rem; color: #6e6e73; margin: 0; }
-    .section-link {
-        color: #c8102e;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.95rem;
-    }
-    .section-link:hover { text-decoration: underline; }
+    <!-- Hero Section (Matching 26TUEventManagement Apple-Calibrated Layout) -->
+    <section class="hero-section" style="padding: 48px 0 24px 0;">
+        <div class="hero-grid">
+            <div>
+                <div class="section-label">YOUR CAMPUS. YOUR COURT. / 2026</div>
+                <h1 class="hero-heading">Get back<br>in the game.</h1>
+                <p class="hero-lead">
+                    Friendly rallies, new connections and a clear plan. Discover free and paid sessions from Taylor's Sports Clubs.
+                </p>
 
-    /* Session Grid Cards */
-    .session-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-        gap: 1.75rem;
-    }
-    .session-card {
-        background: #ffffff;
-        border-radius: 18px;
-        border: 1px solid rgba(0,0,0,0.06);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-        padding: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-        text-decoration: none;
-        color: inherit;
-    }
-    .session-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-        border-color: rgba(200, 16, 46, 0.2);
-    }
-    .card-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    .sport-tag {
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #c8102e;
-        background: #fdf2f4;
-        padding: 0.3rem 0.65rem;
-        border-radius: 980px;
-    }
-    .price-tag {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #1d1d1f;
-    }
-    .card-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #1d1d1f;
-        margin: 0 0 0.5rem;
-        line-height: 1.3;
-    }
-    .card-club {
-        font-size: 0.88rem;
-        color: #86868b;
-        margin-bottom: 1rem;
-        font-weight: 500;
-    }
-    .card-meta {
-        font-size: 0.88rem;
-        color: #424245;
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-        margin-bottom: 1.25rem;
-    }
-    .card-bottom {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-top: 1px solid #f0f0f2;
-        padding-top: 1rem;
-        font-size: 0.88rem;
-    }
-    .seats-count {
-        font-weight: 600;
-        color: #248a3d;
-    }
-    .seats-count.low { color: #d70015; }
+                <form action="<?= APP_BASE_PATH ?>/sessions.php" method="GET" class="hero-search-bar" role="search">
+                    <svg class="hero-search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" name="q" placeholder="Find your next session, sport or club..." class="hero-search-input" aria-label="Search sessions">
+                    <button type="submit" class="hero-search-btn" aria-label="Explore sessions">
+                        <span>Explore</span>
+                        <svg class="hero-btn-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                </form>
 
-    /* Clubs Grid */
-    .club-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
-    }
-    .club-card {
-        background: #ffffff;
-        border-radius: 18px;
-        padding: 1.5rem;
-        border: 1px solid rgba(0,0,0,0.06);
-        box-shadow: 0 4px 18px rgba(0,0,0,0.03);
-        text-decoration: none;
-        color: inherit;
-        transition: transform 0.15s ease;
-    }
-    .club-card:hover { transform: translateY(-2px); }
-    .club-card-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #1d1d1f;
-        margin: 0 0 0.5rem;
-    }
-    .club-card-desc {
-        font-size: 0.88rem;
-        color: #6e6e73;
-        line-height: 1.5;
-        margin: 0 0 1rem;
-    }
-</style>
-
-<section class="hero-section">
-    <div class="hero-container">
-        <div class="hero-pill">🏸 Taylor's University SportsHub</div>
-        <h1 class="hero-title">Play. Train. <span>Compete.</span></h1>
-        <p class="hero-subtitle">
-            The official portal for Taylor's student sports sessions. Reserve individual spots in social games, training clinics, and club tournaments.
-        </p>
-        <div class="hero-ctas">
-            <a href="<?= APP_BASE_PATH ?>/sessions.php" class="btn-hero-primary">Explore Sessions</a>
-            <a href="<?= APP_BASE_PATH ?>/clubs.php" class="btn-hero-secondary">View Sports Clubs</a>
-        </div>
-    </div>
-</section>
-
-<section class="section-wrap">
-    <div class="section-header">
-        <div>
-            <h2 class="section-title">Upcoming Sessions</h2>
-            <p class="section-desc">Join open social sessions and structured coaching</p>
-        </div>
-        <a href="<?= APP_BASE_PATH ?>/sessions.php" class="section-link">View all sessions →</a>
-    </div>
-
-    <div class="session-grid">
-        <?php if (empty($upcoming_sessions)): ?>
-            <p style="color: #6e6e73; grid-column: 1/-1;">No upcoming sessions scheduled right now. Check back soon!</p>
-        <?php else: ?>
-            <?php foreach ($upcoming_sessions as $sess): ?>
-                <?php 
-                $seat_info = get_session_seat_info($sess['id']);
-                ?>
-                <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $sess['id'] ?>" class="session-card">
-                    <div>
-                        <div class="card-top">
-                            <span class="sport-tag"><?= e($sess['sport_type']) ?></span>
-                            <span class="price-tag"><?= format_price($sess['price']) ?></span>
-                        </div>
-                        <h3 class="card-title"><?= e($sess['title']) ?></h3>
-                        <div class="card-club">Hosted by <?= e($sess['club_name']) ?></div>
-                        <div class="card-meta">
-                            <div>📅 <?= format_session_date($sess['session_date']) ?></div>
-                            <div>⏰ <?= format_session_time_range($sess['start_time'], $sess['end_time']) ?></div>
-                            <div>📍 <?= e($sess['venue']) ?></div>
-                        </div>
-                    </div>
-                    <div class="card-bottom">
-                        <span class="seats-count <?= $seat_info['seats_left'] <= 3 ? 'low' : '' ?>">
-                            <?= $seat_info['seats_left'] ?> <?= $seat_info['seats_left'] === 1 ? 'place' : 'places' ?> left (of <?= $seat_info['capacity'] ?>)
-                        </span>
-                        <span style="color: #c8102e; font-weight: 600;">Details →</span>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
-</section>
-
-<section class="section-wrap" style="background: #fafafa; border-radius: 24px; margin-bottom: 2rem;">
-    <div class="section-header">
-        <div>
-            <h2 class="section-title">Campus Sports Clubs</h2>
-            <p class="section-desc">Appointed student leaders and regular training communities</p>
-        </div>
-        <a href="<?= APP_BASE_PATH ?>/clubs.php" class="section-link">All clubs →</a>
-    </div>
-
-    <div class="club-grid">
-        <?php foreach ($clubs as $club): ?>
-            <a href="<?= APP_BASE_PATH ?>/club.php?id=<?= $club['id'] ?>" class="club-card">
-                <span class="sport-tag" style="margin-bottom: 0.75rem; display: inline-block;"><?= e($club['sport_type']) ?></span>
-                <h3 class="club-card-title"><?= e($club['name']) ?></h3>
-                <p class="club-card-desc"><?= e($club['description']) ?></p>
-                <div style="font-size: 0.85rem; color: #86868b;">
-                    <?= $club['session_count'] ?> active <?= $club['session_count'] === 1 ? 'session' : 'sessions' ?> available
+                <div class="hero-quick-tags" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 18px;">
+                    <span class="quick-tags-label" style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Quick find:</span>
+                    <a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Badminton" class="quick-tag-chip" style="font-size: 12.5px; padding: 4px 10px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 980px; text-decoration: none; color: #1d1d1f;">🏸 Badminton</a>
+                    <a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Basketball" class="quick-tag-chip" style="font-size: 12.5px; padding: 4px 10px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 980px; text-decoration: none; color: #1d1d1f;">🏀 Basketball</a>
+                    <a href="<?= APP_BASE_PATH ?>/sessions.php?price=free" class="quick-tag-chip" style="font-size: 12.5px; padding: 4px 10px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 980px; text-decoration: none; color: #1d1d1f;">✨ Free Sessions</a>
                 </div>
+
+                <div class="hero-search-sub" style="font-size: 12.5px; color: var(--text-muted); margin-top: 14px;">
+                    Individual signup · Taylor's students · Malaysia Time
+                </div>
+            </div>
+
+            <?php if ($spotlight): ?>
+                <div class="spotlight-card">
+                    <div style="position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: #141824;">
+                        <img src="<?= e(get_session_cover_url($spotlight)) ?>" alt="<?= e($spotlight['title']) ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                        <div style="position: absolute; top: 16px; left: 16px;">
+                            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); color: #fff; padding: 4px 10px; border-radius: 980px;">
+                                <?= e($spotlight['sport_type']) ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="spotlight-info-bar">
+                        <div>
+                            <div class="spotlight-label" style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #fecdd3; text-transform: uppercase; margin-bottom: 2px;">Next on court</div>
+                            <div style="font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 3px;"><?= e($spotlight['title']) ?></div>
+                            <div class="spotlight-meta" style="font-size: 12.5px; color: #d4d4da;">
+                                <?= e(format_session_date($spotlight['session_date'])) ?> · <?= e(format_price($spotlight['price'])) ?> · <?= $spotlight_seats['seats_left'] ?> places left
+                            </div>
+                        </div>
+                        <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $spotlight['id'] ?>" class="spotlight-cta-btn" style="background: #fff; color: #1d1d1f; padding: 8px 16px; border-radius: 980px; text-decoration: none; font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                            <span>Explore session</span>
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Wayfinding Tiles (From UIUX Designs) -->
+    <section class="wayfinding-grid" aria-label="Campus Sports Wayfinding">
+        <a href="<?= APP_BASE_PATH ?>/sessions.php" class="wayfinding-tile">
+            <div class="wayfinding-tile-title">
+                <span>Find a session</span>
+                <span style="color: #c8102e;">→</span>
+            </div>
+            <div class="wayfinding-tile-desc">Free and paid individual sports sessions.</div>
+        </a>
+        <a href="<?= APP_BASE_PATH ?>/clubs.php" class="wayfinding-tile">
+            <div class="wayfinding-tile-title">
+                <span>Campus sports clubs</span>
+                <span style="color: #c8102e;">→</span>
+            </div>
+            <div class="wayfinding-tile-desc">Meet official clubs. All abilities welcome.</div>
+        </a>
+        <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="wayfinding-tile">
+            <div class="wayfinding-tile-title">
+                <span>Track your place</span>
+                <span style="color: #c8102e;">→</span>
+            </div>
+            <div class="wayfinding-tile-desc">Registration, payment and cancellation status.</div>
+        </a>
+    </section>
+
+    <!-- Upcoming Sessions Section (Replaced 'Coming up on court') -->
+    <section style="margin-bottom: 56px;">
+        <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <div class="section-label">FIND YOUR NEXT SESSION</div>
+                <h2 class="section-title" style="font-size: 28px; font-weight: 800; letter-spacing: -0.025em; color: #1d1d1f; margin: 0 0 4px;">Upcoming sessions</h2>
+                <p class="section-desc" style="font-size: 15px; color: #6e6e73; margin: 0;">Pick a session, check the details and reserve your place.</p>
+            </div>
+            <a href="<?= APP_BASE_PATH ?>/sessions.php" style="color: #c8102e; font-weight: 600; text-decoration: none; font-size: 14.5px; display: inline-flex; align-items: center; gap: 4px;">
+                <span>View all sessions</span>
+                <span>→</span>
             </a>
-        <?php endforeach; ?>
-    </div>
-</section>
+        </div>
+
+        <div class="session-cards-grid">
+            <?php foreach ($upcoming_sessions as $session): 
+                $seats = get_session_seat_info((int)$session['id']);
+                $cover_url = get_session_cover_url($session);
+            ?>
+                <article class="session-card">
+                    <div class="session-card-media">
+                        <img src="<?= e($cover_url) ?>" alt="<?= e($session['title']) ?>" loading="lazy">
+                        <div class="session-card-badge-row">
+                            <span style="background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 980px; letter-spacing: 0.05em; text-transform: uppercase;">
+                                <?= e($session['sport_type']) ?>
+                            </span>
+                            <span style="background: #ffffff; color: #1d1d1f; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 980px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
+                                <?= format_price($session['price']) ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="session-card-content">
+                        <h3 class="session-card-title"><?= e($session['title']) ?></h3>
+                        <div class="session-card-meta">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                            <span><?= e(format_session_date($session['session_date'])) ?> · <?= e(format_session_time($session['start_time'])) ?></span>
+                        </div>
+                        <div class="session-card-venue">
+                            📍 <?= e($session['venue']) ?>
+                        </div>
+                        <div class="session-card-footer">
+                            <div style="font-size: 13px; font-weight: 600; color: <?= $seats['is_full'] ? '#d70015' : '#248a3d' ?>;">
+                                <?= $seats['is_full'] ? 'Session Full' : $seats['seats_left'] . ' of ' . $seats['capacity'] . ' places left' ?>
+                            </div>
+                            <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $session['id'] ?>" class="btn-primary" style="padding: 7px 16px; font-size: 13.5px; text-decoration: none; border-radius: 980px; background: #c8102e; color: #fff; font-weight: 600;">
+                                View session →
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- Campus Sports Clubs Section -->
+    <section style="margin-bottom: 56px;">
+        <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <div class="section-label">CAMPUS COMMUNITY</div>
+                <h2 class="section-title" style="font-size: 28px; font-weight: 800; letter-spacing: -0.025em; color: #1d1d1f; margin: 0 0 4px;">Campus sports clubs</h2>
+                <p class="section-desc" style="font-size: 15px; color: #6e6e73; margin: 0;">Approved student sports clubs organizing regular campus sessions.</p>
+            </div>
+            <a href="<?= APP_BASE_PATH ?>/clubs.php" style="color: #c8102e; font-weight: 600; text-decoration: none; font-size: 14.5px; display: inline-flex; align-items: center; gap: 4px;">
+                <span>All sports clubs</span>
+                <span>→</span>
+            </a>
+        </div>
+
+        <div class="club-cards-grid">
+            <?php foreach ($clubs as $club): 
+                $club_banner = get_club_banner_url($club);
+            ?>
+                <article class="club-card">
+                    <div class="club-card-banner">
+                        <img src="<?= e($club_banner) ?>" alt="<?= e($club['name']) ?>" loading="lazy">
+                        <div style="position: absolute; bottom: 12px; left: 16px;">
+                            <span style="background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 980px; text-transform: uppercase;">
+                                <?= e($club['sport_type']) ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="club-card-body">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                            <h3 style="font-size: 19px; font-weight: 700; color: #1d1d1f; margin: 0;"><?= e($club['name']) ?></h3>
+                        </div>
+                        <p style="font-size: 14px; color: #6e6e73; line-height: 1.5; margin: 0 0 16px; flex: 1;">
+                            <?= e($club['description']) ?>
+                        </p>
+                        <div style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <span style="font-size: 12.5px; color: #86868b; font-weight: 500;">
+                                <?= $club['session_count'] ?> active <?= $club['session_count'] === 1 ? 'session' : 'sessions' ?>
+                            </span>
+                            <a href="<?= APP_BASE_PATH ?>/club.php?id=<?= $club['id'] ?>" style="color: #c8102e; font-size: 13.5px; font-weight: 600; text-decoration: none;">
+                                View Club Profile →
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <!-- More Than A Session Section (From UIUX Designs) -->
+    <section style="margin-bottom: 32px;">
+        <div class="community-invite-banner">
+            <div class="community-invite-left">
+                <span class="community-invite-eyebrow">MORE THAN A SESSION</span>
+                <h2 class="community-invite-title">Find your people.<br>Make your next rally.</h2>
+                <p class="community-invite-lead">
+                    From your first practice to your next regular game, join at your pace. Your student account keeps every session in one place.
+                </p>
+                <div>
+                    <?php if ($current_user): ?>
+                        <a href="<?= APP_BASE_PATH ?>/sessions.php" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 980px; background: #c8102e; color: #fff; text-decoration: none; font-weight: 600; font-size: 14.5px;">
+                            <span>Explore all sessions</span>
+                            <span>→</span>
+                        </a>
+                    <?php else: ?>
+                        <a href="<?= APP_BASE_PATH ?>/register.php" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 980px; background: #c8102e; color: #fff; text-decoration: none; font-weight: 600; font-size: 14.5px;">
+                            <span>Create student account</span>
+                            <span>→</span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="community-invite-right">
+                <div class="community-invite-stat-title">One club.<br>More time to play.</div>
+                <div class="community-invite-stat-desc">Free and paid individual sessions. No membership required.</div>
+            </div>
+        </div>
+
+        <!-- 3-Step Journey Strip -->
+        <div class="journey-steps-grid">
+            <div class="journey-step-item">
+                <span class="journey-step-num">01 /</span>
+                <h4 class="journey-step-title">Discover your session</h4>
+                <p class="journey-step-desc">Check the venue, Malaysia time, price and available places.</p>
+            </div>
+            <div class="journey-step-item">
+                <span class="journey-step-num">02 /</span>
+                <h4 class="journey-step-title">Reserve your place</h4>
+                <p class="journey-step-desc">Free sessions confirm immediately. Paid sessions need a receipt and organiser review.</p>
+            </div>
+            <div class="journey-step-item">
+                <span class="journey-step-num">03 /</span>
+                <h4 class="journey-step-title">Keep track</h4>
+                <p class="journey-step-desc">My Activities shows payment decisions, confirmation and cancellation progress.</p>
+            </div>
+        </div>
+    </section>
+
+</div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

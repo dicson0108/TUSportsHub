@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="100%" height="100%">
+  <defs>
+    <linearGradient id="rallyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="40%" stop-color="#7c3aed"/>
+      <stop offset="80%" stop-color="#c026d3"/>
+      <stop offset="100%" stop-color="#c81e27"/>
+    </linearGradient>
+    <radialGradient id="meshGrad" cx="30%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
+    </radialGradient>
+  </defs>
+  <rect width="1000" height="700" fill="url(#rallyGrad)"/>
+  <rect width="1000" height="700" fill="url(#meshGrad)"/>
+  
+  <g font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif">
+    <text x="50" y="70" fill="#ffffff" font-size="14" font-weight="700" letter-spacing="4" opacity="0.9">TAYLOR'S / BADMINTON CLUB</text>
+    <text x="950" y="70" fill="#ffffff" font-size="14" font-weight="700" letter-spacing="2" opacity="0.9" text-anchor="end">2026</text>
+    
+    <text x="50" y="240" fill="#ffffff" font-size="92" font-weight="900" letter-spacing="-3" line-height="0.9">WEEKEND</text>
+    <text x="50" y="325" fill="#fef08a" font-size="92" font-weight="900" letter-spacing="-3">RALLY</text>
+    
+    <line x1="50" y1="370" x2="950" y2="370" stroke="#ffffff" stroke-width="2" opacity="0.3"/>
+    
+    <text x="50" y="440" fill="#ffffff" font-size="24" font-weight="600">Friendly rallies. Individual signup. All abilities welcome.</text>
+    
+    <g transform="translate(50, 560)">
+      <text x="0" y="0" fill="#ffffff" font-size="14" font-weight="700" letter-spacing="2" opacity="0.75">DATE &amp; TIME</text>
+      <text x="0" y="26" fill="#ffffff" font-size="20" font-weight="800">28 NOV 2026 ↗</text>
+      <text x="0" y="50" fill="#ffffff" font-size="14" opacity="0.85">10:00 AM – 12:00 PM MYT</text>
+      
+      <text x="350" y="0" fill="#ffffff" font-size="14" font-weight="700" letter-spacing="2" opacity="0.75">VENUE</text>
+      <text x="350" y="26" fill="#ffffff" font-size="20" font-weight="800">SPORTS COMPLEX</text>
+      <text x="350" y="50" fill="#ffffff" font-size="14" opacity="0.85">Courts 1 to 4</text>
+      
+      <text x="650" y="0" fill="#ffffff" font-size="14" font-weight="700" letter-spacing="2" opacity="0.75">REGISTRATION</text>
+      <text x="650" y="26" fill="#ffffff" font-size="20" font-weight="800">RM 15.00</text>
+      <text x="650" y="50" fill="#ffffff" font-size="14" opacity="0.85">Includes shuttlecocks</text>
+    </g>
+  </g>
+</svg>
