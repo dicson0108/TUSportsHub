@@ -44,6 +44,7 @@ $end_val = $session['end_time'] ?? ($_POST['end_time'] ?? '20:00');
 $price_val = isset($session['price']) ? (float)$session['price'] : (float)($_POST['price'] ?? 0.00);
 $capacity_val = $session['capacity'] ?? (int)($_POST['capacity'] ?? 16);
 $desc_val = $session['description'] ?? ($_POST['description'] ?? '');
+$image_path_val = $session['image_path'] ?? ($_POST['image_path'] ?? 'assets/images/sports/badminton-open-play.webp');
 
 $is_published = ($session && $session['status'] === 'published');
 
@@ -61,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $price_val = max(0.00, (float)($_POST['price'] ?? 0.00));
         $capacity_val = max(1, (int)($_POST['capacity'] ?? 1));
         $desc_val = trim($_POST['description'] ?? '');
+        $image_path_val = trim($_POST['image_path'] ?? 'assets/images/sports/badminton-open-play.webp');
         $action = $_POST['action'] ?? 'draft';
 
         if (!is_club_manager($club_id_val, $user['id'])) {
@@ -78,12 +80,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($session_id > 0) {
                 if ($is_published) {
-                    // Only description can be updated for published sessions
-                    $stmt = $db->prepare("UPDATE sessions SET description = :desc, updated_at = NOW() WHERE id = :id");
-                    $stmt->execute([':desc' => $desc_val, ':id' => $session_id]);
+                    // Description and visual cover can be updated for published sessions
+                    $stmt = $db->prepare("UPDATE sessions SET description = :desc, image_path = :image_path, updated_at = NOW() WHERE id = :id");
+                    $stmt->execute([':desc' => $desc_val, ':image_path' => $image_path_val, ':id' => $session_id]);
                 } else {
                     $stmt = $db->prepare("UPDATE sessions SET club_id = :club_id, title = :title, description = :desc, sport_type = :sport, 
-                                          venue = :venue, session_date = :sdate, start_time = :stime, end_time = :etime, 
+                                          venue = :venue, image_path = :image_path, session_date = :sdate, start_time = :stime, end_time = :etime, 
                                           price = :price, capacity = :cap, status = :st, updated_at = NOW() 
                                           WHERE id = :id");
                     $stmt->execute([
@@ -92,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':desc' => $desc_val,
                         ':sport' => $sport_val,
                         ':venue' => $venue_val,
+                        ':image_path' => $image_path_val,
                         ':sdate' => $date_val,
                         ':stime' => $start_val,
                         ':etime' => $end_val,
@@ -102,14 +105,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]);
                 }
             } else {
-                $stmt = $db->prepare("INSERT INTO sessions (club_id, title, description, sport_type, venue, session_date, start_time, end_time, price, capacity, status, created_by) 
-                                      VALUES (:club_id, :title, :desc, :sport, :venue, :sdate, :stime, :etime, :price, :cap, :st, :uid)");
+                $stmt = $db->prepare("INSERT INTO sessions (club_id, title, description, sport_type, venue, image_path, session_date, start_time, end_time, price, capacity, status, created_by) 
+                                      VALUES (:club_id, :title, :desc, :sport, :venue, :image_path, :sdate, :stime, :etime, :price, :cap, :st, :uid)");
                 $stmt->execute([
                     ':club_id' => $club_id_val,
                     ':title' => $title_val,
                     ':desc' => $desc_val,
                     ':sport' => $sport_val,
                     ':venue' => $venue_val,
+                    ':image_path' => $image_path_val,
                     ':sdate' => $date_val,
                     ':stime' => $start_val,
                     ':etime' => $end_val,
@@ -175,6 +179,66 @@ require_once __DIR__ . '/../includes/header.php';
             <div>
                 <label for="venue" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.4rem; color: #1d1d1f;">Venue / Court</label>
                 <input type="text" id="venue" name="venue" value="<?= e($venue_val) ?>" placeholder="e.g. Sports Complex Court 1-3" required <?= $is_published ? 'readonly' : '' ?> style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box;">
+            </div>
+        </div>
+
+        <!-- Session Cover Visual Image Picker -->
+        <div style="margin-bottom: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
+                <label style="font-size: 0.88rem; font-weight: 600; color: #1d1d1f;">Session Cover Image</label>
+                <span style="font-size: 0.8rem; color: #86868b;">Select high-resolution WebP hero visual</span>
+            </div>
+
+            <?php
+            $image_presets = [
+                [
+                    'path' => 'assets/images/sports/badminton-open-play.webp',
+                    'title' => 'Badminton Open Play & Social',
+                    'badge' => 'Badminton'
+                ],
+                [
+                    'path' => 'assets/images/sports/badminton-footwork.webp',
+                    'title' => 'Footwork & Training Drills',
+                    'badge' => 'Clinic'
+                ],
+                [
+                    'path' => 'assets/images/sports/basketball-run.webp',
+                    'title' => 'Basketball 5v5 Open Court',
+                    'badge' => 'Basketball'
+                ],
+                [
+                    'path' => 'assets/images/sports/rally-poster.webp',
+                    'title' => 'Weekend Social Rally & Doubles',
+                    'badge' => 'Social Game'
+                ],
+                [
+                    'path' => 'assets/images/sports/badminton-banner.webp',
+                    'title' => 'Indoor Sports Arena Court',
+                    'badge' => 'Arena'
+                ],
+                [
+                    'path' => 'assets/images/sports/basketball-banner.webp',
+                    'title' => 'Tournament Court View',
+                    'badge' => 'Tournament'
+                ],
+            ];
+            ?>
+
+            <div class="image-picker-grid">
+                <?php foreach ($image_presets as $idx => $preset): 
+                    $isSelected = ($image_path_val === $preset['path']);
+                ?>
+                    <label class="image-picker-option <?= $isSelected ? 'selected' : '' ?>">
+                        <input type="radio" name="image_path" value="<?= e($preset['path']) ?>" <?= $isSelected ? 'checked' : '' ?>>
+                        <img src="<?= app_url('/' . $preset['path']) ?>" alt="<?= e($preset['title']) ?>" class="image-picker-thumb" loading="lazy">
+                        <div class="image-picker-label">
+                            <span style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #c8102e; display: block; margin-bottom: 2px;">
+                                <?= e($preset['badge']) ?>
+                            </span>
+                            <?= e($preset['title']) ?>
+                        </div>
+                    </label>
+                <?php endforeach; ?>
             </div>
         </div>
 

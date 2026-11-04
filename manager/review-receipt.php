@@ -114,23 +114,38 @@ require_once __DIR__ . '/../includes/header.php';
 
         <!-- Receipt preview -->
         <div style="margin-bottom: 2rem;">
-            <span style="font-size: 0.88rem; font-weight: 600; color: #1d1d1f; display: block; margin-bottom: 0.75rem;">Submitted Transfer Evidence:</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span style="font-size: 0.88rem; font-weight: 600; color: #1d1d1f;">Submitted Transfer Evidence:</span>
+                <?php if (!empty($reg['receipt_path']) && !str_ends_with(strtolower($reg['receipt_path']), '.pdf')): ?>
+                    <button type="button" class="btn-secondary-sm" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>" data-receipt-title="Payment Receipt · <?= e($reg['student_name']) ?> (<?= format_price($reg['price_snapshot']) ?>)" data-receipt-caption="Uploaded by <?= e($reg['student_name']) ?> on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>" style="font-size: 0.82rem; padding: 4px 12px; border-radius: 980px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                        🔍 Click to Zoom & Inspect
+                    </button>
+                <?php endif; ?>
+            </div>
+
             <?php if (!empty($reg['receipt_path'])): ?>
                 <?php $is_pdf = str_ends_with(strtolower($reg['receipt_path']), '.pdf'); ?>
                 <?php if ($is_pdf): ?>
-                    <div style="padding: 2rem; background: #fafafa; border: 1px dashed #d2d2d7; border-radius: 14px; text-align: center;">
-                        <span style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem;">📄</span>
+                    <div style="padding: 2.5rem 1.5rem; background: #fafafa; border: 1px dashed #d2d2d7; border-radius: 16px; text-align: center;">
+                        <span style="font-size: 2.75rem; display: block; margin-bottom: 0.5rem;">📄</span>
+                        <div style="font-weight: 700; color: #1d1d1f; font-size: 1rem; margin-bottom: 0.25rem;">PDF Payment Receipt</div>
+                        <p style="color: #6e6e73; font-size: 0.85rem; margin: 0 0 1.25rem;"><?= basename($reg['receipt_path']) ?></p>
                         <a href="<?= app_url('/' . $reg['receipt_path']) ?>" target="_blank" class="btn-hero-secondary" style="display: inline-block;">
                             Open PDF Receipt in New Tab ↗
                         </a>
                     </div>
                 <?php else: ?>
-                    <div style="border: 1px solid #e5e5ea; border-radius: 14px; overflow: hidden; background: #fafafa; text-align: center; padding: 1rem;">
-                        <img src="<?= app_url('/' . $reg['receipt_path']) ?>" alt="Payment Receipt" style="max-width: 100%; max-height: 500px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);">
+                    <div style="border: 1px solid #e5e5ea; border-radius: 16px; overflow: hidden; background: #fbfbfd; text-align: center; padding: 1.25rem; position: relative;">
+                        <div style="position: relative; display: inline-block; cursor: zoom-in;" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>" data-receipt-title="Payment Receipt · <?= e($reg['student_name']) ?> (<?= format_price($reg['price_snapshot']) ?>)" data-receipt-caption="Uploaded by <?= e($reg['student_name']) ?> on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>">
+                            <img src="<?= app_url('/' . $reg['receipt_path']) ?>" alt="Payment Receipt" style="max-width: 100%; max-height: 500px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: transform 0.2s ease; display: block;">
+                            <div style="position: absolute; bottom: 14px; right: 14px; background: rgba(0,0,0,0.74); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); pointer-events: none;">
+                                🔍 Click to Zoom (High-Res Inspect)
+                            </div>
+                        </div>
                     </div>
                 <?php endif; ?>
             <?php else: ?>
-                <div style="color: #6e6e73; font-style: italic;">No receipt file attached.</div>
+                <div style="color: #6e6e73; font-style: italic; background: #fafafa; border: 1px dashed #d2d2d7; border-radius: 14px; padding: 2rem; text-align: center;">No receipt file attached.</div>
             <?php endif; ?>
         </div>
 

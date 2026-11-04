@@ -182,7 +182,10 @@ function pagination_url(int $p): string {
             <div style="font-size: 2.75rem; margin-bottom: 1rem;">🔍</div>
             <h3 style="font-size: 1.35rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.02em;">No sessions match your search</h3>
             <p style="color: #6e6e73; font-size: 0.95rem; margin: 0 0 1.5rem; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.5;">Try adjusting your keywords, sport categories, or date filters to find upcoming games.</p>
-            <a href="<?= APP_BASE_PATH ?>/sessions.php" style="display: inline-block; padding: 0.65rem 1.5rem; background: #f5f5f7; color: #1d1d1f; border-radius: 980px; text-decoration: none; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7;">Reset all filters</a>
+            <div style="display: flex; gap: 0.75rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+                <a href="<?= APP_BASE_PATH ?>/sessions.php" style="display: inline-block; padding: 0.65rem 1.5rem; background: #f5f5f7; color: #1d1d1f; border-radius: 980px; text-decoration: none; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7;">Reset all filters</a>
+                <a href="<?= APP_BASE_PATH ?>/clubs.php" class="btn-hero-primary" style="display: inline-block; padding: 0.65rem 1.5rem; font-size: 0.92rem;">Explore Sports Clubs →</a>
+            </div>
         </div>
     <?php else: ?>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; margin-bottom: 48px;">

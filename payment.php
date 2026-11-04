@@ -90,27 +90,62 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
 
         <?php if ($reg['status'] === 'awaiting_approval'): ?>
-            <div style="background: #f0f7ff; border: 1px solid #cce5ff; border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem;">
-                <h4 style="color: #004085; margin: 0 0 0.25rem; font-size: 1rem; font-weight: 700;">Receipt Submitted · Under Review</h4>
-                <p style="color: #424245; font-size: 0.92rem; margin: 0 0 0.5rem;">
-                    Your receipt was submitted on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>. Your place is held while the club manager verifies external settlement.
-                </p>
-                <?php if (!empty($reg['receipt_path'])): ?>
-                    <div style="margin-top: 1rem;">
-                        <a href="<?= app_url('/' . $reg['receipt_path']) ?>" target="_blank" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.88rem; color: #0071e3; font-weight: 600; text-decoration: none;">
-                            📄 View Uploaded Receipt ↗
-                        </a>
+            <div style="background: #f0f7ff; border: 1px solid #cce5ff; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                    <div>
+                        <h4 style="color: #004085; margin: 0 0 0.35rem; font-size: 1.05rem; font-weight: 700;">Receipt Submitted · Under Review</h4>
+                        <p style="color: #424245; font-size: 0.92rem; margin: 0;">
+                            Your transfer slip was submitted on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>. Your spot is reserved while the club manager verifies payment.
+                        </p>
+                    </div>
+                    <?php if (!empty($reg['receipt_path'])): ?>
+                        <?php $is_pdf = str_ends_with(strtolower($reg['receipt_path']), '.pdf'); ?>
+                        <?php if ($is_pdf): ?>
+                            <a href="<?= app_url('/' . $reg['receipt_path']) ?>" target="_blank" class="btn-hero-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                                📄 Open PDF Receipt ↗
+                            </a>
+                        <?php else: ?>
+                            <button type="button" class="btn-hero-secondary" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>" data-receipt-title="Payment Receipt · <?= e($reg['title']) ?>" data-receipt-caption="Submitted on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>" style="font-size: 0.85rem; padding: 0.5rem 1rem; cursor: pointer;">
+                                🔍 Zoom & Preview Receipt
+                            </button>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (!empty($reg['receipt_path']) && !str_ends_with(strtolower($reg['receipt_path']), '.pdf')): ?>
+                    <div style="margin-top: 1.25rem; display: flex; align-items: center; gap: 1rem; background: #fff; padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #d0e3ff;">
+                        <img src="<?= app_url('/' . $reg['receipt_path']) ?>" alt="Receipt" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; cursor: pointer;" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>">
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.88rem; font-weight: 600; color: #1d1d1f;"><?= basename($reg['receipt_path']) ?></div>
+                            <span style="font-size: 0.8rem; color: #0071e3; cursor: pointer;" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>">Click to view enlarged receipt modal</span>
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
         <?php if ($reg['status'] === 'confirmed'): ?>
-            <div style="background: #f2faf3; border: 1px solid #d1e7dd; border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem;">
-                <h4 style="color: #0f5132; margin: 0 0 0.25rem; font-size: 1rem; font-weight: 700;">Registration Confirmed</h4>
-                <p style="color: #424245; font-size: 0.92rem; margin: 0;">
-                    Your place has been approved and confirmed. See you at <?= e($reg['venue']) ?> on <?= format_session_date($reg['session_date']) ?>!
-                </p>
+            <div style="background: #f2faf3; border: 1px solid #d1e7dd; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                    <div>
+                        <h4 style="color: #0f5132; margin: 0 0 0.35rem; font-size: 1.05rem; font-weight: 700;">Registration Confirmed</h4>
+                        <p style="color: #424245; font-size: 0.92rem; margin: 0;">
+                            Your booking has been approved and confirmed. See you at <?= e($reg['venue']) ?> on <?= format_session_date($reg['session_date']) ?>!
+                        </p>
+                    </div>
+                    <?php if (!empty($reg['receipt_path'])): ?>
+                        <?php $is_pdf = str_ends_with(strtolower($reg['receipt_path']), '.pdf'); ?>
+                        <?php if ($is_pdf): ?>
+                            <a href="<?= app_url('/' . $reg['receipt_path']) ?>" target="_blank" class="btn-hero-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+                                📄 View PDF Receipt ↗
+                            </a>
+                        <?php else: ?>
+                            <button type="button" class="btn-hero-secondary" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>" data-receipt-title="Confirmed Receipt · <?= e($reg['title']) ?>" style="font-size: 0.85rem; padding: 0.5rem 1rem; cursor: pointer;">
+                                🔍 View Receipt Modal
+                            </button>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -160,22 +195,50 @@ require_once __DIR__ . '/includes/header.php';
                     Step 2: Upload Payment Receipt
                 </h3>
 
-                <form method="POST" action="<?= app_url('/upload-receipt.php') ?>" enctype="multipart/form-data" style="background: #fafafa; border: 1px solid #e5e5ea; border-radius: 16px; padding: 1.75rem;">
+                <form method="POST" action="<?= app_url('/upload-receipt.php') ?>" enctype="multipart/form-data" style="background: #fafafa; border: 1px solid #e5e5ea; border-radius: 20px; padding: 2rem;">
                     <?= csrf_field() ?>
                     <input type="hidden" name="registration_id" value="<?= $reg['id'] ?>">
 
-                    <div style="margin-bottom: 1.25rem;">
-                        <label for="receipt" style="display: block; font-size: 0.9rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.5rem;">
-                            Select Receipt File (PNG, JPG, WebP, or PDF - max 5MB)
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="receipt" style="display: block; font-size: 0.92rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.65rem;">
+                            Transfer Evidence Slip
                         </label>
-                        <input type="file" id="receipt" name="receipt" accept="image/png,image/jpeg,image/webp,application/pdf" required style="width: 100%; padding: 0.75rem; background: #fff; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 0.9rem;">
+
+                        <!-- Apple Drag & Drop Zone -->
+                        <div class="upload-dropzone" id="receipt-dropzone" onclick="document.getElementById('receipt').click()">
+                            <input type="file" id="receipt" name="receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required style="display: none;">
+                            <div style="font-size: 2.25rem; margin-bottom: 0.5rem;">📤</div>
+                            <div style="font-weight: 700; font-size: 1rem; color: #1d1d1f; margin-bottom: 0.35rem;">
+                                Choose a file or drag & drop here
+                            </div>
+                            <p style="color: #6e6e73; font-size: 0.88rem; margin: 0 0 0.85rem;">
+                                Upload proof of transfer (transaction slip or banking screenshot)
+                            </p>
+                            <div style="display: flex; gap: 0.4rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+                                <span class="format-pill">JPG</span>
+                                <span class="format-pill">PNG</span>
+                                <span class="format-pill">WEBP</span>
+                                <span class="format-pill">PDF</span>
+                                <span style="font-size: 0.8rem; color: #86868b; margin-left: 6px;">· Max 5 MB</span>
+                            </div>
+                        </div>
+
+                        <!-- Live File Preview -->
+                        <div id="receipt-upload-preview" style="display: none; align-items: center; gap: 1rem; margin-top: 1rem; background: #fff; padding: 1rem; border-radius: 12px; border: 1px solid #d2d2d7;">
+                            <div class="preview-thumb" style="width: 54px; height: 54px; background: #f5f5f7; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;"></div>
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="preview-name" style="font-weight: 600; font-size: 0.92rem; color: #1d1d1f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                                <div class="preview-size" style="font-size: 0.82rem; color: #6e6e73; margin-top: 2px;"></div>
+                            </div>
+                            <span style="font-size: 0.8rem; color: #248a3d; font-weight: 600;">Ready to upload ✓</span>
+                        </div>
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                         <span style="font-size: 0.82rem; color: #6e6e73;">
-                            Submission locks your place for manager review.
+                            Submission locks your place while managers review settlement.
                         </span>
-                        <button type="submit" class="btn-hero-primary" style="border: none; cursor: pointer; padding: 0.75rem 1.75rem;">
+                        <button type="submit" class="btn-hero-primary" style="border: none; cursor: pointer; padding: 0.75rem 1.85rem;">
                             Submit Receipt →
                         </button>
                     </div>

@@ -99,6 +99,29 @@ require_once __DIR__ . '/includes/header.php';
             <p style="font-size: 1rem; color: #424245; line-height: 1.6; margin: 0; white-space: pre-line;"><?= e($session['description']) ?></p>
         </div>
 
+        <!-- Session Cancellation Policy Visual Indicator -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 24px; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 16px;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px;">
+                🛡️
+            </div>
+            <div style="flex: 1;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+                    <strong style="font-size: 14.5px; color: #1d1d1f;">Taylor's SportsHub Fair Play &amp; Cancellation Policy</strong>
+                    <span style="font-size: 11.5px; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 3px 9px; border-radius: 980px; letter-spacing: 0.04em; text-transform: uppercase;">
+                        24-Hour Window
+                    </span>
+                </div>
+                <p style="font-size: 13.5px; color: #475569; line-height: 1.5; margin: 0 0 10px;">
+                    Cancel freely up to <strong>24 hours before session start</strong> with full refund eligibility. Paid sessions cancelled under 24 hours require manager review. Free sessions release your court spot immediately for fellow students.
+                </p>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: #64748b;">
+                    <span>✓ Immediate spot release</span>
+                    <span>✓ DuitNow / Bank Transfer reversal for paid games</span>
+                    <span>✓ Recorded in My Activities</span>
+                </div>
+            </div>
+        </div>
+
         <?php if ($session['status'] === 'cancelled'): ?>
             <div style="background: #fff2f2; border: 1px solid #fecdd3; border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem;">
                 <h4 style="color: #c81e27; margin: 0 0 0.25rem; font-size: 1rem;">Session Cancelled by Organiser</h4>

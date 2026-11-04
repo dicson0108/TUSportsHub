@@ -10,6 +10,8 @@ $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['rol
 $css_map = [
     'index.php' => 'home.css',
     'sessions.php' => 'events.css',
+    'session-detail.php' => 'event-detail.css',
+    'my-activities.php' => 'my-events.css',
     'login.php' => 'auth.css',
     'register.php' => 'auth.css',
 ];
@@ -23,6 +25,7 @@ $page_css = $css_map[$current_page] ?? null;
     <title><?= isset($page_title) ? e($page_title) . " · Taylor's SportsHub" : "Taylor's SportsHub · Student Sports & Club Sessions" ?></title>
     <link rel="icon" type="image/x-icon" href="<?= APP_BASE_PATH ?>/favicon.ico">
     <link rel="icon" type="image/webp" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.webp">
+    <link rel="apple-touch-icon" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.webp">
     <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/style.css">
     <?php if ($page_css && file_exists(__DIR__ . '/../assets/css/' . $page_css)): ?>
         <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/<?= e($page_css) ?>">
@@ -313,7 +316,59 @@ $page_css = $css_map[$current_page] ?? null;
                 <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-nav-login">Sign in</a>
                 <a href="<?= APP_BASE_PATH ?>/register.php" class="btn-nav-signup">Sign up</a>
             <?php endif; ?>
+
+            <!-- Mobile Hamburger Toggle Button -->
+            <button type="button" class="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+            </button>
         </div>
     </div>
 </header>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-drawer-backdrop" aria-hidden="true"></div>
+<aside class="mobile-drawer" aria-label="Mobile Navigation Drawer">
+    <div class="mobile-drawer-header">
+        <a href="<?= APP_BASE_PATH ?>/index.php" class="brand-group" aria-label="Taylor's SportsHub Home">
+            <?= get_site_logo_html() ?>
+            <div class="brand-text">
+                <span class="brand-title">Taylor's</span>
+                <span class="brand-subtitle">SPORTS HUB</span>
+            </div>
+        </a>
+        <button type="button" class="mobile-drawer-close" aria-label="Close navigation menu">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+    </div>
+
+    <nav class="mobile-drawer-nav">
+        <a href="<?= APP_BASE_PATH ?>/index.php" class="mobile-nav-link <?= $current_page === 'index.php' ? 'active' : '' ?>">Home</a>
+        <a href="<?= APP_BASE_PATH ?>/sessions.php" class="mobile-nav-link <?= in_array($current_page, ['sessions.php', 'session-detail.php']) ? 'active' : '' ?>">Explore Sessions</a>
+        <a href="<?= APP_BASE_PATH ?>/clubs.php" class="mobile-nav-link <?= in_array($current_page, ['clubs.php', 'club.php']) ? 'active' : '' ?>">Sports Clubs</a>
+        <?php if ($current_user): ?>
+            <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="mobile-nav-link <?= in_array($current_page, ['my-activities.php', 'payment.php', 'cancel-registration.php']) ? 'active' : '' ?>">My Activities</a>
+            <a href="<?= APP_BASE_PATH ?>/inbox.php" class="mobile-nav-link <?= $current_page === 'inbox.php' ? 'active' : '' ?>">Inbox (Preview)</a>
+            <?php if ($is_any_manager): ?>
+                <a href="<?= APP_BASE_PATH ?>/manager/sessions.php" class="mobile-nav-link" style="color:#c8102e; font-weight:700;">Club Manager Workbench ↗</a>
+            <?php endif; ?>
+            <div class="mobile-drawer-footer">
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+                    Signed in as <strong><?= e($current_user['name']) ?></strong>
+                </div>
+                <form method="POST" action="<?= APP_BASE_PATH ?>/logout.php" style="margin: 0;">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="btn-secondary" style="width:100%; justify-content:center; color:#dc2626;">Log out</button>
+                </form>
+            </div>
+        <?php else: ?>
+            <div class="mobile-drawer-auth">
+                <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-secondary" style="width:100%; justify-content:center;">Log in</a>
+                <a href="<?= APP_BASE_PATH ?>/register.php" class="btn-primary" style="width:100%; justify-content:center;">Register</a>
+            </div>
+        <?php endif; ?>
+    </nav>
+</aside>
+
 <main id="main-content">

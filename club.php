@@ -81,8 +81,16 @@ require_once __DIR__ . '/includes/header.php';
         </h2>
 
         <?php if (empty($sessions)): ?>
-            <div style="background: #fff; border-radius: 18px; padding: 3rem 2rem; text-align: center; border: 1px solid #e5e5ea; color: #6e6e73;">
-                No sessions published by this club yet.
+            <div style="background: #fff; border-radius: 20px; padding: 4rem 2rem; text-align: center; border: 1px solid #e5e5ea; box-shadow: 0 4px 18px rgba(0,0,0,0.03);">
+                <div style="font-size: 2.75rem; margin-bottom: 0.75rem;">🏸</div>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem;">No upcoming sessions published</h3>
+                <p style="color: #6e6e73; font-size: 0.95rem; margin: 0 0 1.5rem; max-width: 420px; margin-left: auto; margin-right: auto;">
+                    This club doesn't have active sessions scheduled right now. Check out all upcoming sessions across the campus!
+                </p>
+                <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="<?= app_url('/sessions.php') ?>" class="btn-hero-primary" style="display: inline-block;">Browse All Sessions →</a>
+                    <a href="<?= app_url('/clubs.php') ?>" style="display: inline-block; padding: 0.65rem 1.4rem; background: #f5f5f7; color: #1d1d1f; border-radius: 980px; text-decoration: none; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7;">All Clubs</a>
+                </div>
             </div>
         <?php else: ?>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.75rem;">

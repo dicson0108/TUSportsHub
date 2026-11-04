@@ -94,8 +94,23 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
 
         <?php if (empty($participants)): ?>
-            <div style="padding: 4rem 2rem; text-align: center; color: #6e6e73;">
-                No participants have registered for this session yet.
+            <div style="padding: 4.5rem 2rem; text-align: center; color: #6e6e73;">
+                <div style="font-size: 3rem; margin-bottom: 0.75rem;">👥</div>
+                <h3 style="font-size: 1.35rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.015em;">No registrations yet</h3>
+                <p style="color: #6e6e73; font-size: 0.95rem; margin: 0 0 1.75rem; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                    Students haven't registered for this session yet. Share your session link with students or promote it during club practice!
+                </p>
+                <div style="display: flex; gap: 0.85rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+                    <a href="<?= app_url('/session-detail.php?id=' . $session['id']) ?>" target="_blank" class="btn-hero-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                        View Public Session Page ↗
+                    </a>
+                    <button type="button" data-copy-link="<?= app_url('/session-detail.php?id=' . $session['id']) ?>" class="btn-hero-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        📋 Copy Session Link
+                    </button>
+                    <a href="<?= app_url('/manager/sessions.php') ?>" style="display: inline-block; padding: 0.75rem 1.4rem; background: #f5f5f7; color: #1d1d1f; border-radius: 980px; text-decoration: none; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7;">
+                        Back to Sessions
+                    </a>
+                </div>
             </div>
         <?php else: ?>
             <div style="overflow-x: auto;">
@@ -143,9 +158,15 @@ require_once __DIR__ . '/../includes/header.php';
                                             Record Refund ↗
                                         </a>
                                     <?php elseif (!empty($p['receipt_path'])): ?>
-                                        <a href="<?= app_url('/' . $p['receipt_path']) ?>" target="_blank" style="color: #6e6e73; text-decoration: none; font-size: 0.85rem;">
-                                            View Receipt ↗
-                                        </a>
+                                        <?php if (str_ends_with(strtolower($p['receipt_path']), '.pdf')): ?>
+                                            <a href="<?= app_url('/' . $p['receipt_path']) ?>" target="_blank" style="color: #0071e3; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+                                                📄 View PDF ↗
+                                            </a>
+                                        <?php else: ?>
+                                            <button type="button" class="btn-secondary-sm" data-receipt-zoom="<?= app_url('/' . $p['receipt_path']) ?>" data-receipt-title="Receipt · <?= e($p['name']) ?> (<?= format_price($p['price_snapshot']) ?>)" style="padding: 4px 10px; font-size: 0.82rem; border-radius: 980px; cursor: pointer;">
+                                                🔍 View Receipt
+                                            </button>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span style="color: #c7c7cc; font-size: 0.85rem;">—</span>
                                     <?php endif; ?>

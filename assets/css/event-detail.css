@@ -1,0 +1,165 @@
+/* ==========================================================================
+   Event Detail Page Styles (event-detail.css)
+   ========================================================================== */
+
+.event-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 370px;
+  gap: 48px;
+  padding: 32px 0 64px 0;
+}
+
+.event-detail-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-detail-poster-wrap {
+  margin-bottom: 32px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.event-detail-poster-wrap .poster-art-wrapper {
+  aspect-ratio: 21 / 9;
+}
+
+.event-detail-poster-wrap .poster-uploaded-img {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+}
+
+.event-detail-title {
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin: 12px 0 16px 0;
+  line-height: 1.12;
+  color: var(--text-main);
+  font-optical-sizing: auto;
+}
+
+.event-detail-lead {
+  font-size: 17px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  margin-bottom: 32px;
+}
+
+.info-card-box {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--radius-xl);
+  padding: 30px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.info-card-title {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  color: var(--text-main);
+}
+
+/* Event Detail Sticky Sidebar Card (Apple Floating Glass Panel) */
+.sticky-reg-card {
+  position: sticky;
+  top: calc(var(--header-height) + 24px);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-xl);
+  padding: 30px;
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.10), 0 4px 14px -2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.sticky-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.free-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: #248a3d;
+  background: rgba(52, 199, 89, 0.14);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  letter-spacing: -0.01em;
+}
+
+.reg-card-headline {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.reg-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 14px;
+}
+
+.reg-meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.reg-meta-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.reg-action-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Star Rating Selector */
+.star-rating-selector {
+  display: inline-flex;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.star-icon {
+  font-size: 24px;
+  color: #d1d5db;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.star-icon:hover {
+  transform: scale(1.15);
+}
+
+.star-icon.active {
+  color: var(--color-primary);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .event-detail-layout {
+    grid-template-columns: 1fr;
+  }
+  .sticky-reg-card {
+    position: static;
+  }
+}

@@ -1,39 +1,58 @@
 </main>
 
-<footer style="background: #ffffff; border-top: 1px solid #e5e5ea; padding: 3rem 1.5rem 2rem; margin-top: 4rem;">
-    <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #f0f0f2;">
-        <div>
-            <div style="color: #c8102e; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">
-                Taylor's <span style="color: #1d1d1f;">SportsHub</span>
+<footer class="site-footer">
+    <div class="app-container">
+        <div class="footer-top-grid">
+            <div>
+                <a href="<?= APP_BASE_PATH ?>/index.php" class="brand-group" style="margin-bottom: 16px;">
+                    <?= get_site_logo_html() ?>
+                    <div class="brand-text">
+                        <span class="brand-title">Taylor's</span>
+                        <span class="brand-subtitle">SPORTS HUB</span>
+                    </div>
+                </a>
+                <p style="font-size: 13.5px; color: var(--text-secondary); max-width: 320px; line-height: 1.5;">
+                    Your campus arena. Connect with university sports clubs, participate in competitive drills and social open play.
+                </p>
             </div>
-            <p style="font-size: 0.88rem; color: #6e6e73; line-height: 1.5; margin: 0;">
-                Connect with university sports clubs, participate in regular sessions, and stay active across Taylor's Lakeside Campus.
-            </p>
+
+            <div>
+                <h4 class="footer-col-title">Discover</h4>
+                <ul class="footer-links-list">
+                    <li><a href="<?= APP_BASE_PATH ?>/sessions.php" class="footer-link">Upcoming sessions</a></li>
+                    <li><a href="<?= APP_BASE_PATH ?>/clubs.php" class="footer-link">Sports clubs</a></li>
+                    <li><a href="<?= APP_BASE_PATH ?>/my-activities.php" class="footer-link">My activities</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-col-title">Campus Sports</h4>
+                <ul class="footer-links-list">
+                    <li><a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Badminton" class="footer-link">Badminton Club</a></li>
+                    <li><a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Basketball" class="footer-link">Basketball Club</a></li>
+                    <li><a href="mailto:sportshub@taylors.edu.my" class="footer-link">Contact Sports Complex</a></li>
+                </ul>
+            </div>
         </div>
-        <div>
-            <h4 style="font-size: 0.9rem; font-weight: 600; color: #1d1d1f; margin: 0 0 0.75rem;">Explore</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                <li><a href="<?= APP_BASE_PATH ?>/sessions.php" style="color: #6e6e73; text-decoration: none;">Upcoming Sessions</a></li>
-                <li><a href="<?= APP_BASE_PATH ?>/clubs.php" style="color: #6e6e73; text-decoration: none;">Sports Clubs</a></li>
-                <li><a href="<?= APP_BASE_PATH ?>/inbox.php" style="color: #6e6e73; text-decoration: none;">Inbox Preview</a></li>
-            </ul>
-        </div>
-        <div>
-            <h4 style="font-size: 0.9rem; font-weight: 600; color: #1d1d1f; margin: 0 0 0.75rem;">Community</h4>
-            <p style="font-size: 0.88rem; color: #6e6e73; line-height: 1.5; margin: 0;">
-                Sessions are organized by appointed club managers. Taylor's students can register using their active @sd.taylors.edu.my credentials.
-            </p>
-        </div>
-    </div>
-    <div style="max-width: 1200px; margin: 1.5rem auto 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.82rem; color: #86868b;">
-        <div>© <?= date('Y') ?> Taylor's University SportsHub. All rights reserved.</div>
-        <div style="display: flex; gap: 1rem;">
-            <span>Malaysia Time (MYT)</span>
-            <span>·</span>
-            <span>Subang Jaya, Selangor</span>
+
+        <div class="footer-bottom-bar">
+            <span>© <?= date('Y') ?> Taylor's University SportsHub. All rights reserved.</span>
+            <div style="display:flex; gap:20px; align-items:center;">
+                <span style="color:var(--text-muted)">Subang Jaya, Selangor</span>
+                <span style="color:var(--text-muted)">·</span>
+                <span style="color:var(--text-muted)">Malaysia Time (MYT)</span>
+            </div>
         </div>
     </div>
 </footer>
 
+<!-- Floating Back To Top Button -->
+<button type="button" id="back-to-top" class="back-to-top-btn" aria-label="Back to top" title="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 15l-6-6-6 6"/>
+    </svg>
+</button>
+
+<script src="<?= APP_BASE_PATH ?>/assets/js/main.js"></script>
 </body>
 </html>

@@ -84,11 +84,24 @@ require_once __DIR__ . '/../includes/header.php';
 
     <!-- Sessions Table / Cards -->
     <?php if (empty($sessions)): ?>
-        <div style="background: #fff; border-radius: 20px; padding: 4rem 2rem; text-align: center; border: 1px solid #e5e5ea;">
-            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📋</div>
-            <h3 style="font-size: 1.25rem; font-weight: 600; color: #1d1d1f; margin: 0 0 0.5rem;">No sessions found</h3>
-            <p style="color: #6e6e73; font-size: 0.95rem; margin: 0 0 1.5rem;">Create your first club session or adjust your filter.</p>
-            <a href="<?= app_url('/manager/session-edit.php') ?>" class="btn-hero-primary" style="display: inline-block;">Create Session</a>
+        <div style="background: #fff; border-radius: 20px; padding: 4.5rem 2rem; text-align: center; border: 1px solid #e5e5ea; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+            <div style="font-size: 3rem; margin-bottom: 0.75rem;">📋</div>
+            <h3 style="font-size: 1.35rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.015em;">
+                <?= $filter_status !== '' ? 'No ' . e($filter_status) . ' sessions found' : 'No club sessions created yet' ?>
+            </h3>
+            <p style="color: #6e6e73; font-size: 0.95rem; margin: 0 0 1.75rem; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+                <?= $filter_status !== '' ? 'Try selecting another status tab or view all club sessions.' : 'Get started by creating your club\'s first training session or social open play.' ?>
+            </p>
+            <div style="display: flex; gap: 0.75rem; justify-content: center; align-items: center; flex-wrap: wrap;">
+                <a href="<?= app_url('/manager/session-edit.php') ?>" class="btn-hero-primary" style="display: inline-block;">
+                    + Create New Session
+                </a>
+                <?php if ($filter_status !== ''): ?>
+                    <a href="<?= app_url('/manager/sessions.php') ?>" style="display: inline-block; padding: 0.75rem 1.4rem; background: #f5f5f7; color: #1d1d1f; border-radius: 980px; text-decoration: none; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7;">
+                        Show All Sessions
+                    </a>
+                <?php endif; ?>
+            </div>
         </div>
     <?php else: ?>
         <div style="display: flex; flex-direction: column; gap: 1.25rem;">
