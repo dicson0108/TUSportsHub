@@ -22,8 +22,8 @@ INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role`, `status`, `
 
 -- Seed Clubs
 INSERT INTO `clubs` (`id`, `name`, `slug`, `description`, `sport_type`, `logo_path`, `banner_path`, `bank_name`, `account_holder`, `account_number`, `status`) VALUES
-(1, "Taylor's Badminton Club", 'taylors-badminton-club', "The official Taylor's University Badminton Club organizing weekly sparring sessions, footwork clinics, and campus tournaments.", 'Badminton', 'assets/images/logo/logo.png', 'assets/images/sports/badminton-banner.svg', 'Maybank', "Taylor's Badminton Club", '514012345678', 'active'),
-(2, "Taylor's Basketball Club", 'taylors-basketball-club', "Taylor's University Basketball Club connecting campus hoopers for regular open runs, league matches, and skill development.", 'Basketball', 'assets/images/logo/logo.png', 'assets/images/sports/basketball-banner.svg', 'CIMB Bank', "Taylor's Basketball Club", '800987654321', 'active');
+(1, "Taylor's Badminton Club", 'taylors-badminton-club', "The official Taylor's University Badminton Club organizing weekly sparring sessions, footwork clinics, and campus tournaments.", 'Badminton', 'assets/images/logo/logo.webp', 'assets/images/sports/badminton-banner.webp', 'Maybank', "Taylor's Badminton Club", '514012345678', 'active'),
+(2, "Taylor's Basketball Club", 'taylors-basketball-club', "Taylor's University Basketball Club connecting campus hoopers for regular open runs, league matches, and skill development.", 'Basketball', 'assets/images/logo/logo.webp', 'assets/images/sports/basketball-banner.webp', 'CIMB Bank', "Taylor's Basketball Club", '800987654321', 'active');
 
 -- Appoint Club Manager (Alex Wong manages Badminton Club)
 INSERT INTO `club_managers` (`id`, `club_id`, `user_id`, `appointed_by`) VALUES
@@ -31,10 +31,10 @@ INSERT INTO `club_managers` (`id`, `club_id`, `user_id`, `appointed_by`) VALUES
 
 -- Seed Sessions
 INSERT INTO `sessions` (`id`, `club_id`, `title`, `description`, `sport_type`, `venue`, `image_path`, `session_date`, `start_time`, `end_time`, `price`, `capacity`, `status`, `created_by`) VALUES
-(1, 1, 'Sunday Open Play & Social Smash', 'Casual doubles and singles open play across 3 indoor courts. Shuttles provided. All skill levels welcome.', 'Badminton', "Taylor's Sports Complex Court 1-3", 'assets/images/sports/badminton-open-play.png', '2026-11-15', '14:00:00', '16:00:00', 0.00, 16, 'published', 2),
-(2, 1, 'Weekly Badminton Intensive & Footwork Clinic', 'Structured 2-hour coaching session focusing on shadow footwork drills, net play, and match strategy with tournament seniors.', 'Badminton', 'Multi-Purpose Hall Court A', 'assets/images/sports/badminton-footwork.png', '2026-11-20', '18:00:00', '20:00:00', 15.00, 12, 'published', 2),
-(3, 1, 'Doubles Mini-Tournament (Semester Cup)', 'Internal club tournament with group stages and knockout playoffs. Trophies and grip bundles for top 3 pairs.', 'Badminton', "Taylor's Sports Complex Court 1-4", 'assets/images/sports/rally-poster.svg', '2026-12-05', '09:00:00', '13:00:00', 25.00, 24, 'draft', 2),
-(4, 2, "Friday Night 3v3 Half-Court Run", 'Weekly 3v3 basketball runs with king-of-the-court rotation. Bring both light and dark jerseys.', 'Basketball', 'Outdoor Basketball Court 2', 'assets/images/sports/basketball-run.svg', '2026-11-22', '19:00:00', '21:00:00', 10.00, 18, 'published', 1);
+(1, 1, 'Sunday Open Play & Social Smash', 'Casual doubles and singles open play across 3 indoor courts. Shuttles provided. All skill levels welcome.', 'Badminton', "Taylor's Sports Complex Court 1-3", 'assets/images/sports/badminton-open-play.webp', '2026-11-15', '14:00:00', '16:00:00', 0.00, 16, 'published', 2),
+(2, 1, 'Weekly Badminton Intensive & Footwork Clinic', 'Structured 2-hour coaching session focusing on shadow footwork drills, net play, and match strategy with tournament seniors.', 'Badminton', 'Multi-Purpose Hall Court A', 'assets/images/sports/badminton-footwork.webp', '2026-11-20', '18:00:00', '20:00:00', 15.00, 12, 'published', 2),
+(3, 1, 'Doubles Mini-Tournament (Semester Cup)', 'Internal club tournament with group stages and knockout playoffs. Trophies and grip bundles for top 3 pairs.', 'Badminton', "Taylor's Sports Complex Court 1-4", 'assets/images/sports/rally-poster.webp', '2026-12-05', '09:00:00', '13:00:00', 25.00, 24, 'draft', 2),
+(4, 2, "Friday Night 3v3 Half-Court Run", 'Weekly 3v3 basketball runs with king-of-the-court rotation. Bring both light and dark jerseys.', 'Basketball', 'Outdoor Basketball Court 2', 'assets/images/sports/basketball-run.webp', '2026-11-22', '19:00:00', '21:00:00', 10.00, 18, 'published', 1);
 
 -- Seed Registrations
 -- Liam registered for free session -> confirmed

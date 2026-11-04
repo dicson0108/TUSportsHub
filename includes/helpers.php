@@ -120,7 +120,7 @@ function get_site_logo_html(): string {
     if ($logo_html !== null) {
         return $logo_html;
     }
-    $logo_path = '/assets/images/logo/logo.png';
+    $logo_path = '/assets/images/logo/logo.webp';
     if (file_exists(__DIR__ . '/..' . $logo_path)) {
         $logo_html = '<img src="' . e(app_url($logo_path)) . '" alt="Taylor\'s University" class="brand-logo-img">';
     } else {
@@ -140,15 +140,15 @@ function get_session_cover_url(array $session): string {
     $id = (int)($session['id'] ?? 0);
     $sport = strtolower($session['sport_type'] ?? '');
     if ($sport === 'basketball') {
-        return app_url('/assets/images/sports/basketball-run.svg');
+        return app_url('/assets/images/sports/basketball-run.webp');
     }
     if ($id === 2 || str_contains(strtolower($session['title'] ?? ''), 'footwork')) {
-        return app_url('/assets/images/sports/badminton-footwork.png');
+        return app_url('/assets/images/sports/badminton-footwork.webp');
     }
     if ($id === 3 || str_contains(strtolower($session['title'] ?? ''), 'rally')) {
-        return app_url('/assets/images/sports/rally-poster.svg');
+        return app_url('/assets/images/sports/rally-poster.webp');
     }
-    return app_url('/assets/images/sports/badminton-open-play.png');
+    return app_url('/assets/images/sports/badminton-open-play.webp');
 }
 
 // Club banner image resolver
@@ -161,9 +161,9 @@ function get_club_banner_url(array $club): string {
     }
     $sport = strtolower($club['sport_type'] ?? '');
     if ($sport === 'basketball') {
-        return app_url('/assets/images/sports/basketball-banner.svg');
+        return app_url('/assets/images/sports/basketball-banner.webp');
     }
-    return app_url('/assets/images/sports/badminton-banner.svg');
+    return app_url('/assets/images/sports/badminton-banner.webp');
 }
 
 // Validate Taylor's University email domain

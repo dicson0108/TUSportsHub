@@ -1326,3 +1326,48 @@ textarea.form-input:focus {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   Apple Design & Web Interface Guidelines Enhancements
+   ========================================================================== */
+
+/* 1. Direct Instant Press Feedback */
+button:active,
+.btn-primary:active,
+.btn-secondary:active,
+.btn-nav-login:active,
+.btn-nav-signup:active,
+.nav-inbox-btn:active,
+.page-btn:active,
+.wayfinding-tile:active {
+  transform: scale(0.97) !important;
+  transition: transform 100ms ease-out !important;
+}
+
+/* 2. Accessible Focus Rings (WCAG 2.1 AA) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.user-pill:focus-visible,
+.nav-inbox-btn:focus-visible {
+  outline: 2px solid #c8102e !important;
+  outline-offset: 2px !important;
+}
+
+/* 3. Minimum 44px Touch Targets for Interactive Elements on Mobile */
+@media (max-width: 820px) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-nav-login,
+  .btn-nav-signup,
+  .nav-item,
+  .user-pill,
+  .nav-inbox-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

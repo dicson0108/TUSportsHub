@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($page_title) ?></title>
     <link rel="icon" type="image/x-icon" href="<?= APP_BASE_PATH ?>/favicon.ico">
-    <link rel="icon" type="image/png" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.png">
+    <link rel="icon" type="image/webp" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.webp">
     <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/style.css">
     <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/auth.css">
     <style>
@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
 
             <div class="auth-poster-card" style="max-width: 460px;">
-                <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-footwork.png" alt="Taylor's Badminton Training">
+                <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-footwork.webp" alt="Taylor's Badminton Training">
                 <div class="auth-poster-overlay">
                     <span class="auth-poster-tag">START STRONG</span>
                     <div class="auth-poster-title">FOOTWORK CLINIC</div>

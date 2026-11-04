@@ -9,6 +9,7 @@ $is_any_manager = !empty($managed_clubs) || ($current_user && $current_user['rol
 
 $css_map = [
     'index.php' => 'home.css',
+    'sessions.php' => 'events.css',
     'login.php' => 'auth.css',
     'register.php' => 'auth.css',
 ];
@@ -21,7 +22,7 @@ $page_css = $css_map[$current_page] ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? e($page_title) . " · Taylor's SportsHub" : "Taylor's SportsHub · Student Sports & Club Sessions" ?></title>
     <link rel="icon" type="image/x-icon" href="<?= APP_BASE_PATH ?>/favicon.ico">
-    <link rel="icon" type="image/png" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.png">
+    <link rel="icon" type="image/webp" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.webp">
     <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/style.css">
     <?php if ($page_css && file_exists(__DIR__ . '/../assets/css/' . $page_css)): ?>
         <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/<?= e($page_css) ?>">
