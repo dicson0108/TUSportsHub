@@ -1,0 +1,4 @@
+# Paths are relative to web root
+ErrorDocument 403 /MyProject/27TUSportsHub/403.php
+ErrorDocument 404 /MyProject/27TUSportsHub/404.php
+ErrorDocument 500 /MyProject/27TUSportsHub/500.php
