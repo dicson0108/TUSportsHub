@@ -79,53 +79,16 @@
   background: transparent;
 }
 
+.hero-search-input:focus-visible {
+  outline: none !important;
+}
+
 .hero-search-input::placeholder {
   color: var(--text-light);
 }
 
 .hero-search-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 22px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, #9e141c 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: var(--radius-full);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
   min-height: 40px;
-  box-shadow: 0 3px 12px rgba(200, 30, 39, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
-}
-
-.hero-search-btn:hover {
-  background: linear-gradient(135deg, #d3232d 0%, #aa1620 100%);
-  box-shadow: 0 5px 16px rgba(200, 30, 39, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.hero-search-btn:hover .hero-btn-arrow {
-  transform: translateX(3px);
-}
-
-.hero-search-btn:active {
-  transform: scale(0.97);
-  box-shadow: 0 2px 6px rgba(200, 30, 39, 0.3);
-}
-
-.hero-search-btn:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.hero-btn-arrow {
-  transition: transform var(--transition-fast);
 }
 
 /* Quick tag filters under search */
@@ -201,19 +164,9 @@
   border-color: rgba(200, 30, 39, 0.25);
 }
 
-.spotlight-card .poster-art-wrapper,
-.spotlight-card .poster-uploaded-img {
-  border-radius: 0;
-  width: 100%;
-}
-
-.spotlight-card:hover .poster-art-wrapper {
-  transform: scale(1.02);
-}
-
 .spotlight-info-bar {
-  background: linear-gradient(135deg, #1d1d1f 0%, #151516 100%);
-  color: #fff;
+  background: #ffffff;
+  color: var(--text-main);
   padding: 18px 24px;
   display: flex;
   align-items: center;
@@ -222,14 +175,24 @@
 }
 
 .spotlight-label {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.spotlight-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 3px;
 }
 
 .spotlight-meta {
-  font-size: 12px;
-  color: #86868b;
+  font-size: 12.5px;
+  color: var(--text-secondary);
   margin-top: 3px;
 }
 

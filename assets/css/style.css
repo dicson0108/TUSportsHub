@@ -250,12 +250,7 @@ img {
    Header & Navbar (With Glassmorphic Backdrop & Mobile Drawer)
    ========================================================================== */
 .site-header {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(20px) saturate(190%);
-  -webkit-backdrop-filter: blur(20px) saturate(190%);
-  z-index: 100;
   height: var(--header-height);
-  transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .site-header .header-inner {
@@ -273,30 +268,13 @@ img {
   letter-spacing: -0.02em;
 }
 
-.brand-logo-icon {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #a6161e 100%);
-  border-radius: var(--radius-xs);
-  font-family: var(--font-serif);
-}
 
-.brand-title {
-  color: var(--text-main);
-}
 
-.brand-subtitle {
-  color: var(--text-muted);
-}
 
-.nav-links {
-  gap: 32px;
-}
 
 .nav-link {
-  font-size: 14.5px;
-  color: var(--text-secondary);
   position: relative;
   padding: 6px 0;
-  transition: color var(--transition-fast);
 }
 
 .nav-link:hover {
@@ -327,23 +305,12 @@ img {
 
 /* User Menu Pill */
 .user-menu-pill {
-  display: flex;
-  padding: 5px 12px 5px 6px;
-  border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: var(--shadow-xs);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
-  min-height: 44px;
 }
 
-.user-menu-pill:hover, .user-menu-pill:focus-visible {
-  box-shadow: var(--shadow-sm);
-}
 
 .avatar-initials {
-  color: var(--color-primary);
   overflow: hidden;
 }
 
@@ -364,15 +331,8 @@ img {
   text-overflow: ellipsis;
 }
 
-.dropdown-arrow {
-  width: 15px;
-  height: 15px;
-  color: var(--text-muted);
-}
 
 .user-dropdown {
-  border-radius: var(--radius-md);
-  z-index: 150;
   transform-origin: top right;
   animation: dropdownIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -388,32 +348,16 @@ img {
   }
 }
 
-.user-dropdown.show {
-  display: flex;
-}
 
-.user-dropdown-header {
-  padding: 10px 14px 10px 14px;
-}
 
-.user-dropdown-header strong {
-  color: var(--text-main);
-}
 
-.user-dropdown-header span {
-  color: var(--text-muted);
-}
 
 .dropdown-item {
   letter-spacing: -0.01em;
-  color: var(--text-secondary);
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
 }
 
 .dropdown-item:hover {
   background-color: rgba(0, 0, 0, 0.04);
-  color: var(--text-main);
 }
 
 .dropdown-item:active {
@@ -426,12 +370,10 @@ img {
 
 .dropdown-item.text-danger:hover {
   background-color: rgba(255, 59, 48, 0.08);
-  color: #d70015;
 }
 
 .dropdown-divider {
   background-color: rgba(0, 0, 0, 0.06);
-  margin: 6px 4px;
 }
 
 /* Mobile Hamburger Button */
@@ -1285,19 +1227,12 @@ textarea:focus-visible,
 .user-pill:active, .user-menu-pill:active {
   transform: scale(0.98);
 }
-.user-dropdown.show {
-  display: flex;
-}
 .user-dropdown-header {
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid #f0f0f2;
   font-size: 0.82rem;
   color: #86868b;
 }
 .user-dropdown-header strong {
   display: block;
-  color: #1d1d1f;
-  font-size: 0.9rem;
   margin-bottom: 0.1rem;
 }
 .dropdown-arrow {

@@ -219,6 +219,9 @@ const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
                     assert.deepEqual(await search.evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderStyle,background:s.backgroundColor,shadow:s.boxShadow}}),{border:'none',background:'rgba(0, 0, 0, 0)',shadow:'none'});
                     await search.focus(); await page.waitForTimeout(200);
                     assert.equal(await search.evaluate(el=>getComputedStyle(el).boxShadow),'none');
+                    assert.equal(await search.evaluate(el=>getComputedStyle(el).outlineStyle),'none');
+                    assert.equal(await page.locator('.spotlight-info-bar').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
+                    assert.equal(await page.locator('.spotlight-title').evaluate(el=>getComputedStyle(el).color),'rgb(29, 29, 31)');
                     assert.equal(await page.locator('.hero-search-bar').evaluate(el=>getComputedStyle(el).borderColor),'rgb(200, 30, 39)');
                     await page.goto(base+'/sessions.php');
                     await noOverflow(page,`sessions at ${width}`); await rail(page,'.sessions-container');
@@ -232,6 +235,13 @@ const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
                     await manager.goto(base+'/manager/sessions.php');
                     await noOverflow(manager,`manager at ${width}`); await rail(manager,'.manager-container');
                 }
+                await manager.setViewportSize({width:900,height:1000});
+                await manager.goto(base+'/manager/sessions.php');
+                await manager.locator('.mobile-menu-btn').click();
+                await manager.setViewportSize({width:1000,height:1000});
+                assert.equal(await manager.locator('.mobile-drawer').evaluate(el=>el.classList.contains('open')),true);
+                await manager.setViewportSize({width:1200,height:1000});
+                await manager.waitForFunction(()=>document.querySelector('.mobile-menu-btn').getAttribute('aria-expanded')==='false');
                 const reg = JSON.parse(fixture('read'));
                 for (const route of ['review-receipt','record-refund']) {
                     await manager.goto(base+`/manager/${route}.php?id=${reg.id}`);

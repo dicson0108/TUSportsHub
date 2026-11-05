@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         closeDrawer = () => toggleDrawer(false);
         mobileDrawer.addEventListener('keydown', event => trapFocus(event, mobileDrawer));
-        window.matchMedia('(min-width: 821px)').addEventListener('change', event => {
+        window.matchMedia('(min-width: 1101px)').addEventListener('change', event => {
             if (event.matches && mobileDrawer.classList.contains('open')) toggleDrawer(false);
         });
 

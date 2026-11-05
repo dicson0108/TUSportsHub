@@ -187,11 +187,6 @@
   line-height: 1.45;
 }
 
-.activity-callout.alert {
-  background: #fff2f2;
-  border-color: #fecdd3;
-  color: #991b1b;
-}
 
 .callout-step-title {
   font-size: 11.5px;
@@ -207,10 +202,6 @@
 }
 
 .activity-actions-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
   margin-top: auto;
   padding-top: 4px;
 }

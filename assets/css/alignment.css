@@ -29,8 +29,7 @@
 
 :is(.btn-primary, .btn-secondary, .btn-link, .manager-btn,
     .journey-button, .btn-reserve) svg { display: block; flex-shrink: 0; }
-:is(.fact-value, .journey-facts dd, .manager-metric-value,
-    .participants-metric-value) { font-variant-numeric: tabular-nums; }
+:is(.fact-value, .journey-facts dd) { font-variant-numeric: tabular-nums; }
 .fact-row { align-items: flex-start; gap: 16px; }
 .fact-label { flex-shrink: 0; }
 .fact-value { min-width: 0; overflow-wrap: anywhere; }

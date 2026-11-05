@@ -93,9 +93,9 @@ $clubs = $stmt->fetchAll();
                     </div>
                     <div class="spotlight-info-bar">
                         <div>
-                            <div class="spotlight-label" style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #fecdd3; text-transform: uppercase; margin-bottom: 2px;">Next on court</div>
-                            <div style="font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 3px;"><?= e($spotlight['title']) ?></div>
-                            <div class="spotlight-meta" style="font-size: 12.5px; color: #d4d4da;">
+                            <div class="spotlight-label">Next on court</div>
+                            <div class="spotlight-title"><?= e($spotlight['title']) ?></div>
+                            <div class="spotlight-meta">
                                 <?= e(format_session_date($spotlight['session_date'])) ?> · <?= e(format_price($spotlight['price'])) ?> · <?= $spotlight_seats['seats_left'] ?> places left
                             </div>
                         </div>

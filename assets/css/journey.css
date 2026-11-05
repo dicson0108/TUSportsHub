@@ -4,17 +4,17 @@ button, input, select, textarea { font: inherit; }
 button, a { touch-action: manipulation; }
 button { cursor: pointer; }
 button:disabled { cursor: wait; opacity: .7; }
-.btn-hero-primary, .btn-hero-secondary, .btn-secondary-sm, .journey-button {
+.journey-button {
   display: inline-flex; justify-content: center; align-items: center; gap: .5rem;
   min-height: 46px; padding: .75rem 1.25rem; border: 1px solid #d9d9e1; border-radius: 11px;
   background: #fff; color: #1d1d1f; text-decoration: none; font-weight: 600; font-size: .9rem;
   line-height: 1.4; text-align: center; transition: background-color .15s, transform .1s;
 }
-.btn-hero-primary, .journey-button.primary { background: #d60920; color: white; border-color: #d60920; }
-.btn-hero-primary:hover, .journey-button.primary:hover { background: #b6081c; }
-.btn-hero-secondary:hover, .journey-button:hover { background: #f1f1f5; }
+.journey-button.primary { background: #d60920; color: white; border-color: #d60920; }
+.journey-button.primary:hover { background: #b6081c; }
+.journey-button:hover { background: #f1f1f5; }
 .journey-button.primary:hover { color: #fff; }
-.btn-hero-primary:active, .btn-hero-secondary:active, .journey-button:active { transform: scale(.98); }
+.journey-button:active { transform: scale(.98); }
 .status-badge { display: inline-block; padding: .45rem .65rem; border-radius: 8px; font-size: .78rem; font-weight: 600; line-height: 1.4; }
 .badge-confirmed { color: #176633; background: #eaf6ee; }
 .badge-warning { color: #805000; background: #fff5da; }
@@ -71,7 +71,6 @@ button:disabled { cursor: wait; opacity: .7; }
 .receipt-lightbox-modal { overscroll-behavior: contain; }
 .receipt-lightbox-header { flex-wrap: wrap; }
 .receipt-lightbox-toolbar { flex-wrap: wrap; }
-.participants-page [style*="color: #86868b"], .participants-page [style*="color: #248a3d"] { color: #555560 !important; }
 @media (max-width: 820px) {
   .journey-columns, .journey-columns.review { grid-template-columns: minmax(0, 1fr); }
 }
@@ -83,15 +82,12 @@ button:disabled { cursor: wait; opacity: .7; }
   .journey-card h2 { font-size: 1.25rem; }
   .journey-header h1 { font-size: 2.25rem; }
   .journey-page form > .journey-button { width: 100%; }
-  .session-detail-content { padding: 1.5rem !important; }
-  .session-policy { display: block !important; padding: 1rem !important; }
-  .session-policy > div:first-child { display: none !important; }
   .journey-columns { gap: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto !important; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
-  .journey-button:active, .btn-hero-primary:active, .btn-hero-secondary:active { transform: none; }
+  .journey-button:active { transform: none; }
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .mobile-drawer { background: #fff !important; backdrop-filter: none !important; }

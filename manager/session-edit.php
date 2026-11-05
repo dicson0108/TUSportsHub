@@ -325,7 +325,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </button>
             <?php endif; ?>
 
-            <button type="submit" name="action" value="<?= $is_published ? 'save' : 'publish' ?>" class="btn-hero-primary" style="border: none; cursor: pointer;">
+            <button type="submit" name="action" value="<?= $is_published ? 'save' : 'publish' ?>" class="manager-btn manager-btn-primary">
                 <?= $is_published ? 'Update Description' : 'Publish Session' ?>
             </button>
         </div>
