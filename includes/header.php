@@ -46,9 +46,9 @@ if ($is_manager_route) {
     <link rel="icon" type="image/x-icon" href="<?= APP_BASE_PATH ?>/favicon.ico">
     <link rel="icon" type="image/webp" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.webp">
     <link rel="apple-touch-icon" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.webp">
-    <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/style.css">
+    <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
     <?php if ($page_css && file_exists(__DIR__ . '/../assets/css/' . $page_css)): ?>
-        <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/<?= e($page_css) ?>">
+        <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/<?= e($page_css) ?>?v=<?= filemtime(__DIR__ . '/../assets/css/' . $page_css) ?>">
     <?php endif; ?>
 </head>
 <body>

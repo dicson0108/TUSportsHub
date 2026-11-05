@@ -45,11 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div class="auth-page-container">
+<div class="app-container">
     <div class="auth-split-layout">
         <!-- Left Hero -->
         <div class="auth-hero-col">
-            <span class="auth-hero-eyebrow">WELCOME BACK TO CAMPUS LIFE</span>
+            <span class="section-label">WELCOME BACK TO CAMPUS LIFE</span>
             <h1 class="auth-hero-title">
                 Your next great<br>moment is waiting.
             </h1>
@@ -57,13 +57,11 @@ require_once __DIR__ . '/includes/header.php';
                 Pick up where you left off. Your sports sessions, your community, all in one place.
             </p>
 
-            <div class="auth-poster-card">
-                <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-open-play.webp?v=<?= filemtime(__DIR__ . '/assets/images/sports/badminton-open-play.webp') ?>" alt="Taylor's Badminton Club Open Play">
-                <div class="auth-poster-overlay">
-                    <span class="auth-poster-tag">TAYLOR'S BADMINTON CLUB</span>
-                    <div class="auth-poster-title">OPEN PLAY</div>
-                    <div class="auth-poster-desc">Sports Complex · Court 1-3 · Weekly sparring</div>
-                </div>
+            <div class="auth-hero-poster">
+                <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-open-play.webp?v=<?= filemtime(__DIR__ . '/assets/images/sports/badminton-open-play.webp') ?>" alt="Taylor's Badminton Club Open Play" class="poster-uploaded-img">
+            </div>
+            <div class="auth-hero-tagline">
+                Made for the Taylor's sports community. Made for you.
             </div>
         </div>
 
@@ -74,9 +72,11 @@ require_once __DIR__ . '/includes/header.php';
             <p class="auth-card-sub">Log in with your Taylor's email to save your seat.</p>
 
             <?php if ($error): ?>
-                <div class="auth-alert" role="alert">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                    <strong><?= e($error) ?></strong>
+                <div class="status-alert-box danger" role="alert">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12.01" y1="16" y2="16"/></svg>
+                    <div>
+                        <strong><?= e($error) ?></strong>
+                    </div>
                 </div>
             <?php endif; ?>
 
@@ -85,14 +85,14 @@ require_once __DIR__ . '/includes/header.php';
                 <input type="hidden" name="redirect" value="<?= e($redirect) ?>">
 
                 <div class="form-field">
-                    <label class="auth-label">Taylor's email</label>
+                    <label class="form-label">Taylor's email</label>
                     <input type="email" name="email" value="<?= e($email_val ?: 'alex@sd.taylors.edu.my') ?>" 
-                           class="auth-input <?= $error ? 'input-error' : '' ?>" required placeholder="name@sd.taylors.edu.my">
+                           class="form-input <?= $error ? 'input-error' : '' ?>" required placeholder="name@sd.taylors.edu.my">
                 </div>
 
                 <div class="form-field">
-                    <label class="auth-label">Password</label>
-                    <input type="password" name="password" class="auth-input <?= $error ? 'input-error' : '' ?>" 
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-input <?= $error ? 'input-error' : '' ?>" 
                            required value="Password123!" placeholder="••••••••••••">
                 </div>
 
@@ -104,7 +104,7 @@ require_once __DIR__ . '/includes/header.php';
                     <a href="#" class="auth-forgot-link">Forgot password?</a>
                 </div>
 
-                <button type="submit" class="auth-submit-btn">
+                <button type="submit" class="btn-primary btn-auth-submit">
                     <span>Log in</span>
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </button>

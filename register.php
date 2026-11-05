@@ -74,25 +74,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div class="auth-page-container">
+<div class="app-container">
     <div class="auth-split-layout">
         <!-- Left Hero -->
         <div class="auth-hero-col">
-            <span class="auth-hero-eyebrow">YOUR CAMPUS EXPERIENCE STARTS HERE</span>
+            <span class="section-label">YOUR CAMPUS EXPERIENCE STARTS HERE</span>
             <h1 class="auth-hero-title">
                 A new connection.<br>A new rally.
             </h1>
             <p class="auth-hero-desc">
-                Join university sports clubs, book your court places, and track your active journey at Taylor's.
+                One account for the moments that matter. Join university sports clubs, book your court places, and track your active journey at Taylor's.
             </p>
 
-            <div class="auth-poster-card">
-                <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-footwork.webp?v=<?= filemtime(__DIR__ . '/assets/images/sports/badminton-footwork.webp') ?>" alt="Taylor's Badminton Training">
-                <div class="auth-poster-overlay">
-                    <span class="auth-poster-tag signup-tag">START STRONG</span>
-                    <div class="auth-poster-title">FOOTWORK CLINIC</div>
-                    <div class="auth-poster-desc">Multi-Purpose Hall Court A · Beginner to intermediate</div>
-                </div>
+            <div class="auth-hero-poster">
+                <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-footwork.webp?v=<?= filemtime(__DIR__ . '/assets/images/sports/badminton-footwork.webp') ?>" alt="Taylor's Badminton Training" class="poster-uploaded-img">
+            </div>
+            <div class="auth-hero-tagline">
+                Made for the Taylor's sports community. Made for you.
             </div>
         </div>
 
@@ -107,7 +105,7 @@ require_once __DIR__ . '/includes/header.php';
 
                     <h2 class="auth-card-title">You're part of it.</h2>
 
-                    <div class="auth-status-alert success" role="alert">
+                    <div class="status-alert-box success" role="alert">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         <div>
                             <div class="auth-status-title">Your account is ready.</div>
@@ -119,7 +117,7 @@ require_once __DIR__ . '/includes/header.php';
                         Log in with <strong><?= e($success_user['email']) ?></strong> and start exploring club sparring and training sessions.
                     </p>
 
-                    <a href="<?= APP_BASE_PATH ?>/login.php" class="auth-submit-btn">
+                    <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-primary btn-auth-submit">
                         <span>Continue to login</span>
                         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     </a>
@@ -130,7 +128,7 @@ require_once __DIR__ . '/includes/header.php';
                 <div>
                     <h2 class="auth-card-title">Already one of us?</h2>
 
-                    <div class="auth-status-alert danger" role="alert">
+                    <div class="status-alert-box danger" role="alert">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                         <div>
                             <div class="auth-status-title">This email is already registered.</div>
@@ -139,12 +137,12 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
 
                     <div class="form-field">
-                        <label class="auth-label">Taylor's email</label>
-                        <input type="email" value="<?= e($email_val) ?>" class="auth-input input-error" readonly>
+                        <label class="form-label">Taylor's email</label>
+                        <input type="email" value="<?= e($email_val) ?>" class="form-input input-error" readonly>
                     </div>
 
                     <div class="auth-action-col">
-                        <a href="<?= APP_BASE_PATH ?>/login.php" class="auth-submit-btn">
+                        <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-primary btn-auth-submit">
                             <span>Go to login</span>
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </a>
@@ -163,7 +161,7 @@ require_once __DIR__ . '/includes/header.php';
                 </p>
 
                 <?php if (!empty($errors['general'])): ?>
-                    <div class="auth-alert" role="alert">
+                    <div class="status-alert-box danger" role="alert">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                         <strong><?= e($errors['general']) ?></strong>
                     </div>
@@ -173,18 +171,18 @@ require_once __DIR__ . '/includes/header.php';
                     <?= csrf_field() ?>
 
                     <div class="form-field">
-                        <label class="auth-label">Full name</label>
+                        <label class="form-label">Full name</label>
                         <input type="text" name="name" value="<?= e($name_val) ?>" 
-                               class="auth-input <?= !empty($errors['name']) ? 'input-error' : '' ?>" required placeholder="Aisha Tan">
+                               class="form-input <?= !empty($errors['name']) ? 'input-error' : '' ?>" required placeholder="Aisha Tan">
                         <?php if (!empty($errors['name'])): ?>
                             <div class="field-error-msg"><?= e($errors['name']) ?></div>
                         <?php endif; ?>
                     </div>
 
                     <div class="form-field">
-                        <label class="auth-label">Taylor's email</label>
+                        <label class="form-label">Taylor's email</label>
                         <input type="email" name="email" value="<?= e($email_val) ?>" 
-                               class="auth-input <?= !empty($errors['email']) ? 'input-error' : '' ?>" required placeholder="name@sd.taylors.edu.my">
+                               class="form-input <?= !empty($errors['email']) ? 'input-error' : '' ?>" required placeholder="name@sd.taylors.edu.my">
                         <?php if (!empty($errors['email'])): ?>
                             <div class="field-error-msg"><?= e($errors['email']) ?></div>
                         <?php else: ?>
@@ -193,14 +191,14 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
 
                     <div class="form-field">
-                        <label class="auth-label">Phone number <span class="auth-label-opt">(optional)</span></label>
+                        <label class="form-label">Phone number <span class="auth-label-opt">(optional)</span></label>
                         <input type="tel" name="phone" value="<?= e($phone_val) ?>" 
-                               class="auth-input" placeholder="+6012-345 6789">
+                               class="form-input" placeholder="+6012-345 6789">
                     </div>
 
                     <div class="form-field">
-                        <label class="auth-label">Password</label>
-                        <input type="password" name="password" class="auth-input <?= !empty($errors['password']) ? 'input-error' : '' ?>" 
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-input <?= !empty($errors['password']) ? 'input-error' : '' ?>" 
                                required placeholder="••••••••••••">
                         <?php if (!empty($errors['password'])): ?>
                             <div class="field-error-msg"><?= e($errors['password']) ?></div>
@@ -210,8 +208,8 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
 
                     <div class="form-field">
-                        <label class="auth-label">Confirm password</label>
-                        <input type="password" name="confirm_password" class="auth-input <?= !empty($errors['confirm_password']) ? 'input-error' : '' ?>" 
+                        <label class="form-label">Confirm password</label>
+                        <input type="password" name="confirm_password" class="form-input <?= !empty($errors['confirm_password']) ? 'input-error' : '' ?>" 
                                required placeholder="••••••••••••">
                         <?php if (!empty($errors['confirm_password'])): ?>
                             <div class="field-error-msg"><?= e($errors['confirm_password']) ?></div>
@@ -228,7 +226,7 @@ require_once __DIR__ . '/includes/header.php';
                         <?php endif; ?>
                     </div>
 
-                    <button type="submit" class="auth-submit-btn">
+                    <button type="submit" class="btn-primary btn-auth-submit">
                         <span>Create account</span>
                         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     </button>
