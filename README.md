@@ -1,4 +1,4 @@
-# SportsHub
+# Taylor's University SportsHub
 
 SportsHub is a PHP web application for campus sports sessions. Students can discover sessions, reserve places, submit payment receipts, and track registrations. Club managers can publish sessions, review receipts, and record external refunds.
 
