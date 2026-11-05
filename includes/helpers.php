@@ -191,39 +191,55 @@ function get_site_logo_html(): string {
 
 // Session cover image resolver
 function get_session_cover_url(array $session): string {
+    $p = '';
     if (!empty($session['image_path'])) {
-        $p = '/' . ltrim($session['image_path'], '/');
-        if (file_exists(__DIR__ . '/..' . $p)) {
-            return app_url($p);
+        $candidate = '/' . ltrim($session['image_path'], '/');
+        if (file_exists(__DIR__ . '/..' . $candidate)) {
+            $p = $candidate;
         }
     }
-    $id = (int)($session['id'] ?? 0);
-    $sport = strtolower($session['sport_type'] ?? '');
-    if ($sport === 'basketball') {
-        return app_url('/assets/images/sports/basketball-run.webp');
+    if ($p === '') {
+        $id = (int)($session['id'] ?? 0);
+        $sport = strtolower($session['sport_type'] ?? '');
+        if ($sport === 'basketball') {
+            $p = '/assets/images/sports/basketball-run.webp';
+        } elseif ($sport === 'pickleball') {
+            $p = '/assets/images/sports/pickleball-rally.webp';
+        } elseif ($id === 2 || str_contains(strtolower($session['title'] ?? ''), 'footwork')) {
+            $p = '/assets/images/sports/badminton-footwork.webp';
+        } elseif ($id === 3 || str_contains(strtolower($session['title'] ?? ''), 'cup') || str_contains(strtolower($session['title'] ?? ''), 'tournament')) {
+            $p = '/assets/images/sports/rally-poster.webp';
+        } else {
+            $p = '/assets/images/sports/badminton-open-play.webp';
+        }
     }
-    if ($id === 2 || str_contains(strtolower($session['title'] ?? ''), 'footwork')) {
-        return app_url('/assets/images/sports/badminton-footwork.webp');
-    }
-    if ($id === 3 || str_contains(strtolower($session['title'] ?? ''), 'rally')) {
-        return app_url('/assets/images/sports/rally-poster.webp');
-    }
-    return app_url('/assets/images/sports/badminton-open-play.webp');
+    $full_path = __DIR__ . '/..' . $p;
+    $v = file_exists($full_path) ? filemtime($full_path) : '1';
+    return app_url($p) . '?v=' . $v;
 }
 
 // Club banner image resolver
 function get_club_banner_url(array $club): string {
+    $p = '';
     if (!empty($club['banner_path'])) {
-        $p = '/' . ltrim($club['banner_path'], '/');
-        if (file_exists(__DIR__ . '/..' . $p)) {
-            return app_url($p);
+        $candidate = '/' . ltrim($club['banner_path'], '/');
+        if (file_exists(__DIR__ . '/..' . $candidate)) {
+            $p = $candidate;
         }
     }
-    $sport = strtolower($club['sport_type'] ?? '');
-    if ($sport === 'basketball') {
-        return app_url('/assets/images/sports/basketball-banner.webp');
+    if ($p === '') {
+        $sport = strtolower($club['sport_type'] ?? '');
+        if ($sport === 'basketball') {
+            $p = '/assets/images/sports/basketball-banner.webp';
+        } elseif ($sport === 'pickleball') {
+            $p = '/assets/images/sports/pickleball-banner.webp';
+        } else {
+            $p = '/assets/images/sports/badminton-banner.webp';
+        }
     }
-    return app_url('/assets/images/sports/badminton-banner.webp');
+    $full_path = __DIR__ . '/..' . $p;
+    $v = file_exists($full_path) ? filemtime($full_path) : '1';
+    return app_url($p) . '?v=' . $v;
 }
 
 // Validate Taylor's University email domain

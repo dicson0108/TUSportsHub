@@ -202,24 +202,34 @@ require_once __DIR__ . '/../includes/header.php';
                     'badge' => 'Clinic'
                 ],
                 [
+                    'path' => 'assets/images/sports/rally-poster.webp',
+                    'title' => 'Badminton Tournament Smash',
+                    'badge' => 'Tournament'
+                ],
+                [
                     'path' => 'assets/images/sports/basketball-run.webp',
-                    'title' => 'Basketball 5v5 Open Court',
+                    'title' => 'Basketball 3v3 Twilight Run',
                     'badge' => 'Basketball'
                 ],
                 [
-                    'path' => 'assets/images/sports/rally-poster.webp',
-                    'title' => 'Weekend Social Rally & Doubles',
-                    'badge' => 'Social Game'
+                    'path' => 'assets/images/sports/pickleball-rally.webp',
+                    'title' => 'Pickleball Social Rally',
+                    'badge' => 'Pickleball'
                 ],
                 [
-                    'path' => 'assets/images/sports/badminton-banner.webp',
-                    'title' => 'Indoor Sports Arena Court',
-                    'badge' => 'Arena'
+                    'path' => 'assets/images/sports/pickleball-clinic.webp',
+                    'title' => 'Pickleball Coaching Clinic',
+                    'badge' => 'Coaching'
                 ],
                 [
-                    'path' => 'assets/images/sports/basketball-banner.webp',
-                    'title' => 'Tournament Court View',
+                    'path' => 'assets/images/sports/pickleball-ladder.webp',
+                    'title' => 'Pickleball Ladder Shootout',
                     'badge' => 'Tournament'
+                ],
+                [
+                    'path' => 'assets/images/sports/sports-complex-banner.webp',
+                    'title' => 'Taylor\'s Sports Complex Arena',
+                    'badge' => 'Arena'
                 ],
             ];
             ?>
@@ -227,10 +237,11 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="image-picker-grid">
                 <?php foreach ($image_presets as $idx => $preset): 
                     $isSelected = ($image_path_val === $preset['path']);
+                    $preset_v = file_exists(__DIR__ . '/../' . $preset['path']) ? filemtime(__DIR__ . '/../' . $preset['path']) : '1';
                 ?>
                     <label class="image-picker-option <?= $isSelected ? 'selected' : '' ?>">
                         <input type="radio" name="image_path" value="<?= e($preset['path']) ?>" <?= $isSelected ? 'checked' : '' ?>>
-                        <img src="<?= app_url('/' . $preset['path']) ?>" alt="<?= e($preset['title']) ?>" class="image-picker-thumb" loading="lazy">
+                        <img src="<?= app_url('/' . $preset['path']) ?>?v=<?= $preset_v ?>" alt="<?= e($preset['title']) ?>" class="image-picker-thumb" loading="lazy">
                         <div class="image-picker-label">
                             <span style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #c8102e; display: block; margin-bottom: 2px;">
                                 <?= e($preset['badge']) ?>

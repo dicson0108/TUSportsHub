@@ -68,7 +68,11 @@ require_once __DIR__ . "/includes/header.php";
             <div class="payment-qr-col">
               <div class="duitnow-qr-card">
                 <div class="duitnow-qr-image-wrapper">
-                  <img src="<?= app_url('/' . ltrim($reg['duitnow_qr_path'] ?: 'assets/images/payment/duitnow-qr.webp', '/')) ?>" alt="DuitNow QR Code" class="duitnow-qr-img" width="150" height="206">
+                  <?php 
+                    $qr_path = '/' . ltrim($reg['duitnow_qr_path'] ?: 'assets/images/payment/duitnow-qr.webp', '/');
+                    $qr_v = file_exists(__DIR__ . $qr_path) ? filemtime(__DIR__ . $qr_path) : '1';
+                  ?>
+                  <img src="<?= app_url($qr_path) ?>?v=<?= $qr_v ?>" alt="DuitNow QR Code" class="duitnow-qr-img" width="150" height="206">
                 </div>
                 <div class="duitnow-qr-caption">
                   <strong>Scan with Bank or E-Wallet</strong>

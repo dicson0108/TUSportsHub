@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </p>
 
             <div class="auth-poster-card" style="max-width: 460px;">
-                <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-footwork.webp" alt="Taylor's Badminton Training">
+                <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-footwork.webp?v=<?= filemtime(__DIR__ . '/assets/images/sports/badminton-footwork.webp') ?>" alt="Taylor's Badminton Training">
                 <div class="auth-poster-overlay">
                     <span class="auth-poster-tag">START STRONG</span>
                     <div class="auth-poster-title">FOOTWORK CLINIC</div>
