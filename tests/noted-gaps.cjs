@@ -1,0 +1,133 @@
+// NODE_PATH: existing Playwright test tools. Uses disposable UX fixtures only.
+const {chromium} = require('playwright');
+const {execFileSync} = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const root = path.resolve(__dirname, '..');
+const base = process.env.SPORTSHUB_URL || 'http://localhost/MyProject/27TUSportsHub';
+const php = process.env.PHP_BINARY || 'php';
+const fixture = (...args) => execFileSync(php, [path.join(__dirname, 'ux-fixtures.php'), ...args], {encoding:'utf8'}).trim();
+const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
+    'require "config/db.php"; $q=get_db_connection()->prepare($argv[1]); $q->execute(json_decode($argv[2],true)); echo json_encode($q->columnCount() ? $q->fetchAll() : []);',
+    query, JSON.stringify(params)], {cwd:root, encoding:'utf8'}));
+(async () => {
+    const f = JSON.parse(fixture('create'));
+    let browser;
+    let failures = 0;
+    try {
+        browser = await chromium.launch({channel:'chrome', headless:true});
+        const login = async role => {
+            const page = await browser.newPage();
+            await page.goto(base+'/login.php');
+            await page.locator('[name=email]').fill(f.users[role].email);
+            await page.locator('[name=password]').fill('UxFixture123!');
+            await Promise.all([page.waitForNavigation(), page.locator('button[type=submit]').click()]);
+            return page;
+        };
+        const student = await login('student'), manager = await login('manager'), outsider = await login('outsider');
+        const post = async (page, url, data, receipt) => {
+            const csrf_token = await page.locator('[name=csrf_token]').first().inputValue();
+            if (url.startsWith('/manager/review-receipt.php') && await page.locator('[name=receipt_id]').count()) {
+                data = {receipt_id:await page.locator('[name=receipt_id]').inputValue(),...data};
+            }
+            return page.request.post(base+url, receipt ? {multipart:{csrf_token,...data,receipt:{name:'synthetic.png',mimeType:'image/png',buffer:receipt}}} : {form:{csrf_token,...data}});
+        };
+        const check = async (name, run) => {
+            try { await run(); console.log('PASS '+name); }
+            catch (e) { failures++; console.error('FAIL '+name+': '+e.message); }
+        };
+        await check('staff email rejected by actual signup handler', async () => {
+            const page = await browser.newPage();
+            await page.goto(base+'/register.php');
+            const response = await post(page, '/register.php', {name:'Staff test',email:'admin@taylors.edu.my',password:'Password123!',confirm_password:'Password123!',terms:'1'});
+            assert.ok((await response.text()).includes('Use your @sd.taylors.edu.my student email'), 'staff signup must show student-domain error');
+            await page.close();
+        });
+        await check('published/closed/cancelled terms stay fixed; draft editable', async () => {
+            const sid = f.sessions.free;
+            const original = sql('SELECT * FROM sessions WHERE id=?',[sid])[0];
+            for (const status of ['published','closed','cancelled']) {
+                sql('UPDATE sessions SET status=? WHERE id=?',[status,sid]);
+                await manager.goto(base+`/manager/session-edit.php?id=${sid}`);
+                await post(manager, `/manager/session-edit.php?id=${sid}`, {
+                    club_id:f.club,title:'FORGED TITLE',sport_type:'Basketball',venue:'FORGED VENUE',
+                    session_date:'2099-01-01',start_time:'09:00',end_time:'10:00',price:'999',capacity:'999',
+                    description:'Updated description',image_path:'assets/images/sports/badminton-open-play.webp',action:'publish'
+                });
+                const current = sql('SELECT * FROM sessions WHERE id=?',[sid])[0];
+                for (const key of ['club_id','title','sport_type','venue','session_date','start_time','end_time','price','capacity']) assert.equal(current[key],original[key],`${status}: ${key}`);
+                assert.equal(current.status,status);
+                assert.equal(current.description,'Updated description');
+            }
+            sql("UPDATE sessions SET status='draft' WHERE id=?",[sid]);
+            await manager.goto(base+`/manager/session-edit.php?id=${sid}`);
+            await post(manager, `/manager/session-edit.php?id=${sid}`, {club_id:f.club,title:'Draft edited',sport_type:'Badminton',venue:'Draft court',session_date:'2099-01-01',start_time:'09:00',end_time:'10:00',price:'0',capacity:'3',description:'Draft description',image_path:'',action:'draft'});
+            assert.equal(sql('SELECT title FROM sessions WHERE id=?',[sid])[0].title,'Draft edited');
+        });
+        await check('receipt replacements retain review history and scoped evidence', async () => {
+            await student.goto(base+`/session-detail.php?id=${f.sessions.paid}`);
+            await post(student,'/reserve.php',{session_id:f.sessions.paid});
+            const reg = JSON.parse(fixture('read'));
+            const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aK9sAAAAASUVORK5CYII=','base64');
+            await post(student,'/upload-receipt.php',{registration_id:reg.id},png);
+            await manager.goto(base+`/manager/review-receipt.php?id=${reg.id}`);
+            await post(manager,`/manager/review-receipt.php?id=${reg.id}`,{decision:'reject',rejection_reason:'First reference unreadable'});
+            await post(student,'/upload-receipt.php',{registration_id:reg.id},png);
+            const staleReceipt = await manager.locator('[name=receipt_id]').inputValue();
+            const stale = await post(manager,`/manager/review-receipt.php?id=${reg.id}`,{decision:'approve',receipt_id:staleReceipt});
+            assert.ok((await stale.text()).includes('The receipt changed'));
+            assert.equal(JSON.parse(fixture('read')).status,'awaiting_approval');
+            await manager.goto(base+`/manager/review-receipt.php?id=${reg.id}`);
+            await post(manager,`/manager/review-receipt.php?id=${reg.id}`,{decision:'approve'});
+            const receipts = sql('SELECT * FROM payment_receipts WHERE registration_id=? ORDER BY id',[reg.id]);
+            assert.equal(receipts.length,2);
+            assert.equal(receipts[0].decision,'rejected');
+            assert.equal(receipts[0].rejection_reason,'First reference unreadable');
+            assert.equal(receipts[1].decision,'approved');
+            for (const r of receipts) {
+                assert.equal(r.reviewed_by,f.users.manager.id);
+                assert.ok(r.reviewed_at);
+                const url=base+`/evidence.php?registration_id=${reg.id}&receipt_id=${r.id}`;
+                assert.equal((await student.request.get(url)).status(),200);
+                assert.equal((await manager.request.get(url)).status(),200);
+                assert.equal((await outsider.request.get(url)).status(),403);
+            }
+            assert.notEqual(receipts[0].receipt_path,receipts[1].receipt_path);
+            const mismatch=base+`/evidence.php?registration_id=${reg.id}&receipt_id=2147483647`;
+            assert.equal((await student.request.get(mismatch)).status(),404);
+            for (const page of [student,manager]) {
+                await page.goto(base+(page===student?`/payment.php?id=${reg.id}`:`/manager/review-receipt.php?id=${reg.id}`));
+                assert.match(await page.locator('main').innerText(),/First reference unreadable/);
+                assert.equal(await page.locator('a[href*="receipt_id="]').count(),2);
+            }
+            // Retried decision cannot overwrite the earlier reviewer decision.
+            await post(manager,`/manager/review-receipt.php?id=${reg.id}`,{decision:'reject',rejection_reason:'Stale retry'});
+            assert.equal(sql('SELECT decision FROM payment_receipts WHERE id=?',[receipts[1].id])[0].decision,'approved');
+        });
+        await check('account menu supports native Enter/Space, Escape, Tab and link navigation', async () => {
+            await student.goto(base+'/my-activities.php');
+            const toggle=student.locator('.user-menu-pill');
+            await toggle.focus(); await student.keyboard.press('Enter');
+            assert.equal(await toggle.getAttribute('aria-expanded'),'true');
+            await student.keyboard.press('Tab');
+            assert.equal(await student.locator('.user-dropdown a').first().evaluate(el=>el===document.activeElement),true);
+            await student.keyboard.press('Escape');
+            assert.equal(await toggle.getAttribute('aria-expanded'),'false');
+            assert.equal(await toggle.evaluate(el=>el===document.activeElement),true);
+            await student.keyboard.press('Space');
+            assert.equal(await toggle.getAttribute('aria-expanded'),'true');
+            await student.locator('.user-dropdown a').first().click();
+            await student.waitForURL('**/profile.php');
+        });
+        await check('CSS uses explicit transition properties', async () => {
+            for (const file of fs.readdirSync(path.join(root,'assets/css')).filter(n=>n.endsWith('.css'))) {
+                assert.doesNotMatch(fs.readFileSync(path.join(root,'assets/css',file),'utf8'),/transition\s*:\s*all\b/,file);
+            }
+        });
+    } finally {
+        if (browser) await browser.close();
+        console.log(fixture('cleanup'));
+    }
+    if (failures) process.exitCode=1;
+})().catch(e=>{console.error(e);process.exitCode=1;});

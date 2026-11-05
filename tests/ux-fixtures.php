@@ -101,7 +101,25 @@ if ($action === "create") {
     } elseif ($action === "session-state") {
         $q=$db->prepare('SELECT status FROM sessions WHERE id=?');$q->execute([$sid]);echo $q->fetchColumn();
     } elseif ($action === "review-reset") {
-        $db->prepare("UPDATE registrations SET status='awaiting_approval',cancellation_requested_at=NULL,cancellation_reason=NULL WHERE session_id=? AND user_id=?")->execute([$f['sessions']['review'],$uid]);
+        // Separate synthetic submission for each independent review scenario.
+        // Never rewrite a prior receipt's recorded decision to reset a test.
+        $q = $db->prepare('SELECT * FROM registrations WHERE session_id=? AND user_id=?');
+        $q->execute([$f['sessions']['review'], $uid]);
+        $reg = $q->fetch();
+        $receipt_path = 'assets/uploads/receipts/receipt_' . $reg['id'] . '_' . bin2hex(random_bytes(8)) . '.png';
+        if (!copy(__DIR__ . '/../' . $reg['receipt_path'], __DIR__ . '/../' . $receipt_path)) {
+            throw new RuntimeException('Could not create synthetic receipt fixture.');
+        }
+        $db->beginTransaction();
+        try {
+            $db->prepare('INSERT INTO payment_receipts (registration_id,receipt_path,submitted_at) VALUES (?,?,?)')->execute([$reg['id'], $receipt_path, $reg['receipt_uploaded_at']]);
+            $db->prepare("UPDATE registrations SET status='awaiting_approval',receipt_path=?,rejection_reason=NULL,cancellation_requested_at=NULL,cancellation_reason=NULL WHERE id=?")->execute([$receipt_path, $reg['id']]);
+            $db->commit();
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) $db->rollBack();
+            unlink(__DIR__ . '/../' . $receipt_path);
+            throw $e;
+        }
     } elseif ($action === "review-start") {
         $db->prepare(
             "UPDATE sessions SET session_date=CURDATE(),start_time=TIME(DATE_SUB(NOW(),INTERVAL 1 MINUTE)),end_time=TIME(DATE_ADD(NOW(),INTERVAL 1 HOUR)) WHERE id=?",

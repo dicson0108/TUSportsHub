@@ -176,7 +176,7 @@ img {
   gap: 8px;
   min-height: 44px;
   box-shadow: 0 1px 3px rgba(200, 30, 39, 0.22);
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
   user-select: none;
   font-optical-sizing: auto;
 }
@@ -210,7 +210,7 @@ img {
   gap: 8px;
   min-height: 44px;
   box-shadow: var(--shadow-xs);
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
   user-select: none;
 }
 
@@ -236,7 +236,7 @@ img {
   align-items: center;
   gap: 6px;
   min-height: 44px;
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
 }
 
 .btn-link:hover {
@@ -395,7 +395,7 @@ img {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: var(--shadow-xs);
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
   user-select: none;
   min-height: 44px;
 }
@@ -518,7 +518,7 @@ img {
   align-items: center;
   gap: 10px;
   border-radius: var(--radius-sm);
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
 }
 
 .dropdown-item:hover {
@@ -566,7 +566,7 @@ img {
   padding: 0;
   gap: 5px;
   color: var(--text-main);
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
 }
 
 .mobile-menu-btn:hover {
@@ -583,7 +583,7 @@ img {
   height: 2px;
   background-color: var(--text-main);
   border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
 }
 
 /* Mobile Drawer Overlay */
@@ -666,7 +666,7 @@ img {
   color: var(--text-secondary);
   padding: 12px 14px;
   border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
 }
 
 .mobile-nav-link:hover, .mobile-nav-link.active {
@@ -716,7 +716,7 @@ img {
   max-width: 400px;
   opacity: 0;
   transform: translateY(12px) scale(0.95);
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1), color 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .toast-pill.visible {
@@ -1041,7 +1041,7 @@ img {
   opacity: 0;
   visibility: hidden;
   transform: translateY(16px);
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform var(--transition-press);
+  transition: background-color 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1), color 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform var(--transition-press);
 }
 
 .back-to-top-btn.visible {
@@ -1123,7 +1123,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
 }
 
 .modal-close-btn:hover {
@@ -1259,7 +1259,7 @@ textarea.form-input {
   letter-spacing: -0.01em;
   color: var(--text-main);
   outline: none;
-  transition: all var(--transition-fast), box-shadow var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
   -webkit-appearance: none;
   appearance: none;
 }
@@ -1447,7 +1447,7 @@ textarea:focus-visible,
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
 }
 
 .receipt-tool-btn:hover {
@@ -1518,7 +1518,7 @@ textarea:focus-visible,
   overflow: hidden;
   background: #fafafa;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
 }
@@ -1571,7 +1571,7 @@ textarea:focus-visible,
   padding: 2rem;
   background: #ffffff;
   text-align: center;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   position: relative;
   cursor: pointer;
 }
@@ -1694,7 +1694,7 @@ textarea:focus-visible,
   box-shadow: var(--shadow-xs);
   color: #1d1d1f;
   text-decoration: none;
-  transition: all 0.15s ease, transform var(--transition-press);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, transform var(--transition-press);
 }
 .nav-inbox-btn:hover {
   background: #ffffff;
@@ -1724,7 +1724,7 @@ textarea:focus-visible,
   border-radius: 980px;
   border: 1px solid #d2d2d7;
   background: #fff;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 .btn-nav-login:hover { background: #f5f5f7; }
 .btn-nav-signup {
@@ -1756,7 +1756,7 @@ textarea:focus-visible,
   font-weight: 500;
   color: #1d1d1f;
   font-family: inherit;
-  transition: all 0.15s ease, transform var(--transition-press);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, transform var(--transition-press);
 }
 .user-pill:hover, .user-menu-pill:hover,
 .user-pill:focus-visible, .user-menu-pill:focus-visible {
@@ -1869,7 +1869,7 @@ textarea:focus-visible,
   font-weight: 500;
   text-decoration: none;
   box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
-  transition: all 0.15s ease, transform var(--transition-press, 120ms ease);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, transform var(--transition-press, 120ms ease);
   min-height: 38px;
 }
 .btn-manage-club:hover {
@@ -1893,7 +1893,7 @@ textarea:focus-visible,
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: #ffffff;
   box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
-  transition: all 0.15s ease, transform var(--transition-press, 120ms ease);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, transform var(--transition-press, 120ms ease);
   user-select: none;
   min-height: 40px;
 }
@@ -2009,7 +2009,7 @@ textarea:focus-visible,
   flex-shrink: 0;
   min-height: 44px;
   box-shadow: 0 3px 12px rgba(200, 30, 39, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all var(--transition-fast, 150ms ease), transform var(--transition-press, 120ms ease);
+  transition: background-color var(--transition-fast, 150ms ease), border-color var(--transition-fast, 150ms ease), color var(--transition-fast, 150ms ease), box-shadow var(--transition-fast, 150ms ease), opacity var(--transition-fast, 150ms ease), transform var(--transition-press, 120ms ease);
 }
 
 .hero-search-btn:hover, .btn-filter-search:hover {
@@ -2035,3 +2035,8 @@ textarea:focus-visible,
 .hero-btn-arrow {
   transition: transform var(--transition-fast, 150ms ease);
 }
+
+/* Account links remain available in the mobile navigation drawer. */
+@media (max-width: 820px) {
+  .user-account { display: none; }
+}

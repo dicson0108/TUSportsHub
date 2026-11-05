@@ -34,14 +34,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $cancelling = !empty($reg["cancellation_requested_at"]) || $reg["session_status"] === "cancelled";
             $decision = $_POST["decision"] ?? "";
             $reason = trim($_POST["rejection_reason"] ?? "");
+            $receipt_query = $db->prepare('SELECT id FROM payment_receipts WHERE registration_id=? AND receipt_path=?');
+            $receipt_query->execute([$reg_id, $reg['receipt_path']]);
+            $current_receipt_id = (int)$receipt_query->fetchColumn();
             if ($reg["status"] !== "awaiting_approval" || !$reg["receipt_path"]) {
                 $error =
                     "This receipt is no longer awaiting a decision. Return to participants for its current status.";
+            } elseif (!$current_receipt_id || (int)($_POST['receipt_id'] ?? 0) !== $current_receipt_id) {
+                $error = 'The receipt changed since you opened this form. Inspect the current receipt before deciding.';
             } elseif (!in_array($decision, ["approve", "reject"], true)) {
                 $error = "Choose a payment decision.";
             } elseif ($decision === "reject" && ($reason === "" || mb_strlen($reason) > 255)) {
                 $error = "Enter a rejection reason of 1–255 characters.";
             } else {
+                $q = $db->prepare("UPDATE payment_receipts SET decision=?, rejection_reason=?, reviewed_by=?, reviewed_at=NOW() WHERE registration_id=? AND receipt_path=? AND decision='awaiting_review'");
+                $q->execute([
+                    $decision === 'approve' ? 'approved' : 'rejected',
+                    $decision === 'reject' ? $reason : null,
+                    $user['id'], $reg_id, $reg['receipt_path'],
+                ]);
+                if ($q->rowCount() !== 1) throw new RuntimeException('Receipt history is unavailable or already reviewed. Reload before retrying.');
                 if ($decision === "approve") {
                     $next = $cancelling ? "cancellation_pending" : "confirmed";
                     $q = $db->prepare(
@@ -82,6 +94,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 $cancelling = !empty($reg["cancellation_requested_at"]) || $reg["session_status"] === "cancelled";
 $can_review = $reg["status"] === "awaiting_approval" && !empty($reg["receipt_path"]) && !$is_self;
+$receipt_query = $db->prepare('SELECT id FROM payment_receipts WHERE registration_id=? AND receipt_path=?');
+$receipt_query->execute([$reg_id, $reg['receipt_path']]);
+$displayed_receipt_id = (int)$receipt_query->fetchColumn();
 $page_title = "Review payment evidence";
 require_once __DIR__ . "/../includes/header.php";
 ?>
@@ -120,6 +135,7 @@ require_once __DIR__ . "/../includes/header.php";
    ): ?><div class="journey-notice"><strong>Cancellation requested</strong><p>If money arrived, approve settlement to queue a full refund. Complete cancellation without refund only after checking that no transfer arrived.</p></div><?php endif; ?>
    <?php if ($can_review): ?><form method="POST" autocomplete="off">
      <?= csrf_field() ?>
+     <input type="hidden" name="receipt_id" value="<?= $displayed_receipt_id ?>">
      <div class="journey-field"><label for="rejection_reason"><?= $cancelling
          ? "Settlement check notes (required to complete without refund)"
          : "Rejection reason (required when rejecting)" ?></label><textarea id="rejection_reason" name="rejection_reason" rows="3" maxlength="255" placeholder="Explain what needs correcting…"><?= e(
@@ -142,5 +158,6 @@ require_once __DIR__ . "/../includes/header.php";
    ) ?>">Back to participants</a></div>
   </section>
  </div>
+ <?php render_receipt_history($reg_id); ?>
 </div>
 <?php require_once __DIR__ . "/../includes/footer.php"; ?>

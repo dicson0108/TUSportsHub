@@ -29,8 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($email_val)) {
             $errors['email'] = "Taylor's email is required.";
-        } elseif (!is_valid_student_email($email_val) && !is_valid_taylors_email($email_val)) {
-            $errors['email'] = "Use @sd.taylors.edu.my or @taylors.edu.my.";
+        } elseif (!is_valid_student_email($email_val)) {
+            $errors['email'] = "Use your @sd.taylors.edu.my student email.";
         }
 
         if (strlen($password) < 8 || !preg_match('/[0-9]/', $password) || !preg_match('/[a-zA-Z]/', $password)) {
@@ -186,7 +186,7 @@ require_once __DIR__ . '/includes/header.php';
                         <?php if (!empty($errors['email'])): ?>
                             <div class="field-error-msg"><?= e($errors['email']) ?></div>
                         <?php else: ?>
-                            <div class="field-help-msg">Use your @taylors.edu.my or @sd.taylors.edu.my email</div>
+                            <div class="field-help-msg">Use your @sd.taylors.edu.my student email</div>
                         <?php endif; ?>
                     </div>
 

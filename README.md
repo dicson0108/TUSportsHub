@@ -90,12 +90,15 @@ define('DB_PORT', 3306);
 
 ### 4. Automatic Database Initialization
 
-On first visit, the system acquires an advisory setup lock, creates `tu_sportshub`, builds all 6 tables from [database/schema.sql](database/schema.sql), and imports all seeded users, clubs, and sessions from [database/seed.sql](database/seed.sql). **No manual SQL import is needed.**
+On first visit, the system acquires an advisory setup lock, creates `tu_sportshub`, builds the core tables from [database/schema.sql](database/schema.sql), and imports seeded users, clubs, and sessions from [database/seed.sql](database/seed.sql). It also applies [database/receipt-history.sql](database/receipt-history.sql) to fresh and existing installations without resetting data. **No manual SQL import is needed.**
+
+Every new receipt submission retains its file, review decision, rejection reason, reviewer and decision time. Students and authorised club managers can open prior submissions through the protected evidence endpoint. Existing current receipt references are backfilled; previously overwritten references and unrecorded reviewer identities/times cannot be reconstructed.
 
 To initialize manually via CLI:
 ```powershell
 Get-Content database/schema.sql | & "C:\xampp\mysql\bin\mysql.exe" -u root
 Get-Content database/seed.sql | & "C:\xampp\mysql\bin\mysql.exe" -u root
+Get-Content database/receipt-history.sql | & "C:\xampp\mysql\bin\mysql.exe" -u root tu_sportshub
 ```
 
 ### 5. Access the Web Application
@@ -186,7 +189,14 @@ All accounts use the password: `Password123!`
 To run the automated end-to-end integration and concurrency test suite:
 
 ```powershell
-php tests/test_e2e.php
+php -d zend.assertions=1 -d assert.exception=1 tests/run-existing.php test_e2e.php
+```
+
+Targeted HTTP/browser regressions for signup, immutable terms, receipt history/access, keyboard menus and explicit CSS transitions:
+
+```powershell
+# NODE_PATH must point to existing Playwright test tools; Chrome and local Apache/MySQL must be running.
+node tests/noted-gaps.cjs
 ```
 
 ### Verified Test Assertions:

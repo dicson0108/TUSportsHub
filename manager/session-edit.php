@@ -46,48 +46,95 @@ $capacity_val = $session['capacity'] ?? (int)($_POST['capacity'] ?? 16);
 $desc_val = $session['description'] ?? ($_POST['description'] ?? '');
 $image_path_val = $session['image_path'] ?? ($_POST['image_path'] ?? 'assets/images/sports/badminton-open-play.webp');
 
-$is_published = ($session && $session['status'] === 'published');
+// Every non-draft keeps its published terms, including closed/cancelled sessions.
+$is_published = ($session && $session['status'] !== 'draft');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $error = "Session expired. Please try again.";
     } else {
-        $title_val = trim($_POST['title'] ?? '');
-        $club_id_val = (int)($_POST['club_id'] ?? 0);
-        $sport_val = trim($_POST['sport_type'] ?? '');
-        $venue_val = trim($_POST['venue'] ?? '');
-        $date_val = trim($_POST['session_date'] ?? '');
-        $start_val = trim($_POST['start_time'] ?? '');
-        $end_val = trim($_POST['end_time'] ?? '');
-        $price_val = max(0.00, (float)($_POST['price'] ?? 0.00));
-        $capacity_val = max(1, (int)($_POST['capacity'] ?? 1));
-        $desc_val = trim($_POST['description'] ?? '');
-        $image_path_val = trim($_POST['image_path'] ?? 'assets/images/sports/badminton-open-play.webp');
-        $action = $_POST['action'] ?? 'draft';
-
-        if (!is_club_manager($club_id_val, $user['id'])) {
-            render_error_page(403);
-        }
-
-        if (empty($title_val) || empty($venue_val) || empty($date_val) || empty($start_val) || empty($end_val) || empty($desc_val)) {
-            $error = "Please fill in all required fields.";
-        } elseif (strtotime($date_val . ' ' . $start_val) <= time()) {
-            $error = "Session start time must be in the future.";
-        } elseif (strtotime($start_val) >= strtotime($end_val)) {
-            $error = "End time must be after start time.";
-        } else {
-            $status = ($action === 'publish') ? 'published' : 'draft';
-
+        $db->beginTransaction();
+        try {
             if ($session_id > 0) {
-                if ($is_published) {
-                    // Description and visual cover can be updated for published sessions
-                    $stmt = $db->prepare("UPDATE sessions SET description = :desc, image_path = :image_path, updated_at = NOW() WHERE id = :id");
-                    $stmt->execute([':desc' => $desc_val, ':image_path' => $image_path_val, ':id' => $session_id]);
+                // Recheck under the same lock used by publication, closure and cancellation.
+                $stmt = $db->prepare('SELECT * FROM sessions WHERE id=? FOR UPDATE');
+                $stmt->execute([$session_id]);
+                $session = $stmt->fetch();
+                if (!$session || !is_club_manager($session['club_id'], $user['id'])) {
+                    $db->rollBack();
+                    render_error_page(403);
+                }
+                $is_published = $session['status'] !== 'draft';
+            }
+            $title_val = trim($_POST['title'] ?? '');
+            $club_id_val = (int)($_POST['club_id'] ?? 0);
+            $sport_val = trim($_POST['sport_type'] ?? '');
+            $venue_val = trim($_POST['venue'] ?? '');
+            $date_val = trim($_POST['session_date'] ?? '');
+            $start_val = trim($_POST['start_time'] ?? '');
+            $end_val = trim($_POST['end_time'] ?? '');
+            $price_val = max(0.00, (float)($_POST['price'] ?? 0.00));
+            $capacity_val = max(1, (int)($_POST['capacity'] ?? 1));
+            $desc_val = trim($_POST['description'] ?? '');
+            $image_path_val = trim($_POST['image_path'] ?? 'assets/images/sports/badminton-open-play.webp');
+            $action = $_POST['action'] ?? 'draft';
+
+            // Locked terms come from the DB, never disabled inputs or forged POST fields.
+            if ($is_published) {
+                $title_val = $session['title'];
+                $club_id_val = $session['club_id'];
+                $sport_val = $session['sport_type'];
+                $venue_val = $session['venue'];
+                $date_val = $session['session_date'];
+                $start_val = $session['start_time'];
+                $end_val = $session['end_time'];
+                $price_val = $session['price'];
+                $capacity_val = $session['capacity'];
+            }
+
+            if (!is_club_manager($club_id_val, $user['id'])) {
+                $db->rollBack();
+                render_error_page(403);
+            }
+
+            if (empty($title_val) || empty($venue_val) || empty($date_val) || empty($start_val) || empty($end_val) || empty($desc_val)) {
+                $error = "Please fill in all required fields.";
+            } elseif (!$is_published && strtotime($date_val . ' ' . $start_val) <= time()) {
+                $error = "Session start time must be in the future.";
+            } elseif (strtotime($start_val) >= strtotime($end_val)) {
+                $error = "End time must be after start time.";
+            } else {
+                $status = ($action === 'publish') ? 'published' : 'draft';
+
+                if ($session_id > 0) {
+                    if ($is_published) {
+                        // Description and visual cover can be updated for published sessions
+                        $stmt = $db->prepare("UPDATE sessions SET description = :desc, image_path = :image_path, updated_at = NOW() WHERE id = :id");
+                        $stmt->execute([':desc' => $desc_val, ':image_path' => $image_path_val, ':id' => $session_id]);
+                    } else {
+                        $stmt = $db->prepare("UPDATE sessions SET club_id = :club_id, title = :title, description = :desc, sport_type = :sport,
+                                              venue = :venue, image_path = :image_path, session_date = :sdate, start_time = :stime, end_time = :etime,
+                                              price = :price, capacity = :cap, status = :st, updated_at = NOW()
+                                              WHERE id = :id");
+                        $stmt->execute([
+                            ':club_id' => $club_id_val,
+                            ':title' => $title_val,
+                            ':desc' => $desc_val,
+                            ':sport' => $sport_val,
+                            ':venue' => $venue_val,
+                            ':image_path' => $image_path_val,
+                            ':sdate' => $date_val,
+                            ':stime' => $start_val,
+                            ':etime' => $end_val,
+                            ':price' => $price_val,
+                            ':cap' => $capacity_val,
+                            ':st' => $status,
+                            ':id' => $session_id,
+                        ]);
+                    }
                 } else {
-                    $stmt = $db->prepare("UPDATE sessions SET club_id = :club_id, title = :title, description = :desc, sport_type = :sport, 
-                                          venue = :venue, image_path = :image_path, session_date = :sdate, start_time = :stime, end_time = :etime, 
-                                          price = :price, capacity = :cap, status = :st, updated_at = NOW() 
-                                          WHERE id = :id");
+                    $stmt = $db->prepare("INSERT INTO sessions (club_id, title, description, sport_type, venue, image_path, session_date, start_time, end_time, price, capacity, status, created_by)
+                                          VALUES (:club_id, :title, :desc, :sport, :venue, :image_path, :sdate, :stime, :etime, :price, :cap, :st, :uid)");
                     $stmt->execute([
                         ':club_id' => $club_id_val,
                         ':title' => $title_val,
@@ -101,31 +148,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ':price' => $price_val,
                         ':cap' => $capacity_val,
                         ':st' => $status,
-                        ':id' => $session_id,
+                        ':uid' => $user['id'],
                     ]);
                 }
-            } else {
-                $stmt = $db->prepare("INSERT INTO sessions (club_id, title, description, sport_type, venue, image_path, session_date, start_time, end_time, price, capacity, status, created_by) 
-                                      VALUES (:club_id, :title, :desc, :sport, :venue, :image_path, :sdate, :stime, :etime, :price, :cap, :st, :uid)");
-                $stmt->execute([
-                    ':club_id' => $club_id_val,
-                    ':title' => $title_val,
-                    ':desc' => $desc_val,
-                    ':sport' => $sport_val,
-                    ':venue' => $venue_val,
-                    ':image_path' => $image_path_val,
-                    ':sdate' => $date_val,
-                    ':stime' => $start_val,
-                    ':etime' => $end_val,
-                    ':price' => $price_val,
-                    ':cap' => $capacity_val,
-                    ':st' => $status,
-                    ':uid' => $user['id'],
-                ]);
-            }
 
-            header("Location: " . app_url('/manager/sessions.php'));
-            exit;
+                $db->commit();
+                header("Location: " . app_url('/manager/sessions.php'));
+                exit;
+            }
+            if ($db->inTransaction()) $db->rollBack();
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) $db->rollBack();
+            throw $e;
         }
     }
 }
@@ -235,7 +269,7 @@ require_once __DIR__ . '/../includes/header.php';
             ?>
 
             <div class="image-picker-grid">
-                <?php foreach ($image_presets as $idx => $preset): 
+                <?php foreach ($image_presets as $idx => $preset):
                     $isSelected = ($image_path_val === $preset['path']);
                     $preset_v = file_exists(__DIR__ . '/../' . $preset['path']) ? filemtime(__DIR__ . '/../' . $preset['path']) : '1';
                 ?>

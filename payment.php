@@ -143,6 +143,7 @@ require_once __DIR__ . "/includes/header.php";
             "/evidence.php?registration_id=" . $reg_id,
         ) ?>" target="_blank" rel="noopener">Open receipt ↗</a></section>
       <?php endif; ?>
+      <?php render_receipt_history($reg_id); ?>
       <?php if (!$can_upload && !$is_refund && !$reg["receipt_path"]): ?><section class="journey-card"><h2><?= $reg[
     "status"
 ] === "expired"

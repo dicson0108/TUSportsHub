@@ -22,14 +22,20 @@ function initialize_database(PDO $db, string $database): void {
         $tables = $db->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
         if (!in_array('app_setup', $tables, true)) {
             $required = ['users', 'clubs', 'club_managers', 'sessions', 'registrations', 'refund_records'];
-            if (!array_diff($required, $tables)) return;
+            if (!array_diff($required, $tables)) {
+                initialize_receipt_history($db);
+                return;
+            }
             if ($tables) {
                 throw new RuntimeException('Database has an incomplete or unrelated schema. Set DB_NAME in config/db.php to a new empty database.');
             }
             $db->exec('CREATE TABLE app_setup (id TINYINT PRIMARY KEY, completed TINYINT NOT NULL DEFAULT 0) ENGINE=InnoDB');
         }
         $db->exec('INSERT IGNORE INTO app_setup (id, completed) VALUES (1, 0)');
-        if ((int)$db->query('SELECT completed FROM app_setup WHERE id = 1')->fetchColumn() === 1) return;
+        if ((int)$db->query('SELECT completed FROM app_setup WHERE id = 1')->fetchColumn() === 1) {
+            initialize_receipt_history($db);
+            return;
+        }
 
         $scripts = [];
         foreach (['schema', 'seed'] as $name) {
@@ -47,8 +53,15 @@ function initialize_database(PDO $db, string $database): void {
             if ($db->inTransaction()) $db->rollBack();
             throw $e;
         }
+        initialize_receipt_history($db);
     } finally {
         $release = $db->prepare('SELECT RELEASE_LOCK(:name)');
         $release->execute([':name' => $lock_name]);
     }
+}
+
+function initialize_receipt_history(PDO $db): void {
+    $sql = file_get_contents(__DIR__ . '/../database/receipt-history.sql');
+    if ($sql === false) throw new RuntimeException('Missing database/receipt-history.sql. Restore it and reload.');
+    $db->exec($sql);
 }

@@ -54,7 +54,7 @@
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   max-width: 520px;
   min-height: 52px;
-  transition: all var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .hero-search-bar:focus-within {
@@ -102,7 +102,7 @@
   flex-shrink: 0;
   min-height: 40px;
   box-shadow: 0 3px 12px rgba(200, 30, 39, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
 }
 
 .hero-search-btn:hover {
@@ -163,7 +163,7 @@
   border-radius: var(--radius-full);
   text-decoration: none;
   box-shadow: var(--shadow-xs);
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
   min-height: 32px;
 }
 
@@ -249,7 +249,7 @@
   flex-shrink: 0;
   min-height: 38px;
   box-shadow: 0 2px 8px rgba(200, 30, 39, 0.35);
-  transition: all var(--transition-fast), transform var(--transition-press);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-press);
 }
 
 .spotlight-cta-btn:hover {
@@ -285,7 +285,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform var(--transition-press);
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform var(--transition-press);
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }

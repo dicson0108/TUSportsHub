@@ -86,25 +86,27 @@ if ($is_manager_route) {
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
                 </a>
 
-                <div class="user-menu-pill" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="User menu for <?= e($current_user['name']) ?>">
-                    <div class="avatar-initials"><?= get_initials($current_user['name']) ?></div>
+                <div class="user-account">
+                <button type="button" class="user-menu-pill user-pill" aria-controls="account-menu" aria-expanded="false" aria-label="User menu for <?= e($current_user['name']) ?>">
+                    <span class="avatar-initials"><?= get_initials($current_user['name']) ?></span>
                     <span class="user-name-text"><?= e($current_user['name']) ?></span>
                     <svg class="dropdown-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
 
-                    <div class="user-dropdown" role="menu">
+                </button>
+                    <div class="user-dropdown" id="account-menu" inert>
                         <div class="user-dropdown-header">
                             <strong><?= e($current_user['name']) ?></strong>
                             <span><?= e($current_user['email']) ?></span>
                         </div>
                         <div class="dropdown-divider"></div>
-                        <a href="<?= APP_BASE_PATH ?>/profile.php" class="dropdown-item" role="menuitem">My Profile</a>
-                        <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="dropdown-item" role="menuitem">My Activities</a>
-                        <a href="<?= APP_BASE_PATH ?>/inbox.php" class="dropdown-item" role="menuitem">Inbox (Preview)</a>
+                        <a href="<?= APP_BASE_PATH ?>/profile.php" class="dropdown-item">My Profile</a>
+                        <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="dropdown-item">My Activities</a>
+                        <a href="<?= APP_BASE_PATH ?>/inbox.php" class="dropdown-item">Inbox (Preview)</a>
 
                         <div class="dropdown-divider"></div>
                         <form method="POST" action="<?= APP_BASE_PATH ?>/logout.php" style="margin: 0;">
                             <?= csrf_field() ?>
-                            <button type="submit" class="dropdown-item text-danger" role="menuitem" style="width:100%; border:0; background:none; font:inherit; text-align:left; cursor:pointer;">Sign out</button>
+                            <button type="submit" class="dropdown-item text-danger" style="width:100%; border:0; background:none; font:inherit; text-align:left; cursor:pointer;">Sign out</button>
                         </form>
                     </div>
                 </div>

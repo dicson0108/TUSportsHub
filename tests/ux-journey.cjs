@@ -197,8 +197,8 @@ let png;
   await student.setViewportSize({width:720,height:500});
   check('200% equivalent viewport reflows',await student.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   check('No browser JS errors',errors.length===0);
-  check('Axe finds no violations across captured journey states',audits.every(a=>a.violations.length===0));
   fs.writeFileSync(path.join(out,'after-audit.json'),JSON.stringify({checks,audits,errors},null,2));
+  check('Axe finds no violations across captured journey states',audits.every(a=>a.violations.length===0));
   console.log(JSON.stringify({passed:checks.length,axeViolations:audits.reduce((n,a)=>n+a.violations.length,0),checks,audits,errors},null,2));
  } finally { await browser.close(); console.log(fixture('cleanup')); }
 })().catch(e=>{console.error(e);process.exitCode=1;});

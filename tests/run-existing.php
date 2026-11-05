@@ -10,7 +10,7 @@ if ((int) ini_get("zend.assertions") !== 1) {
     );
 }
 $name = $argv[1] ?? "test_e2e.php";
-if (!in_array($name, ["test_m3.php", "test_m4.php", "test_m5.php", "test_m6.php", "test_e2e.php"], true)) {
+if (!in_array($name, ["test_m3.php", "test_m4.php", "test_m5.php", "test_m6.php", "test_e2e.php", "test_receipt_history.php"], true)) {
     throw new RuntimeException("Unknown test");
 }
 require_once __DIR__ . "/../includes/helpers.php";
@@ -24,6 +24,7 @@ try {
         $sql = preg_replace('/^(?:CREATE DATABASE[^\r\n]*|USE[^\r\n]*);\r?\n/m', "", $sql);
         $db->exec($sql);
     }
+    initialize_receipt_history($db);
     ob_start();
     try {
         require __DIR__ . "/" . $name;

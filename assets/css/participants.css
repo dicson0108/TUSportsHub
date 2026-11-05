@@ -78,7 +78,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease, transform var(--transition-press, 120ms ease);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, transform var(--transition-press, 120ms ease);
 }
 
 .btn-participants-control:active {
@@ -124,7 +124,7 @@
 .metric-card-label {
   font-size: 11.5px;
   text-transform: uppercase;
-  color: #86868b;
+  color: #61616b;
   font-weight: 700;
   display: block;
   margin-bottom: 4px;
@@ -189,7 +189,7 @@
 .participants-table thead tr {
   background: #fafafa;
   border-bottom: 1px solid #e5e5ea;
-  color: #86868b;
+  color: #61616b;
   font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -266,7 +266,7 @@
   text-decoration: none;
   cursor: pointer;
   border: none;
-  transition: all 0.15s ease, transform var(--transition-press, 120ms ease);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, transform var(--transition-press, 120ms ease);
 }
 
 .btn-table-action:active {

@@ -33,18 +33,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. User dropdown menu toggle & keyboard accessibility
     const userMenuPill = document.querySelector('.user-menu-pill');
     const userDropdown = document.querySelector('.user-dropdown') || document.querySelector('.user-dropdown-menu');
+    const setAccountMenuOpen = (open) => {
+        if (!userDropdown || !userMenuPill) return;
+        userDropdown.inert = !open;
+        userDropdown.classList.toggle('show', open);
+        userDropdown.classList.toggle('is-open', open);
+        userMenuPill.setAttribute('aria-expanded', String(open));
+    };
     if (userMenuPill && userDropdown) {
         userMenuPill.addEventListener('click', (e) => {
             e.stopPropagation();
             const isOpen = userDropdown.classList.contains('show') || userDropdown.classList.contains('is-open');
-            userDropdown.classList.toggle('show');
-            userDropdown.classList.toggle('is-open');
-            userMenuPill.setAttribute('aria-expanded', !isOpen);
+            setAccountMenuOpen(!isOpen);
         });
-        document.addEventListener('click', () => {
-            userDropdown.classList.remove('show');
-            userDropdown.classList.remove('is-open');
-            userMenuPill.setAttribute('aria-expanded', 'false');
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.contains(e.target)) setAccountMenuOpen(false);
+        });
+        document.addEventListener('focusin', (e) => {
+            if (e.target !== userMenuPill && !userDropdown.contains(e.target)) setAccountMenuOpen(false);
         });
     }
 
@@ -124,9 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal-backdrop.show').forEach(m => m.classList.remove('show'));
             if (userDropdown && (userDropdown.classList.contains('show') || userDropdown.classList.contains('is-open'))) {
-                userDropdown.classList.remove('show');
-                userDropdown.classList.remove('is-open');
-                userMenuPill.setAttribute('aria-expanded', 'false');
+                setAccountMenuOpen(false);
                 userMenuPill.focus();
             }
             if (mobileDrawer && mobileDrawer.classList.contains('open')) {

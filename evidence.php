@@ -16,7 +16,11 @@ if ($r["user_id"] !== $user["id"] && !is_club_manager($r["club_id"], $user["id"]
     render_error_page(403);
 }
 $path = $r["receipt_path"];
-if (isset($_GET["refund_id"])) {
+if (isset($_GET['receipt_id'])) {
+    $q = $db->prepare('SELECT receipt_path FROM payment_receipts WHERE id=? AND registration_id=?');
+    $q->execute([(int) $_GET['receipt_id'], $id]);
+    $path = $q->fetchColumn();
+} elseif (isset($_GET["refund_id"])) {
     $q = $db->prepare("SELECT proof_path FROM refund_records WHERE id=? AND registration_id=?");
     $q->execute([(int) $_GET["refund_id"], $id]);
     $path = $q->fetchColumn();

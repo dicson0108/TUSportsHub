@@ -28,8 +28,8 @@ if ($session_lock_id) {
     $lock->execute([$session_lock_id]);
 }
 $stmt = $db->prepare("SELECT r.*, s.session_date, s.start_time, s.status AS session_status
-                      FROM registrations r 
-                      INNER JOIN sessions s ON r.session_id = s.id 
+                      FROM registrations r
+                      INNER JOIN sessions s ON r.session_id = s.id
                       WHERE r.id = :id AND r.user_id = :uid LIMIT 1 FOR UPDATE");
 $stmt->execute([':id' => $reg_id, ':uid' => $user['id']]);
 $reg = $stmt->fetch();
@@ -113,16 +113,25 @@ if (!move_uploaded_file($file['tmp_name'], $target_path)) {
 }
 
 // Update registration to awaiting_approval
-// A payment/rejected state has no active cancellation request. Discard stale flags from prior unpaid attempts.
-$stmt = $db->prepare("UPDATE registrations 
-                      SET status = 'awaiting_approval', receipt_path = :path, receipt_uploaded_at = NOW(),
-                          cancellation_requested_at = NULL, cancellation_reason = NULL, updated_at = NOW()
-                      WHERE id = :id");
-$stmt->execute([
-    ':path' => $relative_path,
-    ':id' => $reg_id,
-]);
-$db->commit();
+try {
+    // Preserve each submission independently of the registration's current receipt pointer.
+    $stmt = $db->prepare('INSERT INTO payment_receipts (registration_id, receipt_path, submitted_at) VALUES (?, ?, NOW())');
+    $stmt->execute([$reg_id, $relative_path]);
+    // A payment/rejected state has no active cancellation request. Discard stale flags from prior unpaid attempts.
+    $stmt = $db->prepare("UPDATE registrations
+                          SET status = 'awaiting_approval', receipt_path = :path, receipt_uploaded_at = NOW(),
+                              cancellation_requested_at = NULL, cancellation_reason = NULL, updated_at = NOW()
+                          WHERE id = :id");
+    $stmt->execute([
+        ':path' => $relative_path,
+        ':id' => $reg_id,
+    ]);
+    $db->commit();
+} catch (Throwable $e) {
+    if ($db->inTransaction()) $db->rollBack();
+    if (is_file($target_path)) unlink($target_path);
+    throw $e;
+}
 
 header("Location: " . app_url('/payment.php?id=' . $reg_id . '&msg=uploaded'));
 exit;

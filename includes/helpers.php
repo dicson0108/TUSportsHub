@@ -6,6 +6,32 @@ function e(?string $string): string {
     return htmlspecialchars($string ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+// Call only after the page's registration ownership / club-scope check.
+function render_receipt_history(int $registration_id): void {
+    $q = get_db_connection()->prepare('SELECT p.*, u.name AS reviewer_name FROM payment_receipts p LEFT JOIN users u ON u.id=p.reviewed_by WHERE p.registration_id=? ORDER BY p.id');
+    $q->execute([$registration_id]);
+    $receipts = $q->fetchAll();
+    if (!$receipts) return;
+    echo '<section class="journey-card"><h2>Receipt and review history</h2>';
+    foreach ($receipts as $receipt) {
+        $label = match ($receipt['decision']) {
+            'awaiting_review' => 'Awaiting review',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+            default => 'Legacy evidence — decision unavailable',
+        };
+        echo '<div class="journey-callout"><strong>' . e($label) . '</strong><p>Submitted: ' . e(format_deadline($receipt['submitted_at'])) . '</p>';
+        if ($receipt['reviewed_at']) {
+            echo '<p>Reviewed by ' . e($receipt['reviewer_name'] ?? 'Former reviewer') . ' · ' . e(format_deadline($receipt['reviewed_at'])) . '</p>';
+        } elseif ($receipt['decision'] !== 'awaiting_review') {
+            echo '<p>Legacy record: reviewer and decision time were not recorded.</p>';
+        }
+        if ($receipt['rejection_reason']) echo '<p>' . e($receipt['rejection_reason']) . '</p>';
+        echo '<a href="' . e(app_url('/evidence.php?registration_id=' . $registration_id . '&receipt_id=' . $receipt['id'])) . '" target="_blank" rel="noopener">Open submitted receipt ↗</a></div>';
+    }
+    echo '</section>';
+}
+
 // Format price (RM or Free)
 function format_price($price): string {
     $val = (float) $price;
