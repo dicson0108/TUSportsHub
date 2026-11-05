@@ -1,11 +1,12 @@
 /* ==========================================================================
    Club Manager Portal Styles (manager.css)
+   Taylor's SportsHub - Apple-calibrated Manager Workbench
    ========================================================================== */
 
 .manager-container {
-  max-width: 1120px;
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 40px 24px 64px 24px;
+  padding: 36px 24px 64px 24px;
 }
 
 .manager-header-row {
@@ -17,20 +18,102 @@
   gap: 16px;
 }
 
-.manager-title-group h1 {
-  font-size: 30px;
+.manager-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.manager-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-primary, #c8102e);
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+.manager-title {
+  font-size: 32px;
   font-weight: 800;
   color: #1d1d1f;
   margin: 0 0 6px 0;
   letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
-.manager-title-group p {
+.manager-desc {
   color: #6e6e73;
   font-size: 14.5px;
   margin: 0;
+  line-height: 1.45;
 }
 
+.manager-btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--color-primary, #c8102e);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-full, 980px);
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(200, 16, 46, 0.2);
+  transition: background 0.15s ease, transform var(--transition-press, 120ms ease);
+}
+
+.manager-btn-create:hover {
+  background: #a60d26;
+  color: #ffffff;
+}
+
+.manager-btn-create:active {
+  transform: scale(0.97);
+}
+
+/* Metrics Grid */
+.manager-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.manager-metric-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 20px 22px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.manager-metric-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.manager-metric-val {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+  color: #1d1d1f;
+}
+
+.manager-metric-val.alert {
+  color: var(--color-primary, #c8102e);
+}
+
+.manager-metric-label {
+  font-size: 13px;
+  color: #6e6e73;
+  font-weight: 500;
+}
+
+/* Filter Tabs */
 .manager-filter-tabs {
   display: flex;
   gap: 8px;
@@ -47,6 +130,7 @@
   background: #f5f5f7;
   color: #424245;
   transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
 
 .manager-tab:hover {
@@ -83,11 +167,30 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
+.manager-card-main {
+  flex: 1;
+  min-width: 280px;
+}
+
+.manager-card-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.manager-card-club-tag {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #86868b;
+}
+
 .manager-card-title {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
   color: #1d1d1f;
-  margin: 0 0 8px 0;
+  margin: 0 0 10px 0;
+  line-height: 1.3;
 }
 
 .manager-meta-row {
@@ -110,12 +213,20 @@
   flex-shrink: 0;
 }
 
+.manager-card-aside {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .manager-stat-badge {
   text-align: center;
   padding: 8px 14px;
   background: #fafafa;
   border-radius: 12px;
   border: 1px solid #ebebed;
+  min-width: 90px;
 }
 
 .manager-stat-badge.alert {
@@ -124,7 +235,7 @@
 }
 
 .manager-stat-val {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: #1d1d1f;
 }
@@ -139,6 +250,11 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
+  margin-top: 2px;
+}
+
+.manager-stat-label.alert-text {
+  color: var(--color-primary, #c8102e);
 }
 
 /* Empty State */
@@ -173,6 +289,31 @@
   margin: 0 auto 24px auto;
   max-width: 440px;
   line-height: 1.5;
+}
+
+.manager-empty-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.manager-empty-btn-all {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border-radius: var(--radius-full, 980px);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13.5px;
+  border: 1px solid #d2d2d7;
+  transition: background 0.15s ease;
+}
+
+.manager-empty-btn-all:hover {
+  background: #e8e8ed;
 }
 
 /* Action Buttons */
@@ -227,40 +368,70 @@
   background: #fee2e2;
 }
 
-/* Participants Table */
-.manager-table-wrapper {
+/* Modal / Confirmation Box */
+.manager-confirm-box {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+
+.manager-confirm-card {
   background: #ffffff;
-  border-radius: var(--radius-lg, 20px);
+  border-radius: 20px;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
-  overflow-x: auto;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+  padding: 36px 32px;
+  text-align: center;
 }
 
-.manager-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 13.5px;
-}
-
-.manager-table th {
-  background: #fafafa;
-  padding: 14px 18px;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #86868b;
-  border-bottom: 1px solid #e5e5ea;
-}
-
-.manager-table td {
-  padding: 16px 18px;
-  border-bottom: 1px solid #f2f2f7;
+.manager-confirm-icon {
+  margin-bottom: 16px;
   color: #1d1d1f;
-  vertical-align: middle;
 }
 
-.manager-table tr:last-child td {
-  border-bottom: none;
+.manager-confirm-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1d1d1f;
+  margin: 0 0 10px 0;
+}
+
+.manager-confirm-desc {
+  color: #6e6e73;
+  font-size: 14.5px;
+  line-height: 1.5;
+  margin: 0 0 28px 0;
+}
+
+.manager-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .manager-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .manager-card {
+    padding: 20px;
+  }
+  .manager-card-aside {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.manager-alert-error {
+  background: #fff2f2;
+  border: 1px solid #fecdd3;
+  color: #c8102e;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 13.5px;
+  text-align: left;
 }

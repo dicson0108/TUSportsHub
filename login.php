@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<main class="auth-page-container">
+<div class="auth-page-container">
     <div class="auth-split-layout">
         <!-- Left Hero -->
         <div class="auth-hero-col">
@@ -119,6 +119,6 @@ require_once __DIR__ . '/includes/header.php';
             </form>
         </div>
     </div>
-</main>
+</div>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -39,50 +39,78 @@ $sql .= " ORDER BY s.session_date DESC, s.start_time DESC";
 
 $sessions = $db->query($sql)->fetchAll();
 
+// Executive metrics across all managed sessions
+$all_mgr_sql = "SELECT s.status,
+                (SELECT COUNT(*) FROM registrations r WHERE r.session_id = s.id AND r.status = 'awaiting_approval') AS pending_review_count
+                FROM sessions s WHERE s.club_id IN ($in_clause)";
+$all_mgr_rows = $db->query($all_mgr_sql)->fetchAll();
+
+$metric_total = count($all_mgr_rows);
+$metric_published = count(array_filter($all_mgr_rows, fn($r) => $r['status'] === 'published'));
+$metric_draft = count(array_filter($all_mgr_rows, fn($r) => $r['status'] === 'draft'));
+$metric_pending_receipts = array_sum(array_column($all_mgr_rows, 'pending_review_count'));
+
 $page_title = "Manager Workbench · Sessions";
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem;">
+<div class="manager-container">
     <!-- Workbench Header -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-        <div>
-            <div style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: #c8102e; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-                Club Operations
-            </div>
-            <h1 style="font-size: 2.25rem; font-weight: 800; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.02em;">
-                Manager Workbench
-            </h1>
-            <p style="color: #6e6e73; font-size: 0.95rem; margin: 0;">
+    <div class="manager-header-row">
+        <div class="manager-title-group">
+            <span class="manager-eyebrow">Club Operations</span>
+            <h1 class="manager-title">Manager Workbench</h1>
+            <p class="manager-desc">
                 Manage club sessions, review payment receipts, and record refunds.
             </p>
         </div>
 
-        <a href="<?= app_url('/manager/session-edit.php') ?>" class="btn-hero-primary" style="display: inline-block;">
-            + Create New Session
+        <a href="<?= app_url('/manager/session-edit.php') ?>" class="manager-btn-create">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Create New Session</span>
         </a>
     </div>
 
-    <!-- Status filter tabs -->
-    <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem;">
-        <a href="<?= app_url('/manager/sessions.php') ?>" style="padding: 0.5rem 1rem; border-radius: 980px; text-decoration: none; font-size: 0.88rem; font-weight: 500; <?= $filter_status === '' ? 'background: #1d1d1f; color: #fff;' : 'background: #f5f5f7; color: #424245;' ?>">
-            All Sessions (<?= count($sessions) ?>)
+    <!-- Executive Metrics Grid -->
+    <div class="manager-metrics-grid">
+        <div class="manager-metric-card">
+            <div class="manager-metric-val"><?= $metric_total ?></div>
+            <div class="manager-metric-label">All Sessions</div>
+        </div>
+        <div class="manager-metric-card">
+            <div class="manager-metric-val"><?= $metric_published ?></div>
+            <div class="manager-metric-label">Published Active</div>
+        </div>
+        <div class="manager-metric-card">
+            <div class="manager-metric-val <?= $metric_pending_receipts > 0 ? 'alert' : '' ?>"><?= $metric_pending_receipts ?></div>
+            <div class="manager-metric-label">Receipts to Review</div>
+        </div>
+        <div class="manager-metric-card">
+            <div class="manager-metric-val"><?= $metric_draft ?></div>
+            <div class="manager-metric-label">Draft Sessions</div>
+        </div>
+    </div>
+
+    <!-- Status Filter Tabs -->
+    <div class="manager-filter-tabs">
+        <a href="<?= app_url('/manager/sessions.php') ?>" class="manager-tab <?= $filter_status === '' ? 'active' : '' ?>">
+            All Sessions (<?= $metric_total ?>)
         </a>
-        <a href="<?= app_url('/manager/sessions.php?status=published') ?>" style="padding: 0.5rem 1rem; border-radius: 980px; text-decoration: none; font-size: 0.88rem; font-weight: 500; <?= $filter_status === 'published' ? 'background: #1d1d1f; color: #fff;' : 'background: #f5f5f7; color: #424245;' ?>">
+        <a href="<?= app_url('/manager/sessions.php?status=published') ?>" class="manager-tab <?= $filter_status === 'published' ? 'active' : '' ?>">
             Published
         </a>
-        <a href="<?= app_url('/manager/sessions.php?status=draft') ?>" style="padding: 0.5rem 1rem; border-radius: 980px; text-decoration: none; font-size: 0.88rem; font-weight: 500; <?= $filter_status === 'draft' ? 'background: #1d1d1f; color: #fff;' : 'background: #f5f5f7; color: #424245;' ?>">
+        <a href="<?= app_url('/manager/sessions.php?status=draft') ?>" class="manager-tab <?= $filter_status === 'draft' ? 'active' : '' ?>">
             Drafts
         </a>
-        <a href="<?= app_url('/manager/sessions.php?status=closed') ?>" style="padding: 0.5rem 1rem; border-radius: 980px; text-decoration: none; font-size: 0.88rem; font-weight: 500; <?= $filter_status === 'closed' ? 'background: #1d1d1f; color: #fff;' : 'background: #f5f5f7; color: #424245;' ?>">
+        <a href="<?= app_url('/manager/sessions.php?status=closed') ?>" class="manager-tab <?= $filter_status === 'closed' ? 'active' : '' ?>">
             Closed
         </a>
-        <a href="<?= app_url('/manager/sessions.php?status=cancelled') ?>" style="padding: 0.5rem 1rem; border-radius: 980px; text-decoration: none; font-size: 0.88rem; font-weight: 500; <?= $filter_status === 'cancelled' ? 'background: #1d1d1f; color: #fff;' : 'background: #f5f5f7; color: #424245;' ?>">
+        <a href="<?= app_url('/manager/sessions.php?status=cancelled') ?>" class="manager-tab <?= $filter_status === 'cancelled' ? 'active' : '' ?>">
             Cancelled
         </a>
     </div>
 
-    <!-- Sessions Table / Cards -->
+    <!-- Sessions List / Cards -->
     <?php if (empty($sessions)): ?>
         <div class="manager-empty-state">
             <svg class="manager-empty-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>
@@ -92,12 +120,12 @@ require_once __DIR__ . '/../includes/header.php';
             <p class="manager-empty-desc">
                 <?= $filter_status !== '' ? 'Try selecting another status tab or view all club sessions.' : 'Get started by creating your club\'s first training session or social open play.' ?>
             </p>
-            <div style="display: flex; gap: 0.75rem; justify-content: center; align-items: center; flex-wrap: wrap;">
-                <a href="<?= app_url('/manager/session-edit.php') ?>" class="btn-hero-primary" style="display: inline-block;">
+            <div class="manager-empty-actions">
+                <a href="<?= app_url('/manager/session-edit.php') ?>" class="manager-btn-create">
                     + Create New Session
                 </a>
                 <?php if ($filter_status !== ''): ?>
-                    <a href="<?= app_url('/manager/sessions.php') ?>" style="display: inline-block; padding: 0.75rem 1.4rem; background: #f5f5f7; color: #1d1d1f; border-radius: 980px; text-decoration: none; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7;">
+                    <a href="<?= app_url('/manager/sessions.php') ?>" class="manager-empty-btn-all">
                         Show All Sessions
                     </a>
                 <?php endif; ?>
@@ -107,10 +135,10 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="manager-card-list">
             <?php foreach ($sessions as $s): ?>
                 <div class="manager-card">
-                    <div style="flex: 1; min-width: 280px;">
-                        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.5rem;">
+                    <div class="manager-card-main">
+                        <div class="manager-card-badge-row">
                             <?= get_status_badge($s['status']) ?>
-                            <span style="font-size: 0.8rem; font-weight: 600; color: #86868b;"><?= e($s['club_name']) ?> · <?= e($s['sport_type']) ?></span>
+                            <span class="manager-card-club-tag"><?= e($s['club_name']) ?> · <?= e($s['sport_type']) ?></span>
                         </div>
 
                         <h3 class="manager-card-title">
@@ -137,8 +165,8 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                     </div>
 
-                    <!-- Participant & Review stats -->
-                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <!-- Participant & Review Stats + Actions -->
+                    <div class="manager-card-aside">
                         <div class="manager-stat-badge">
                             <div class="manager-stat-val">
                                 <?= $s['confirmed_count'] ?> / <?= $s['capacity'] ?>
@@ -151,7 +179,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 <div class="manager-stat-val">
                                     <?= $s['pending_review_count'] ?>
                                 </div>
-                                <div class="manager-stat-label" style="color: #c8102e;">Receipts to Review</div>
+                                <div class="manager-stat-label alert-text">Receipts to Review</div>
                             </div>
                         <?php endif; ?>
 

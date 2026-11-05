@@ -31,7 +31,11 @@ $css_map = [
     '404.php' => 'errors.css',
     '500.php' => 'errors.css',
 ];
-$page_css = $css_map[$current_page] ?? ($is_manager_route ? 'manager.css' : null);
+if ($is_manager_route) {
+    $page_css = ($current_page === 'participants.php') ? 'participants.css' : 'manager.css';
+} else {
+    $page_css = $css_map[$current_page] ?? null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -105,8 +109,8 @@ $page_css = $css_map[$current_page] ?? ($is_manager_route ? 'manager.css' : null
                     </div>
                 </div>
             <?php else: ?>
-                <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-link">Log in</a>
-                <a href="<?= APP_BASE_PATH ?>/register.php" class="btn-primary">Sign up</a>
+                <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-link <?= $current_page === 'login.php' ? 'active' : '' ?>">Log in</a>
+                <a href="<?= APP_BASE_PATH ?>/register.php" class="btn-primary <?= $current_page === 'register.php' ? 'active' : '' ?>">Register</a>
             <?php endif; ?>
 
             <!-- Mobile Hamburger Toggle Button -->
@@ -144,7 +148,7 @@ $page_css = $css_map[$current_page] ?? ($is_manager_route ? 'manager.css' : null
             <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="mobile-nav-link <?= in_array($current_page, ['my-activities.php', 'payment.php', 'cancel-registration.php']) ? 'active' : '' ?>">My Activities</a>
             <a href="<?= APP_BASE_PATH ?>/inbox.php" class="mobile-nav-link <?= $current_page === 'inbox.php' ? 'active' : '' ?>">Inbox (Preview)</a>
             <?php if ($is_any_manager): ?>
-                <a href="<?= APP_BASE_PATH ?>/manager/sessions.php" class="mobile-nav-link manager-nav-link">Manager Workspace ↗</a>
+                <a href="<?= APP_BASE_PATH ?>/manager/sessions.php" class="mobile-nav-link manager-nav-link">Manager Workspace</a>
             <?php endif; ?>
             <div class="mobile-drawer-footer">
                 <div class="mobile-drawer-user-info">

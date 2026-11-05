@@ -31,24 +31,24 @@ $page_title = "Close Signup · " . $session['title'];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="max-width: 600px; margin: 0 auto; padding: 4rem 1.5rem;">
-    <div style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 6px 24px rgba(0,0,0,0.04); padding: 2.5rem; text-align: center;">
-        <div style="margin-bottom: 1rem; color: #1d1d1f;">
-            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+<div class="manager-confirm-box">
+    <div class="manager-confirm-card">
+        <div class="manager-confirm-icon">
+            <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <h1 style="font-size: 1.75rem; font-weight: 800; color: #1d1d1f; margin: 0 0 0.75rem;">
+        <h1 class="manager-confirm-title">
             Close Session Signup?
         </h1>
-        <p style="color: #6e6e73; font-size: 0.95rem; line-height: 1.5; margin: 0 0 2rem;">
+        <p class="manager-confirm-desc">
             Closing signup for <strong><?= e($session['title']) ?></strong> will prevent new students from joining or reserving spots. Existing reserved participants will keep their active payment window until their deadline expires.
         </p>
 
-        <form method="POST" style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <form method="POST" class="manager-confirm-actions">
             <?= csrf_field() ?>
-            <a href="<?= app_url('/manager/sessions.php') ?>" class="btn-hero-secondary" style="display: inline-block;">
+            <a href="<?= app_url('/manager/sessions.php') ?>" class="manager-btn manager-btn-secondary">
                 Never mind
             </a>
-            <button type="submit" class="btn-hero-primary" style="border: none; cursor: pointer;">
+            <button type="submit" class="manager-btn manager-btn-danger">
                 Confirm Close Signup
             </button>
         </form>

@@ -314,3 +314,58 @@
     padding: 28px 24px;
   }
 }
+
+/* Account Validation States (Success & Duplicate) */
+.auth-success-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #059669;
+  margin-bottom: 20px;
+}
+
+.auth-status-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  margin: 20px 0;
+}
+
+.auth-status-alert.success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.auth-status-alert.danger {
+  background: #fff2f2;
+  border: 1px solid #fecdd3;
+  color: #991b1b;
+}
+
+.auth-status-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.auth-success-desc {
+  font-size: 14px;
+  color: #424245;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.auth-action-col {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

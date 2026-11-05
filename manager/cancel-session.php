@@ -77,20 +77,20 @@ $page_title = "Cancel Session · " . $session['title'];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="max-width: 640px; margin: 0 auto; padding: 4rem 1.5rem;">
-    <div style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 6px 24px rgba(0,0,0,0.04); padding: 2.5rem;">
-        <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #c8102e; background: #fdf2f4; padding: 0.35rem 0.75rem; border-radius: 980px; display: inline-block; margin-bottom: 0.75rem;">
+<div class="manager-confirm-box">
+    <div class="manager-confirm-card">
+        <span class="manager-eyebrow">
             Emergency Action
         </span>
-        <h1 style="font-size: 1.85rem; font-weight: 800; color: #1d1d1f; margin: 0 0 0.75rem; letter-spacing: -0.02em;">
+        <h1 class="manager-confirm-title">
             Cancel Session?
         </h1>
-        <p style="color: #6e6e73; font-size: 0.95rem; line-height: 1.5; margin: 0 0 1.5rem;">
+        <p class="manager-confirm-desc">
             Cancelling <strong><?= e($session['title']) ?></strong> will close registrations permanently. Any paid participants will have their registrations queued for a full external refund.
         </p>
 
         <?php if ($error): ?>
-            <div style="background: #fff2f2; border: 1px solid #fecdd3; color: #c81e27; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+            <div class="manager-alert-error" role="alert">
                 <?= e($error) ?>
             </div>
         <?php endif; ?>
@@ -98,18 +98,18 @@ require_once __DIR__ . '/../includes/header.php';
         <form method="POST" action="<?= $_SERVER['REQUEST_URI'] ?>">
             <?= csrf_field() ?>
 
-            <div style="margin-bottom: 1.75rem;">
-                <label for="cancellation_reason" style="display: block; font-size: 0.88rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.4rem;">
+            <div class="form-field">
+                <label for="cancellation_reason" class="auth-label">
                     Reason for Cancellation
                 </label>
-                <textarea id="cancellation_reason" name="cancellation_reason" rows="3" required placeholder="e.g. Venue maintenance, adverse weather, or emergency coach unavailability..." style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box; font-family: inherit;"></textarea>
+                <textarea id="cancellation_reason" name="cancellation_reason" rows="3" required placeholder="e.g. Venue maintenance, adverse weather, or emergency coach unavailability..." class="auth-input"></textarea>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-                <a href="<?= app_url('/manager/sessions.php') ?>" class="btn-hero-secondary" style="display: inline-block;">
+            <div class="manager-confirm-actions">
+                <a href="<?= app_url('/manager/sessions.php') ?>" class="manager-btn manager-btn-secondary">
                     Keep Session
                 </a>
-                <button type="submit" style="padding: 0.85rem 1.5rem; background: #c8102e; color: #fff; border: none; border-radius: 980px; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+                <button type="submit" class="manager-btn manager-btn-danger">
                     Confirm & Cancel Session
                 </button>
             </div>
