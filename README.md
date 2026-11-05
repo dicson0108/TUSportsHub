@@ -48,37 +48,57 @@ SportsHub records payment and refund evidence. It does not transfer money or ver
 
 ## Requirements
 
-- PHP 8.2 or later with `pdo_mysql`, `mbstring`, and `fileinfo` enabled.
-- MySQL or MariaDB with InnoDB support.
-- Apache configured to honour the repository's `.htaccess` files.
-- Write permission for `assets/uploads/` when testing financial uploads.
-- A modern browser.
+This guide assumes you use **XAMPP or MAMP** for local development. Use the package's Apache server, PHP 8.2 or later, and MySQL/MariaDB. For MAMP, select Apache rather than Nginx so the included `.htaccess` rules apply.
 
-XAMPP or MAMP can provide a local Apache/PHP/database environment. The application does not require Composer, npm, or a frontend build step to run. Browser tests have separate Node.js dependencies.
+Ensure `pdo_mysql`, `mbstring`, and `fileinfo` are enabled in the PHP configuration used by your package. The application also needs a modern browser and write permission for `assets/uploads/` when testing financial uploads.
 
-## Local setup
+No separate PHP/database installation, Composer, npm, or frontend build step is needed to run the application. Node.js and npm are only needed for the optional browser test suites.
 
-### 1. Get the source
+## Local setup with XAMPP or MAMP
 
-Clone or download this repository into a directory served by Apache. For example:
+### 1. Start the local servers
 
-```text
-<apache-document-root>/sportshub/
+| Package | What to do |
+| --- | --- |
+| XAMPP | Open the XAMPP Control Panel or manager application and start **Apache** and **MySQL**. |
+| MAMP | Open MAMP, select **Apache**, choose PHP 8.2 or later, and start the web and database servers. Note the web-server and MySQL ports shown in its settings. |
+
+### 2. Place the project in the document root
+
+Clone or download this repository into a folder named `sportshub` inside your package's document root (`htdocs`). Common examples are:
+
+| Installation | Example project folder |
+| --- | --- |
+| XAMPP on Windows | `C:/xampp/htdocs/sportshub/` |
+| MAMP on macOS | `/Applications/MAMP/htdocs/sportshub/` |
+| Other XAMPP/MAMP installations | `<configured-document-root>/sportshub/` |
+
+If you changed the installation location or document root, use the folder configured in your package instead. Avoid placing the project inside a second nested copy of the downloaded repository.
+
+| Package settings | Example application URL |
+| --- | --- |
+| XAMPP with Apache on port 80 | [http://localhost/sportshub/](http://localhost/sportshub/) |
+| MAMP with Apache on its default port 8888 | [http://localhost:8888/sportshub/](http://localhost:8888/sportshub/) |
+
+Use the ports actually configured in your installation. See the [XAMPP Windows guide](https://www.apachefriends.org/faq_windows) and [MAMP port settings](https://documentation.mamp.info/en/MAMP-Mac/Reference/Settings/Ports/) for package-specific instructions.
+
+### 3. Configure the database connection
+
+Open [config/db.php](config/db.php) and set `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`, and `DB_PORT` for your local database. Use the credentials configured in your XAMPP/MAMP installation and a dedicated development database name.
+
+XAMPP commonly uses MySQL port `3306`; MAMP's default MySQL port is `8889`. Confirm the actual port in your package settings. The web-server port in the browser URL is separate from this database port.
+
+The current connection does not read `DB_PORT`. To use the configured port, including MAMP's default, replace the `$dsn` assignment inside `get_db_connection()` with:
+
+```php
+$dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';charset=utf8mb4';
 ```
 
-These examples use [http://localhost/sportshub/](http://localhost/sportshub/). Substitute your own host, port, and directory prefix throughout the instructions.
+Initial setup needs permission to create the database and tables and load demonstration records. Existing installations also need the permissions required by the receipt-history migration. No manual database creation or SQL import is needed when these permissions are available.
 
-### 2. Configure the database
+### 4. Set the error-page paths
 
-Start Apache and your database server. Open [config/db.php](config/db.php) and set the database host, database name, username, and password for your local environment.
-
-Use a dedicated development database. Initial setup needs permission to create the database and tables and load demonstration records. Existing installations also need the permissions required by the receipt-history migration.
-
-The current PDO connection uses the database server's default port. For a non-default port, update the DSN in `get_db_connection()`; the declared `DB_PORT` constant is not currently passed to PDO.
-
-### 3. Configure the URL prefix
-
-Normal application links detect the installation prefix automatically. Apache's error-document paths in [.htaccess](.htaccess) must match your installation directory. For the example above, use:
+Normal application links detect the installation prefix automatically. For a project folder named `sportshub`, update [.htaccess](.htaccess) to use:
 
 ```apache
 ErrorDocument 403 /sportshub/403.php
@@ -86,13 +106,13 @@ ErrorDocument 404 /sportshub/404.php
 ErrorDocument 500 /sportshub/500.php
 ```
 
-For an installation at the domain root, use `/403.php`, `/404.php`, and `/500.php` instead.
+If you choose a different folder name, change `/sportshub/` in these three paths to match it. Do not include the hostname or port in an `ErrorDocument` path.
 
-Apache must also honour [assets/uploads/.htaccess](assets/uploads/.htaccess), which blocks direct access to financial uploads. Authorised access is provided through [evidence.php](evidence.php). PHP's built-in server does not apply these Apache rules.
+Keep [assets/uploads/.htaccess](assets/uploads/.htaccess) in place and ensure Apache honours it. It blocks direct access to financial uploads; authorised access is provided through [evidence.php](evidence.php).
 
-### 4. Open the application
+### 5. Open SportsHub
 
-Visit your local application URL. On a fresh installation, [config/setup.php](config/setup.php) creates the schema, imports demonstration data, and applies the receipt-history migration. No manual SQL import is needed.
+Visit the application URL for your package from step 2. On first visit, [config/setup.php](config/setup.php) creates the schema, imports demonstration data, and applies the receipt-history migration.
 
 Do not manually rerun [database/seed.sql](database/seed.sql) against data you want to keep: it clears the seeded application tables.
 
@@ -132,7 +152,9 @@ Managers cannot approve their own payment or record their own refund; another au
 
 ## Testing
 
-Run commands from the repository root. Use a local development installation with Apache and the database running. PHP must be available on the command line.
+Run commands from the project folder while XAMPP/MAMP's Apache and database servers are running. Use the PHP version bundled with your package, matching the version selected for the website.
+
+Add your package's PHP executable directory to the terminal's `PATH` if `php` is not recognised. For XAMPP on Windows this is typically `<XAMPP-installation>/php/`; for MAMP on macOS, use the `bin` directory of the selected version under `<MAMP-installation>/bin/php/`. Run `php -v` to check the version before continuing.
 
 ### PHP suites
 
@@ -150,7 +172,7 @@ These PHP suites cover public-page rendering, reservation/capacity helpers, mana
 
 ### Browser suites
 
-Install Node.js, npm, and Google Chrome. Install the test dependencies outside the application checkout:
+These tests are optional and require Node.js, npm, and Google Chrome in addition to XAMPP/MAMP. Install the test dependencies outside the application checkout:
 
 ```sh
 npm install --prefix ../sportshub-test-tools --no-save playwright @axe-core/playwright
@@ -158,7 +180,7 @@ npm install --prefix ../sportshub-test-tools --no-save playwright @axe-core/play
 
 Set `NODE_PATH` to that directory's `node_modules` and `SPORTSHUB_URL` to your running application URL.
 
-PowerShell:
+PowerShell example for XAMPP on port 80:
 
 ```powershell
 $env:NODE_PATH = (Resolve-Path ../sportshub-test-tools/node_modules).Path
@@ -167,14 +189,16 @@ node tests/noted-gaps.cjs
 node tests/ux-journey.cjs
 ```
 
-macOS or Linux shell:
+macOS shell example for MAMP on port 8888:
 
 ```sh
 export NODE_PATH="$PWD/../sportshub-test-tools/node_modules"
-export SPORTSHUB_URL='http://localhost/sportshub'
+export SPORTSHUB_URL='http://localhost:8888/sportshub'
 node tests/noted-gaps.cjs
 node tests/ux-journey.cjs
 ```
+
+Set `SPORTSHUB_URL` to the URL you use in your browser if your package, port, or project folder differs from these examples. The same commands work in a Linux shell with the appropriate XAMPP URL.
 
 Run the browser suites sequentially; they share a disposable-fixture state file. They create generated test accounts and records and clean them up after execution. Browser requests can also run the application's normal overdue-reservation expiry checks.
 
