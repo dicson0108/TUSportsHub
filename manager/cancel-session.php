@@ -95,14 +95,14 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="<?= $_SERVER['REQUEST_URI'] ?>">
+        <form method="POST" action="<?= $_SERVER['REQUEST_URI'] ?>" class="manager-cancellation-form">
             <?= csrf_field() ?>
 
             <div class="form-field">
                 <label for="cancellation_reason" class="auth-label">
                     Reason for Cancellation
                 </label>
-                <textarea id="cancellation_reason" name="cancellation_reason" rows="3" required placeholder="e.g. Venue maintenance, adverse weather, or emergency coach unavailability..." class="auth-input"></textarea>
+                <textarea id="cancellation_reason" name="cancellation_reason" rows="3" required placeholder="e.g. Venue maintenance, adverse weather, or emergency coach unavailability..." class="form-input"></textarea>
             </div>
 
             <div class="manager-confirm-actions">

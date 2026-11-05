@@ -1,0 +1,84 @@
+/* Shared rails and optical alignment; narrow reading/form layouts stay centred. */
+:root { --page-gutter: 24px; }
+
+.brand-group { flex-shrink: 0; }
+.brand-logo-img, .brand-text { flex-shrink: 0; }
+.brand-title, .brand-subtitle { white-space: nowrap; }
+.site-header .header-inner { gap: 20px; }
+.nav-actions > a { white-space: nowrap; }
+
+:is(.sessions-container, .clubs-page-container, .club-page-container,
+    .session-detail-page, .manager-container, .participants-container,
+    .activities-page, .profile-page-container, .journey-page:not(.narrow)) {
+  width: 100%;
+  max-width: var(--max-width, 1220px);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+:is(.manager-container, .participants-container, .journey-page) { padding-top: 24px; }
+:is(.legal-layout, .inbox-page-container, .journey-page.narrow) {
+  width: 100%;
+  padding-inline: var(--page-gutter);
+}
+
+.error-header { padding-inline: var(--page-gutter); }
+.error-header .brand-group {
+  max-width: calc(var(--max-width, 1220px) - 2 * var(--page-gutter));
+  margin-inline: auto;
+}
+
+:is(.btn-primary, .btn-secondary, .btn-link, .manager-btn,
+    .journey-button, .btn-reserve) svg { display: block; flex-shrink: 0; }
+:is(.fact-value, .journey-facts dd, .manager-metric-value,
+    .participants-metric-value) { font-variant-numeric: tabular-nums; }
+.fact-row { align-items: flex-start; gap: 16px; }
+.fact-label { flex-shrink: 0; }
+.fact-value { min-width: 0; overflow-wrap: anywhere; }
+.filter-results-bar { flex-wrap: wrap; gap: 12px; }
+.sort-group { flex-wrap: wrap; gap: 8px; }
+.sort-group > span { white-space: nowrap; }
+.club-card-header { align-items: flex-start; }
+.manager-card-main { min-width: 0; }
+.inbox-notice-title-row { flex-wrap: wrap; }
+.inbox-header-row { align-items: flex-start; gap: 16px; }
+.inbox-header-row > :last-child { flex-shrink: 0; }
+
+@media (max-width: 1100px) {
+  .site-header .nav-links { display: none; }
+  .site-header .mobile-menu-btn { display: inline-flex; }
+}
+
+@media (max-width: 820px) {
+  .site-header .header-inner { gap: 12px; }
+  .site-header .nav-actions { gap: 8px; }
+  .site-header .btn-manage-club { display: none; }
+  .site-header .nav-actions > .btn-link { padding-inline: 8px; }
+  .site-header .nav-actions > .btn-primary { padding-inline: 14px; }
+}
+
+@media (max-width: 600px) {
+  .session-cards-grid, .club-cards-grid, .sessions-grid, .clubs-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .filter-results-bar > div, .sort-group { width: 100%; }
+  .sort-group > form { flex: 1; min-width: 0; }
+  .sort-select { width: 100%; }
+  .club-identity-actions { flex-wrap: wrap; }
+  .club-card-header > :last-child { text-align: right; }
+  .inbox-header-row { flex-direction: column; gap: 8px; }
+  .manager-metrics-grid, .participants-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .journey-columns { grid-template-columns: minmax(0, 1fr); }
+  .journey-actions { flex-wrap: wrap; }
+  .journey-actions > * { flex-basis: 100%; white-space: normal; }
+}
+
+@media (max-width: 360px) {
+  .site-header .brand-group { gap: 8px; }
+  .site-header .brand-logo-img { height: 32px; }
+  .site-header .brand-title { font-size: 16px; }
+  .site-header .brand-subtitle { font-size: 8px; }
+  .site-header .header-inner { gap: 8px; }
+  .site-header .nav-actions { gap: 4px; }
+}

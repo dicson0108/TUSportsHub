@@ -184,12 +184,9 @@ const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
                 await popular.hover(); await publicPage.waitForTimeout(220); assert.deepEqual(await popular.evaluate(readLink),hoverLink);
                 const reference = await feedback(publicPage,'.input-text-standard');
                 assert.deepEqual(await feedback(publicPage,'.form-select'),reference);
-                for (const [route,selector] of [['/index.php','.hero-search-input'],['/login.php','[name=email]'],['/register.php','[name=name]']]) {
+                for (const [route,selector] of [['/login.php','[name=email]'],['/register.php','[name=name]']]) {
                     await publicPage.goto(base+route);
                     assert.deepEqual(await feedback(publicPage,selector),reference,route);
-                    if (route==='/index.php') {
-                        assert.equal(await publicPage.locator('.hero-search-bar').evaluate(el=>getComputedStyle(el).borderColor),'rgba(0, 0, 0, 0.1)');
-                    }
                 }
                 await student.goto(base+'/profile.php');
                 const disabled = student.locator('#user_email');
@@ -203,6 +200,45 @@ const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
                 await manager.goto(base+`/manager/session-edit.php?id=${f.sessions.free}`);
                 for (const selector of ['#club_id','#title','#session_date','textarea']) assert.deepEqual(await feedback(manager,selector),reference,selector);
             } finally { await publicPage.close(); }
+        });
+        await check('home search stays restored and alignment holds across viewport sizes', async () => {
+            const page = await browser.newPage();
+            const noOverflow = async (p,label) => assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),label);
+            const rail = async (p,selector) => {
+                const brand = await p.locator('.site-header .brand-group').boundingBox();
+                const left = await p.locator(selector).evaluate(el=>el.getBoundingClientRect().left+parseFloat(getComputedStyle(el).paddingLeft));
+                assert.ok(Math.abs(brand.x-left)<1,selector+' shares the header content rail');
+            };
+            try {
+                for (const width of [320,390,768,1024,1440]) {
+                    await page.setViewportSize({width,height:1000});
+                    await page.goto(base+'/index.php');
+                    await noOverflow(page,`home at ${width}`);
+                    const search = page.locator('.hero-search-input');
+                    await search.hover();
+                    assert.deepEqual(await search.evaluate(el=>{const s=getComputedStyle(el);return {border:s.borderStyle,background:s.backgroundColor,shadow:s.boxShadow}}),{border:'none',background:'rgba(0, 0, 0, 0)',shadow:'none'});
+                    await search.focus(); await page.waitForTimeout(200);
+                    assert.equal(await search.evaluate(el=>getComputedStyle(el).boxShadow),'none');
+                    assert.equal(await page.locator('.hero-search-bar').evaluate(el=>getComputedStyle(el).borderColor),'rgb(200, 30, 39)');
+                    await page.goto(base+'/sessions.php');
+                    await noOverflow(page,`sessions at ${width}`); await rail(page,'.sessions-container');
+                    await manager.setViewportSize({width,height:1000});
+                    await manager.goto(base+`/manager/session-edit.php?id=${f.sessions.free}`);
+                    await noOverflow(manager,`editor at ${width}`);
+                    for (const selector of ['#session_date','#start_time','#end_time']) {
+                        const bounds = await manager.locator(selector).boundingBox();
+                        assert.ok(bounds.x>=0 && bounds.x+bounds.width<=width,selector+' fits');
+                    }
+                    await manager.goto(base+'/manager/sessions.php');
+                    await noOverflow(manager,`manager at ${width}`); await rail(manager,'.manager-container');
+                }
+                const reg = JSON.parse(fixture('read'));
+                for (const route of ['review-receipt','record-refund']) {
+                    await manager.goto(base+`/manager/${route}.php?id=${reg.id}`);
+                    if (route==='review-receipt') assert.equal(await manager.locator('.journey-columns').evaluate(el=>getComputedStyle(el).display),'grid');
+                    assert.equal(await manager.locator('.journey-card').first().evaluate(el=>getComputedStyle(el).paddingLeft),'24px');
+                }
+            } finally { await page.close(); }
         });
         await check('shared registration feedback retains hover, focus and reduced-motion behavior', async () => {
             await student.goto(base+`/session-detail.php?id=${f.sessions.paid}`);

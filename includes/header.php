@@ -26,7 +26,11 @@ $css_map = [
     'terms.php' => 'legal.css',
 ];
 if ($is_manager_route) {
-    $page_css = ($current_page === 'participants.php') ? 'participants.css' : 'manager.css';
+    $page_css = match ($current_page) {
+        'participants.php' => 'participants.css',
+        'review-receipt.php', 'record-refund.php' => 'journey.css',
+        default => 'manager.css',
+    };
 } else {
     $page_css = $css_map[$current_page] ?? null;
 }
@@ -45,6 +49,7 @@ if ($is_manager_route) {
         <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/<?= e($page_css) ?>?v=<?= filemtime(__DIR__ . '/../assets/css/' . $page_css) ?>">
     <?php endif; ?>
     <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/form-controls.css?v=<?= filemtime(__DIR__ . '/../assets/css/form-controls.css') ?>">
+    <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/alignment.css?v=<?= filemtime(__DIR__ . '/../assets/css/alignment.css') ?>">
 </head>
 <body class="site-form-controls">
 <a class="skip-link" href="#main-content">Skip to main content</a>

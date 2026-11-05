@@ -24,6 +24,7 @@ function render_error_page(int $status): void {
     <title><?= $status ?> · <?= htmlspecialchars($title) ?> · Taylor's SportsHub</title>
     <link rel="stylesheet" href="<?= $base ?>/assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
     <link rel="stylesheet" href="<?= $base ?>/assets/css/errors.css?v=<?= filemtime(__DIR__ . '/../assets/css/errors.css') ?>">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/alignment.css?v=<?= filemtime(__DIR__ . '/../assets/css/alignment.css') ?>">
 </head>
 <body class="error-page" data-error-code="<?= $status ?>">
     <header class="error-header">

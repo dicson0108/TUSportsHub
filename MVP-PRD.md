@@ -74,7 +74,7 @@ Expiry is checked during relevant web requests. There is no scheduled cleanup wo
 
 - Taylor's crimson identity, shared logo renderer, system typography and responsive layouts.
 - Session search keeps its pill-shaped primary button. Reset filters and Most popular share the same link-button design and at least 44px target height.
-- Editable text/date/time/number inputs, textareas and selects share sessions-style hover/focus feedback: neutral unfocused fields, white focused field, red border and soft halo without a second outer outline. Preserve disabled, readonly and explicit validation-error states.
+- Editable text/date/time/number inputs, textareas and selects share sessions-style hover/focus feedback: neutral unfocused fields, white focused field, red border and soft halo without a second outer outline. Preserve disabled, readonly and explicit validation-error states. The home search bar keeps its original combined-field styling.
 - Dropdown option menus use native browser/platform behavior. File pickers, checkboxes and radio controls retain their own interaction patterns.
 - Registration actions share hover/press feedback and reduced-motion handling. The existing high-contrast focus limitation remains deferred at the user's request.
 
@@ -106,7 +106,7 @@ Current automated checks are executable implementation checks, not usability or 
 - Browser tooling uses Playwright and axe installed outside the application. Generated browser fixtures are cleaned up; visits can still execute the application's normal expiry sweep.
 - PHP/JavaScript syntax and diff checks complement these suites. Passing finite tests does not establish absence of all security, concurrency or accessibility defects.
 
-Verification on 5 November 2026: all six PHP suites passed, the journey runner passed 70 checks with zero axe findings in captured states and no browser JavaScript errors, and the focused browser runner passed 11 checks including shared field feedback and reset/popular styling. These results describe the tested local environment and scenarios.
+Verification on 5 November 2026: all six PHP suites passed, the journey runner passed 70 checks with zero axe findings in captured states and no browser JavaScript errors, and the focused browser runner passed 12 checks including shared field feedback and reset/popular styling. These results describe the tested local environment and scenarios.
 
 Remaining release validation:
 

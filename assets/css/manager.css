@@ -435,3 +435,24 @@
   font-size: 13.5px;
   text-align: left;
 }
+
+/* Session-editor rails keep native date/time controls inside narrow screens. */
+.session-editor { width: 100%; max-width: 800px; margin: 0 auto; padding: 24px var(--page-gutter, 24px) 64px; }
+.session-editor-form { background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,.06); box-shadow: 0 4px 20px rgba(0,0,0,.04); padding: 40px; }
+.editor-fields { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; margin-bottom: 24px; }
+.editor-fields-time { grid-template-columns: minmax(0,2fr) repeat(2,minmax(0,1fr)); }
+.editor-fields > div, .session-editor :is(input,select,textarea) { min-width: 0; }
+.editor-cover-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 6px; }
+.editor-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 16px; }
+.editor-actions button { min-height: 44px; }
+.manager-cancellation-form { text-align: left; }
+.manager-cancellation-form label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.manager-cancellation-form .manager-confirm-actions { margin-top: 24px; }
+
+@media (max-width: 600px) {
+  .session-editor-form { padding: 24px; }
+  .editor-fields, .editor-fields-time { grid-template-columns: minmax(0,1fr); }
+  .editor-actions { flex-direction: column; }
+  .editor-actions button { width: 100%; }
+  .manager-cancellation-form .manager-confirm-actions > * { width: 100%; }
+}

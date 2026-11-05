@@ -57,6 +57,12 @@
   transition: background-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+.hero-search-bar:focus-within {
+  background: #ffffff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-glow), 0 8px 24px -4px rgba(200, 30, 39, 0.12);
+}
+
 .hero-search-icon {
   color: var(--text-muted);
   margin-right: 8px;
@@ -64,17 +70,13 @@
 }
 
 .hero-search-input {
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  min-height: 44px;
-  min-width: 0;
+  border: none;
   outline: none;
   width: 100%;
   font-size: 15px;
   letter-spacing: -0.01em;
   color: var(--text-main);
-  background: rgba(0, 0, 0, 0.025);
+  background: transparent;
 }
 
 .hero-search-input::placeholder {

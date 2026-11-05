@@ -168,7 +168,7 @@ $page_title = $session ? "Edit Session · Manager" : "Create Session · Manager"
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem;">
+<div class="session-editor">
     <div style="margin-bottom: 2rem;">
         <a href="<?= app_url('/manager/sessions.php') ?>" style="color: #6e6e73; text-decoration: none; font-size: 0.88rem;">← Back to Sessions</a>
         <h1 style="font-size: 2rem; font-weight: 800; color: #1d1d1f; margin: 0.5rem 0 0; letter-spacing: -0.02em;">
@@ -188,7 +188,7 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="<?= $_SERVER['REQUEST_URI'] ?>" style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.04); padding: 2.5rem;">
+    <form method="POST" action="<?= $_SERVER['REQUEST_URI'] ?>" class="session-editor-form">
         <?= csrf_field() ?>
 
         <div style="margin-bottom: 1.5rem;">
@@ -205,7 +205,7 @@ require_once __DIR__ . '/../includes/header.php';
             <input type="text" id="title" name="title" value="<?= e($title_val) ?>" placeholder="e.g. Sunday Open Play & Social Smash" required <?= $is_published ? 'readonly' : '' ?> style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box;">
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="editor-fields">
             <div>
                 <label for="sport_type" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.4rem; color: #1d1d1f;">Sport</label>
                 <input type="text" id="sport_type" name="sport_type" value="<?= e($sport_val) ?>" placeholder="e.g. Badminton" required <?= $is_published ? 'readonly' : '' ?> style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box;">
@@ -218,7 +218,7 @@ require_once __DIR__ . '/../includes/header.php';
 
         <!-- Session Cover Visual Image Picker -->
         <div style="margin-bottom: 1.75rem;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
+            <div class="editor-cover-header">
                 <label style="font-size: 0.88rem; font-weight: 600; color: #1d1d1f;">Session Cover Image</label>
                 <span style="font-size: 0.8rem; color: #86868b;">Select high-resolution WebP hero visual</span>
             </div>
@@ -287,7 +287,7 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="editor-fields editor-fields-time">
             <div>
                 <label for="session_date" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.4rem; color: #1d1d1f;">Date</label>
                 <input type="date" id="session_date" name="session_date" value="<?= e($date_val) ?>" required <?= $is_published ? 'readonly' : '' ?> style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box;">
@@ -302,7 +302,7 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="editor-fields">
             <div>
                 <label for="price" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.4rem; color: #1d1d1f;">Price (MYR, 0 for Free)</label>
                 <input type="number" step="0.50" min="0" id="price" name="price" value="<?= e((string)$price_val) ?>" required <?= $is_published ? 'readonly' : '' ?> style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box;">
@@ -318,7 +318,7 @@ require_once __DIR__ . '/../includes/header.php';
             <textarea id="description" name="description" rows="5" required placeholder="Outline format, drills, who should attend, and what equipment is provided..." style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box; font-family: inherit;"><?= e($desc_val) ?></textarea>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <div class="editor-actions">
             <?php if (!$is_published): ?>
                 <button type="submit" name="action" value="draft" style="padding: 0.85rem 1.5rem; background: #f5f5f7; color: #1d1d1f; border: 1px solid #d2d2d7; border-radius: 980px; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
                     Save Draft
