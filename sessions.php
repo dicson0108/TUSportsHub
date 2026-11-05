@@ -108,7 +108,7 @@ function pagination_url(int $p): string {
                     <svg class="search-icon-inside" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     <input type="text" name="q" value="<?= e($search) ?>" placeholder="Search by session title, venue, or club" class="input-text-standard" aria-label="Search sessions">
                 </div>
-                <button type="submit" class="hero-search-btn" aria-label="Search sessions">
+                <button type="submit" class="hero-search-btn btn-filter-search" aria-label="Search sessions">
                     <span>Search</span>
                     <svg class="hero-btn-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>

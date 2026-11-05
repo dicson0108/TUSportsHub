@@ -149,11 +149,11 @@ require_once __DIR__ . '/includes/header.php';
                     <input type="text" id="recipient_account_number" name="recipient_account_number" maxlength="50" value="<?= e($_POST['recipient_account_number']??'') ?>" placeholder="Recipient account number…" required style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box;">
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-                    <a href="<?= app_url('/my-activities.php') ?>" class="btn-hero-secondary" style="display: inline-block;">
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <a href="<?= app_url('/my-activities.php') ?>" class="journey-button">
                         Keep Registration
                     </a>
-                    <button type="submit" style="padding: 0.85rem 1.5rem; background: #c81e27; color: #fff; border: none; border-radius: 980px; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+                    <button type="submit" class="journey-button primary" style="background: #c8102e; border-color: #c8102e; color: #fff;">
                         Request cancellation
                     </button>
                 </div>
@@ -164,11 +164,11 @@ require_once __DIR__ . '/includes/header.php';
                 <p style="font-size: 0.9rem; color: #424245; margin-bottom: 2rem;">
                     Cancelling will immediately release your reserved spot so another student can participate.
                 </p>
-                <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-                    <a href="<?= app_url('/my-activities.php') ?>" class="btn-hero-secondary" style="display: inline-block;">
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <a href="<?= app_url('/my-activities.php') ?>" class="journey-button">
                         Keep Registration
                     </a>
-                    <button type="submit" style="padding: 0.85rem 1.5rem; background: #c81e27; color: #fff; border: none; border-radius: 980px; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+                    <button type="submit" class="journey-button primary" style="background: #c8102e; border-color: #c8102e; color: #fff;">
                         Yes, Cancel Spot
                     </button>
                 </div>

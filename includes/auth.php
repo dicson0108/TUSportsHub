@@ -21,18 +21,18 @@ function is_logged_in(): bool {
     return !empty($_SESSION['user_id']);
 }
 
-function current_user(): ?array {
+function current_user(bool $reload = false): ?array {
     if (!is_logged_in()) {
         return null;
     }
     
     static $cached_user = null;
-    if ($cached_user !== null && $cached_user['id'] === (int)$_SESSION['user_id']) {
+    if (!$reload && $cached_user !== null && $cached_user['id'] === (int)$_SESSION['user_id']) {
         return $cached_user;
     }
 
     $db = get_db_connection();
-    $stmt = $db->prepare("SELECT id, name, email, role, status, phone, created_at FROM users WHERE id = :id LIMIT 1");
+    $stmt = $db->prepare("SELECT id, name, preferred_name, email, role, status, phone, faculty, created_at FROM users WHERE id = :id LIMIT 1");
     $stmt->execute([':id' => $_SESSION['user_id']]);
     $user = $stmt->fetch();
 

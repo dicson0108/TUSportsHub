@@ -50,9 +50,10 @@
   aspect-ratio: 21 / 9;
   border-radius: var(--radius-xl, 20px);
   overflow: hidden;
-  background: #141824;
-  box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: transparent;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+  border: none;
+  outline: none;
   margin-bottom: 24px;
 }
 

@@ -20,6 +20,7 @@ $css_map = [
     'cancel-registration.php' => 'payment.css',
     'upload-receipt.php' => 'payment.css',
     'evidence.php' => 'payment.css',
+    'profile.php' => 'profile.css',
     'inbox.php' => 'inbox.css',
     'login.php' => 'auth.css',
     'register.php' => 'auth.css',
@@ -79,7 +80,7 @@ $page_css = $is_manager_route ? 'manager.css' : ($css_map[$current_page] ?? null
                     </a>
                 <?php endif; ?>
 
-                <a href="<?= APP_BASE_PATH ?>/inbox.php" class="nav-inbox-btn <?= $current_page === 'inbox.php' ? 'active' : '' ?>" title="Inbox sample preview" aria-label="Inbox sample preview">
+                <a href="<?= APP_BASE_PATH ?>/inbox.php" class="nav-inbox-btn" title="Inbox sample preview" aria-label="Inbox sample preview">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
                 </a>
 
@@ -94,6 +95,7 @@ $page_css = $is_manager_route ? 'manager.css' : ($css_map[$current_page] ?? null
                             <span><?= e($current_user['email']) ?></span>
                         </div>
                         <div class="dropdown-divider"></div>
+                        <a href="<?= APP_BASE_PATH ?>/profile.php" class="dropdown-item" role="menuitem">My Profile</a>
                         <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="dropdown-item" role="menuitem">My Activities</a>
                         <a href="<?= APP_BASE_PATH ?>/inbox.php" class="dropdown-item" role="menuitem">Inbox (Preview)</a>
                         <?php if ($is_any_manager): ?>
@@ -146,6 +148,7 @@ $page_css = $is_manager_route ? 'manager.css' : ($css_map[$current_page] ?? null
         <a href="<?= APP_BASE_PATH ?>/sessions.php" class="mobile-nav-link <?= in_array($current_page, ['sessions.php', 'session-detail.php']) ? 'active' : '' ?>">Explore Sessions</a>
         <a href="<?= APP_BASE_PATH ?>/clubs.php" class="mobile-nav-link <?= in_array($current_page, ['clubs.php', 'club.php']) ? 'active' : '' ?>">Sports Clubs</a>
         <?php if ($current_user): ?>
+            <a href="<?= APP_BASE_PATH ?>/profile.php" class="mobile-nav-link <?= $current_page === 'profile.php' ? 'active' : '' ?>">My Profile</a>
             <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="mobile-nav-link <?= in_array($current_page, ['my-activities.php', 'payment.php', 'cancel-registration.php']) ? 'active' : '' ?>">My Activities</a>
             <a href="<?= APP_BASE_PATH ?>/inbox.php" class="mobile-nav-link <?= $current_page === 'inbox.php' ? 'active' : '' ?>">Inbox (Preview)</a>
             <?php if ($is_any_manager): ?>

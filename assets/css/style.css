@@ -1696,7 +1696,7 @@ textarea:focus-visible,
   text-decoration: none;
   transition: all 0.15s ease, transform var(--transition-press);
 }
-.nav-inbox-btn:hover, .nav-inbox-btn.active {
+.nav-inbox-btn:hover {
   background: #ffffff;
   color: #c8102e;
   border-color: rgba(200, 16, 46, 0.25);
@@ -1986,4 +1986,51 @@ textarea:focus-visible,
   height: 1px;
   background: rgba(0, 0, 0, 0.06);
   margin: 6px 0;
+}
+
+/* Global Hero Search Button */
+.hero-search-btn, .btn-filter-search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, var(--color-primary, #c8102e) 0%, #9e141c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-full, 980px);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 44px;
+  box-shadow: 0 3px 12px rgba(200, 30, 39, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all var(--transition-fast, 150ms ease), transform var(--transition-press, 120ms ease);
+}
+
+.hero-search-btn:hover, .btn-filter-search:hover {
+  background: linear-gradient(135deg, #d3232d 0%, #aa1620 100%);
+  box-shadow: 0 5px 16px rgba(200, 30, 39, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.hero-search-btn:hover .hero-btn-arrow, .btn-filter-search:hover .hero-btn-arrow {
+  transform: translateX(3px);
+}
+
+.hero-search-btn:active, .btn-filter-search:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(200, 30, 39, 0.3);
+}
+
+.hero-search-btn:focus-visible, .btn-filter-search:focus-visible {
+  outline: 2px solid var(--color-primary, #c8102e);
+  outline-offset: 2px;
+}
+
+.hero-btn-arrow {
+  transition: transform var(--transition-fast, 150ms ease);
 }
