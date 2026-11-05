@@ -28,6 +28,64 @@ function format_session_time_range(string $start_time, string $end_time): string
     return format_session_time($start_time) . ' – ' . format_session_time($end_time) . ' MYT';
 }
 
+function format_deadline(?string $value): string {
+    return $value ? date('j M Y · g:i A', strtotime($value)) . ' MYT' : 'Not applicable';
+}
+
+function can_cancel_registration(array $reg): bool {
+    return !($reg['status'] === 'awaiting_approval' && !empty($reg['cancellation_requested_at']))
+        && ($reg['session_status'] ?? '') !== 'cancelled'
+        && in_array($reg['status'], ['confirmed', 'awaiting_payment', 'awaiting_approval', 'payment_rejected'], true)
+        && strtotime($reg['session_date'] . ' ' . $reg['start_time']) > time();
+}
+
+function registration_next_step(array $reg): string {
+    if ($reg['status'] === 'awaiting_approval' && !empty($reg['cancellation_requested_at'])) {
+        return 'Cancellation requested. The organiser must check external settlement before resolving any refund. Your place stays held during review.';
+    }
+    return match ($reg['status']) {
+        'awaiting_payment' => 'Your place is held. Transfer the quoted amount, then submit a receipt before the deadline.',
+        'awaiting_approval' => 'Your place is held during review, including after the session starts. Receipt submission does not confirm payment. Wait for the organiser’s decision.',
+        'payment_rejected' => 'Check the rejection reason and resubmit evidence before the deadline. A rejected receipt does not prove that no money arrived.',
+        'confirmed' => (float)$reg['price_snapshot'] > 0 ? 'Payment approved. Your registration is confirmed.' : 'Your place is confirmed. No payment is required.',
+        'cancellation_pending' => 'Your cancellation is pending a full external refund. Your place stays occupied until the refund is fully recorded.',
+        'expired' => 'The receipt deadline passed. Your place was released. Check session availability before reserving again.',
+        'cancelled' => 'This registration is cancelled and no longer holds a place. Check the cancellation and refund details below.',
+        default => 'View your current registration details.'
+    };
+}
+
+// Allowlisted feedback: never echo arbitrary query-string messages as status.
+function journey_feedback(): void {
+    $messages = [
+        'uploaded' => ['success', 'Receipt submitted. Your place is held while the organiser checks payment.'],
+        'confirmed' => ['success', 'Your place is confirmed. No payment is required for this session.'],
+        'approved' => ['success', 'Payment decision saved. The participant’s current registration and refund status are shown below.'],
+        'rejected' => ['success', 'Decision saved. The participant can see the rejection reason and deadline.'],
+        'refund_logged' => ['success', 'Refund record saved. Check the remaining balance before recording another transfer.'],
+        'cancelled' => ['success', 'Registration cancelled. Your place has been released.'],
+        'cancellation_pending' => ['success', 'Cancellation requested. View your registration for payment review or refund progress.'],
+        'upload_failed' => ['error', 'Receipt was not uploaded. Choose your file again, then retry.'],
+        'file_too_large' => ['error', 'File exceeds 5 MB. Choose a smaller JPG, PNG, WebP or PDF, then retry.'],
+        'invalid_file_type' => ['error', 'File type not supported. Choose a JPG, PNG, WebP or PDF, then retry.'],
+        'save_failed' => ['error', 'Receipt could not be saved. Your registration is unchanged. Choose the file again and retry.'],
+        'deadline_passed' => ['error', 'Receipt deadline passed. Uploads are closed; check your registration status.'],
+        'invalid_status' => ['error', 'This action is no longer available. Your current registration status is shown below.'],
+        'history_retained' => ['error', 'Previous payment or refund evidence is retained for this session. Contact the organiser before making another reservation or transfer.'],
+        'session_cancelled' => ['error', 'The session is cancelled. New reservations and receipt uploads are closed.'],
+        'session_full' => ['error', 'The last place was reserved before your request completed. Check another session or try again later.'],
+        'session_started' => ['error', 'This session has started. New reservations are closed.'],
+        'not_published' => ['error', 'Signup is closed. Existing payment deadlines remain valid unless the session is cancelled.'],
+        'closed' => ['success', 'Signup closed. Existing receipt deadlines remain valid; new reservations are blocked.'],
+        'csrf_error' => ['error', 'Your form session expired. Reload this page and try again.'],
+        'cannot_cancel_past_start' => ['error', 'Self-service cancellation closes at session start. Contact your organiser for an exceptional withdrawal.'],
+    ];
+    $key = $_GET['msg'] ?? '';
+    if (!isset($messages[$key])) return;
+    [$type, $text] = $messages[$key];
+    echo '<div class="journey-notice notice-' . $type . '" role="' . ($type === 'error' ? 'alert' : 'status') . '">' . e($text) . '</div>';
+}
+
 function get_initials(string $name): string {
     $parts = explode(' ', trim($name));
     if (count($parts) >= 2) {
@@ -109,6 +167,8 @@ function get_status_badge(string $status): string {
         'draft'                => ['Draft', 'badge-muted'],
         'published'            => ['Open', 'badge-confirmed'],
         'closed'               => ['Closed', 'badge-danger'],
+        'full'                 => ['Full', 'badge-warning'],
+        'started'              => ['Started', 'badge-muted'],
     ];
     [$label, $class] = $labels[$status] ?? [ucfirst(str_replace('_', ' ', $status)), 'badge-muted'];
     return '<span class="status-badge ' . $class . '">' . htmlspecialchars($label) . '</span>';

@@ -52,56 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="icon" type="image/webp" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.webp">
     <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/style.css">
     <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/auth.css">
-    <style>
-        .auth-poster-card {
-            position: relative;
-            border-radius: var(--radius-xl, 24px);
-            overflow: hidden;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-            background: #141824;
-            aspect-ratio: 16 / 10;
-        }
-        .auth-poster-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .auth-poster-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.75) 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 24px;
-            color: #ffffff;
-        }
-        .auth-poster-tag {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: #fecdd3;
-            margin-bottom: 6px;
-        }
-        .auth-poster-title {
-            font-size: 26px;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 4px;
-        }
-        .auth-poster-desc {
-            font-size: 13.5px;
-            color: #d1d5db;
-        }
-    </style>
 </head>
-<body style="background: var(--bg-surface-subtle, #fbfbfd);">
+<body class="auth-body">
 
-<header class="site-header" style="background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.08); padding: 0.75rem 1.5rem;">
-    <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-        <a href="<?= APP_BASE_PATH ?>/index.php" class="brand-group" aria-label="Taylor's SportsHub Home" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+<header class="site-header auth-header">
+    <div class="auth-header-inner">
+        <a href="<?= APP_BASE_PATH ?>/index.php" class="brand-group" aria-label="Taylor's SportsHub Home">
             <?= get_site_logo_html() ?>
             <div class="brand-text">
                 <span class="brand-title">Taylor's</span>
@@ -109,10 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </a>
 
-        <nav class="nav-links" style="display: flex; align-items: center; gap: 1.5rem;">
-            <a href="<?= APP_BASE_PATH ?>/index.php" class="nav-link" style="color: #424245; text-decoration: none; font-size: 0.92rem; font-weight: 500;">Home</a>
-            <a href="<?= APP_BASE_PATH ?>/sessions.php" class="nav-link" style="color: #424245; text-decoration: none; font-size: 0.92rem; font-weight: 500;">Explore sessions</a>
-            <a href="<?= APP_BASE_PATH ?>/clubs.php" class="nav-link" style="color: #424245; text-decoration: none; font-size: 0.92rem; font-weight: 500;">Clubs</a>
+        <nav class="nav-links">
+            <a href="<?= APP_BASE_PATH ?>/index.php" class="nav-link">Home</a>
+            <a href="<?= APP_BASE_PATH ?>/sessions.php" class="nav-link">Explore sessions</a>
+            <a href="<?= APP_BASE_PATH ?>/clubs.php" class="nav-link">Clubs</a>
+        </nav>
+    </div>
+</header>
         </nav>
 
         <div class="nav-actions" style="display: flex; align-items: center; gap: 0.75rem;">

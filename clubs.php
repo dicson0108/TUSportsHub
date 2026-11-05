@@ -12,70 +12,69 @@ $stmt = $db->query("SELECT c.*,
 $clubs = $stmt->fetchAll();
 ?>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem;">
-    <div style="margin-bottom: 2.5rem;">
-        <h1 style="font-size: 2.25rem; font-weight: 800; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.02em;">
-            Taylor's Sports Clubs
-        </h1>
-        <p style="color: #6e6e73; font-size: 1.05rem; margin: 0;">
+<div class="clubs-page-container">
+    <div class="clubs-header">
+        <div class="clubs-eyebrow">CAMPUS ORGANISATIONS</div>
+        <h1 class="clubs-title">Taylor's Sports Clubs</h1>
+        <p class="clubs-subtitle">
             Explore approved student sports clubs organizing regular campus sessions.
         </p>
     </div>
 
     <?php if (empty($clubs)): ?>
-        <div style="background: #fff; border-radius: 20px; padding: 4.5rem 2rem; text-align: center; border: 1px solid #e5e5ea; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-            <div style="font-size: 3rem; margin-bottom: 0.75rem;">🏟️</div>
-            <h3 style="font-size: 1.35rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.015em;">No clubs available</h3>
-            <p style="color: #6e6e73; font-size: 0.95rem; margin: 0 0 1.75rem; max-width: 440px; margin-left: auto; margin-right: auto;">
+        <div class="empty-state-box">
+            <svg class="empty-state-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+            <h3 class="empty-state-title">No clubs available</h3>
+            <p class="empty-state-desc">
                 Currently no sports clubs are active on Taylor's SportsHub.
             </p>
-            <a href="<?= app_url('/sessions.php') ?>" class="btn-hero-primary" style="display: inline-block;">
+            <a href="<?= app_url('/sessions.php') ?>" class="btn-primary" style="display: inline-block; padding: 0.65rem 1.5rem; border-radius: 980px;">
                 Explore Sessions →
             </a>
         </div>
     <?php else: ?>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 2rem;">
+        <div class="clubs-grid">
             <?php foreach ($clubs as $club): 
                 $club_banner = get_club_banner_url($club);
             ?>
-                <div style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 20px rgba(0,0,0,0.04); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                    <div style="width: 100%; height: 160px; background: #141824; position: relative; overflow: hidden;">
-                        <img src="<?= e($club_banner) ?>" alt="<?= e($club['name']) ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
-                        <div style="position: absolute; bottom: 12px; left: 16px;">
-                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); padding: 0.35rem 0.75rem; border-radius: 980px;">
-                                <?= e($club['sport_type']) ?>
-                            </span>
+                <a href="<?= app_url('/club.php?id=' . $club['id']) ?>" class="club-card-link">
+                    <div class="club-card-media">
+                        <img src="<?= e($club_banner) ?>" alt="<?= e($club['name']) ?>" loading="lazy">
+                        <div class="club-card-badge">
+                            <?= e($club['sport_type']) ?>
                         </div>
                     </div>
 
-                    <div style="padding: 1.75rem; display: flex; flex-direction: column; flex: 1; justify-content: space-between;">
+                    <div class="club-card-body">
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem;">
-                                <h2 style="font-size: 1.35rem; font-weight: 700; color: #1d1d1f; margin: 0;">
+                            <div class="club-card-header">
+                                <h2 class="club-card-name">
                                     <?= e($club['name']) ?>
                                 </h2>
-                                <span style="font-size: 0.85rem; color: #86868b; white-space: nowrap; margin-left: 8px;">
+                                <span class="club-card-count">
                                     <?= $club['session_count'] ?> active <?= $club['session_count'] === 1 ? 'session' : 'sessions' ?>
                                 </span>
                             </div>
-                            <p style="color: #6e6e73; font-size: 0.95rem; line-height: 1.5; margin: 0 0 1.5rem;">
+                            <p class="club-card-desc">
                                 <?= e($club['description']) ?>
                             </p>
 
                             <?php if (!empty($club['manager_name'])): ?>
-                                <div style="font-size: 0.85rem; color: #424245; margin-bottom: 1.5rem; padding: 0.75rem; background: #f5f5f7; border-radius: 10px;">
+                                <div class="club-card-mgr">
                                     <strong>Club Manager:</strong> <?= e($club['manager_name']) ?>
                                 </div>
                             <?php endif; ?>
                         </div>
 
-                        <div style="border-top: 1px solid #f0f0f2; padding-top: 1.25rem;">
-                            <a href="<?= app_url('/club.php?id=' . $club['id']) ?>" style="display: inline-block; width: 100%; text-align: center; padding: 0.75rem; background: #f5f5f7; color: #1d1d1f; text-decoration: none; border-radius: 980px; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7; box-sizing: border-box; transition: background 0.15s ease;">
-                                View Club Profile & Sessions →
-                            </a>
+                        <div class="club-card-footer">
+                            <span>Explore club</span>
+                            <span class="club-card-footer-arrow">
+                                <span>View sessions</span>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </span>
                         </div>
                     </div>
-                </div>
+                </a>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>

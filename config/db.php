@@ -18,6 +18,7 @@ function get_db_connection(): PDO {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
         $connection = new PDO($dsn, DB_USER, DB_PASS, $options);
+        $connection->exec("SET time_zone = '+08:00'");
         initialize_database($connection, DB_NAME);
         $pdo = $connection;
     }

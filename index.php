@@ -60,14 +60,23 @@ $clubs = $stmt->fetchAll();
                     </button>
                 </form>
 
-                <div class="hero-quick-tags" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 18px;">
-                    <span class="quick-tags-label" style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Quick find:</span>
-                    <a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Badminton" class="quick-tag-chip" style="font-size: 12.5px; padding: 4px 10px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 980px; text-decoration: none; color: #1d1d1f;">🏸 Badminton</a>
-                    <a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Basketball" class="quick-tag-chip" style="font-size: 12.5px; padding: 4px 10px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 980px; text-decoration: none; color: #1d1d1f;">🏀 Basketball</a>
-                    <a href="<?= APP_BASE_PATH ?>/sessions.php?price=free" class="quick-tag-chip" style="font-size: 12.5px; padding: 4px 10px; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 980px; text-decoration: none; color: #1d1d1f;">✨ Free Sessions</a>
+                <div class="hero-quick-tags">
+                    <span class="quick-tags-label">Quick find:</span>
+                    <a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Badminton" class="quick-tag-chip">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+                        <span>Badminton</span>
+                    </a>
+                    <a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Basketball" class="quick-tag-chip">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2.1 13.4A10 10 0 0 0 13.4 21.9M21.9 10.6A10 10 0 0 0 10.6 2.1"/></svg>
+                        <span>Basketball</span>
+                    </a>
+                    <a href="<?= APP_BASE_PATH ?>/sessions.php?price=free" class="quick-tag-chip">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <span>Free Sessions</span>
+                    </a>
                 </div>
 
-                <div class="hero-search-sub" style="font-size: 12.5px; color: var(--text-muted); margin-top: 14px;">
+                <div class="hero-search-sub">
                     Individual signup · Taylor's students · Malaysia Time
                 </div>
             </div>
@@ -144,7 +153,7 @@ $clubs = $stmt->fetchAll();
                 $seats = get_session_seat_info((int)$session['id']);
                 $cover_url = get_session_cover_url($session);
             ?>
-                <article class="session-card">
+                <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $session['id'] ?>" class="session-card">
                     <div class="session-card-media">
                         <img src="<?= e($cover_url) ?>" alt="<?= e($session['title']) ?>" loading="lazy">
                         <div class="session-card-badge-row">
@@ -163,18 +172,20 @@ $clubs = $stmt->fetchAll();
                             <span><?= e(format_session_date($session['session_date'])) ?> · <?= e(format_session_time($session['start_time'])) ?></span>
                         </div>
                         <div class="session-card-venue">
-                            📍 <?= e($session['venue']) ?>
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span><?= e($session['venue']) ?></span>
                         </div>
                         <div class="session-card-footer">
                             <div style="font-size: 13px; font-weight: 600; color: <?= $seats['is_full'] ? '#d70015' : '#248a3d' ?>;">
                                 <?= $seats['is_full'] ? 'Session Full' : $seats['seats_left'] . ' of ' . $seats['capacity'] . ' places left' ?>
                             </div>
-                            <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $session['id'] ?>" class="btn-primary" style="padding: 7px 16px; font-size: 13.5px; text-decoration: none; border-radius: 980px; background: #c8102e; color: #fff; font-weight: 600;">
-                                View session →
-                            </a>
+                            <span style="color: #c8102e; font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>View</span>
+                                <span>→</span>
+                            </span>
                         </div>
                     </div>
-                </article>
+                </a>
             <?php endforeach; ?>
         </div>
     </section>
@@ -197,7 +208,7 @@ $clubs = $stmt->fetchAll();
             <?php foreach ($clubs as $club): 
                 $club_banner = get_club_banner_url($club);
             ?>
-                <article class="club-card">
+                <a href="<?= APP_BASE_PATH ?>/club.php?id=<?= $club['id'] ?>" class="club-card">
                     <div class="club-card-banner">
                         <img src="<?= e($club_banner) ?>" alt="<?= e($club['name']) ?>" loading="lazy">
                         <div style="position: absolute; bottom: 12px; left: 16px;">
@@ -217,12 +228,13 @@ $clubs = $stmt->fetchAll();
                             <span style="font-size: 12.5px; color: #86868b; font-weight: 500;">
                                 <?= $club['session_count'] ?> active <?= $club['session_count'] === 1 ? 'session' : 'sessions' ?>
                             </span>
-                            <a href="<?= APP_BASE_PATH ?>/club.php?id=<?= $club['id'] ?>" style="color: #c8102e; font-size: 13.5px; font-weight: 600; text-decoration: none;">
-                                View Club Profile →
-                            </a>
+                            <span style="color: #c8102e; font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>View Profile</span>
+                                <span>→</span>
+                            </span>
                         </div>
                     </div>
-                </article>
+                </a>
             <?php endforeach; ?>
         </div>
     </section>

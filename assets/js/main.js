@@ -31,17 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 3. User dropdown menu toggle & keyboard accessibility
-    const userMenuPill = document.querySelector('.user-menu-pill');
-    const userDropdown = document.querySelector('.user-dropdown');
+    const userMenuPill = document.querySelector('.user-account .user-pill');
+    const userDropdown = document.querySelector('.user-dropdown-menu');
     if (userMenuPill && userDropdown) {
         userMenuPill.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isOpen = userDropdown.classList.contains('show');
-            userDropdown.classList.toggle('show');
+            const isOpen = userDropdown.classList.contains('is-open');
+            userDropdown.classList.toggle('is-open');
             userMenuPill.setAttribute('aria-expanded', !isOpen);
         });
-        document.addEventListener('click', () => {
-            userDropdown.classList.remove('show');
+        document.addEventListener('click', (event) => {
+            if (event.target.closest('.user-account')) return;
+            userDropdown.classList.remove('is-open');
             userMenuPill.setAttribute('aria-expanded', 'false');
         });
     }
@@ -51,14 +52,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileDrawer = document.querySelector('.mobile-drawer');
     const mobileDrawerClose = document.querySelector('.mobile-drawer-close');
     const mobileDrawerBackdrop = document.querySelector('.mobile-drawer-backdrop');
+    let closeDrawer = () => {};
+    const setBackgroundInert = (active) => {
+        document.querySelectorAll('.site-nav, main, .site-footer').forEach(el => el.inert = active);
+    };
+    const trapFocus = (event, surface) => {
+        if (event.key !== 'Tab') return;
+        const items = [...surface.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),textarea,[tabindex="0"]')].filter(el => el.getClientRects().length);
+        if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
 
     if (mobileMenuBtn && mobileDrawer) {
         const toggleDrawer = (open) => {
+            mobileDrawer.inert = !open;
             mobileDrawer.classList.toggle('open', open);
             mobileDrawerBackdrop?.classList.toggle('open', open);
             mobileMenuBtn.setAttribute('aria-expanded', String(open));
             document.body.style.overflow = open ? 'hidden' : '';
+            setBackgroundInert(open);
+            if (open) mobileDrawerClose?.focus(); else mobileMenuBtn.focus();
         };
+        closeDrawer = () => toggleDrawer(false);
+        mobileDrawer.addEventListener('keydown', event => trapFocus(event, mobileDrawer));
+        window.matchMedia('(min-width: 821px)').addEventListener('change', event => {
+            if (event.matches && mobileDrawer.classList.contains('open')) toggleDrawer(false);
+        });
 
         mobileMenuBtn.addEventListener('click', () => toggleDrawer(!mobileDrawer.classList.contains('open')));
         if (mobileDrawerClose) mobileDrawerClose.addEventListener('click', () => toggleDrawer(false));
@@ -101,11 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal-backdrop.show').forEach(m => m.classList.remove('show'));
-            if (userDropdown) userDropdown.classList.remove('show');
+            if (userDropdown?.classList.contains('is-open')) {
+                userDropdown.classList.remove('is-open');
+                userMenuPill.setAttribute('aria-expanded', 'false');
+                userMenuPill.focus();
+            }
             if (mobileDrawer && mobileDrawer.classList.contains('open')) {
-                mobileDrawer.classList.remove('open');
-                if (mobileDrawerBackdrop) mobileDrawerBackdrop.classList.remove('open');
-                document.body.style.overflow = '';
+                closeDrawer();
             }
             if (adminSidebar) adminSidebar.classList.remove('mobile-open');
         }
@@ -187,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         backToTopBtn.addEventListener('click', () => {
             window.scrollTo({
                 top: 0,
-                behavior: 'smooth'
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
             });
         });
     }
@@ -195,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 11. Receipt Modal Zoom & Preview Controller (Apple-calibrated Lightbox)
     let receiptModal = document.getElementById('receipt-lightbox');
     let currentZoom = 1.0;
+    let receiptTrigger = null;
 
     function initReceiptLightbox() {
         if (!receiptModal) {
@@ -203,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             receiptModal.className = 'receipt-lightbox-modal';
             receiptModal.setAttribute('role', 'dialog');
             receiptModal.setAttribute('aria-modal', 'true');
+            receiptModal.setAttribute('aria-labelledby', 'receipt-modal-title');
             receiptModal.innerHTML = `
                 <div class="receipt-lightbox-box">
                     <div class="receipt-lightbox-header">
@@ -216,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button type="button" class="receipt-tool-btn" id="receipt-zoom-in" title="Zoom In">+</button>
                             <button type="button" class="receipt-tool-btn" id="receipt-zoom-reset" title="Reset Zoom" style="width: auto; padding: 0 10px; border-radius: 980px; font-size: 0.78rem;">Reset</button>
                             <a href="#" id="receipt-open-raw" target="_blank" class="receipt-tool-btn" title="Open in new tab" style="text-decoration: none;">↗</a>
-                            <button type="button" class="receipt-tool-btn receipt-close-btn" id="receipt-modal-close" title="Close preview">✕</button>
+                            <button type="button" class="receipt-tool-btn receipt-close-btn" id="receipt-modal-close" title="Close preview"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                         </div>
                     </div>
                     <div class="receipt-lightbox-viewport" id="receipt-viewport">
@@ -259,6 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 receiptModal.classList.remove('show');
                 setZoom(1.0);
                 document.body.style.overflow = '';
+                setBackgroundInert(false);
+                receiptTrigger?.focus();
             };
 
             closeBtn?.addEventListener('click', closeModal);
@@ -269,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.addEventListener('keydown', (e) => {
                 if (!receiptModal.classList.contains('show')) return;
+                trapFocus(e, receiptModal);
                 if (e.key === 'Escape') closeModal();
                 if (e.key === '+' || e.key === '=') setZoom(currentZoom + 0.25);
                 if (e.key === '-' || e.key === '_') setZoom(currentZoom - 0.25);
@@ -278,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.openReceiptZoom = function(url, title = 'Payment Receipt Preview', caption = 'Official transfer verification evidence') {
+        receiptTrigger = document.activeElement;
         initReceiptLightbox();
         const img = document.getElementById('receipt-lightbox-img');
         const titleEl = document.getElementById('receipt-modal-title');
@@ -299,6 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         receiptModal.classList.add('show');
         document.body.style.overflow = 'hidden';
+        setBackgroundInert(true);
+        document.getElementById('receipt-modal-close')?.focus();
     };
 
     // Attach listeners to any trigger element with [data-receipt-zoom]
@@ -331,19 +362,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewContainer = document.getElementById('receipt-upload-preview');
 
     if (fileInput) {
+        const fieldError = document.getElementById('receipt-error');
         const handleFileSelected = (file) => {
             if (!file) return;
+            if (fieldError) fieldError.textContent = '';
+            fileInput.removeAttribute('aria-invalid');
             const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
             if (!validTypes.includes(file.type)) {
-                if (window.showToast) window.showToast('Please select a JPG, PNG, WebP or PDF file.', 'error');
+                if (fieldError) fieldError.textContent = 'Choose a JPG, PNG, WebP or PDF file, then retry.';
+                fileInput.setAttribute('aria-invalid', 'true');
                 fileInput.value = '';
-                if (previewContainer) previewContainer.style.display = 'none';
+                if (previewContainer) { previewContainer.hidden = true; previewContainer.style.display = 'none'; }
                 return;
             }
             if (file.size > 5 * 1024 * 1024) {
-                if (window.showToast) window.showToast('File exceeds 5MB size limit.', 'error');
+                if (fieldError) fieldError.textContent = 'File exceeds 5 MB. Choose a smaller file, then retry.';
+                fileInput.setAttribute('aria-invalid', 'true');
                 fileInput.value = '';
-                if (previewContainer) previewContainer.style.display = 'none';
+                if (previewContainer) { previewContainer.hidden = true; previewContainer.style.display = 'none'; }
                 return;
             }
 
@@ -358,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (thumbEl) {
                     if (isPdf) {
-                        thumbEl.innerHTML = `<span style="font-size: 2.2rem;">📄</span>`;
+                        thumbEl.innerHTML = `<svg width="28" height="28" fill="none" stroke="#c8102e" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
                     } else {
                         const reader = new FileReader();
                         reader.onload = (e) => {
@@ -368,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 previewContainer.style.display = 'flex';
+                previewContainer.hidden = false;
             }
         };
 
@@ -400,6 +437,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // Preserve button name/value when disabling submits (review decisions depend on it).
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', event => {
+            const button = event.submitter;
+            if (!button?.dataset.pendingLabel) return;
+            if (form.dataset.submitting) { event.preventDefault(); return; }
+            form.dataset.submitting = 'true';
+            if (button.name) {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden'; hidden.name = button.name; hidden.value = button.value;
+                form.appendChild(hidden);
+            }
+            button.textContent = button.dataset.pendingLabel;
+            form.setAttribute('aria-busy', 'true');
+            form.querySelectorAll('button[type="submit"]').forEach(item => item.disabled = true);
+        });
+    });
+    window.addEventListener('pageshow', event => { if (event.persisted) window.location.reload(); });
+    document.querySelector('[data-focus-error]')?.focus();
 
     // 14. Clipboard Copy Button
     document.querySelectorAll('[data-copy-link]').forEach(btn => {

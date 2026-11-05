@@ -1,180 +1,146 @@
 <?php
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/helpers.php';
-
+require_once __DIR__ . "/../includes/auth.php";
+require_once __DIR__ . "/../includes/helpers.php";
 $user = require_login();
-$reg_id = (int)($_GET['id'] ?? 0);
 $db = get_db_connection();
-
-$stmt = $db->prepare("SELECT r.*, u.name AS student_name, u.email AS student_email, u.phone AS student_phone, 
-                             s.title AS session_title, s.sport_type, s.session_date, s.start_time, s.end_time, s.club_id, 
-                             c.name AS club_name 
-                      FROM registrations r 
-                      INNER JOIN users u ON r.user_id = u.id 
-                      INNER JOIN sessions s ON r.session_id = s.id 
-                      INNER JOIN clubs c ON s.club_id = c.id 
-                      WHERE r.id = :id LIMIT 1");
-$stmt->execute([':id' => $reg_id]);
-$reg = $stmt->fetch();
-
+$reg_id = (int) ($_GET["id"] ?? 0);
+$sql =
+    "SELECT r.*,u.name AS student_name,u.email AS student_email,s.title AS session_title,s.club_id,s.session_date,s.start_time,s.status AS session_status,c.name AS club_name FROM registrations r JOIN users u ON u.id=r.user_id JOIN sessions s ON s.id=r.session_id JOIN clubs c ON c.id=s.club_id WHERE r.id=?";
+$q = $db->prepare($sql);
+$q->execute([$reg_id]);
+$reg = $q->fetch();
 if (!$reg) {
     render_error_page(404);
 }
-
-if (!is_club_manager($reg['club_id'], $user['id'])) {
+if (!is_club_manager($reg["club_id"], $user["id"])) {
     render_error_page(403);
 }
-
-// Anti-self-approval rule
-$is_self = ($reg['user_id'] === $user['id']);
-
+$is_self = $reg["user_id"] === $user["id"];
 $error = null;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $error = "Session expired. Please try again.";
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if (!verify_csrf_token($_POST["csrf_token"] ?? "")) {
+        $error = "Your form session expired. Reload and try again.";
     } elseif ($is_self) {
-        $error = "Conflict of interest: You cannot approve or reject your own payment receipt. Another authorised manager or administrator must review it.";
+        $error = "Another authorised manager must review your own payment.";
     } else {
-        $decision = $_POST['decision'] ?? '';
-
-        if ($decision === 'approve') {
-            $stmt = $db->prepare("UPDATE registrations 
-                                  SET status = 'confirmed', rejection_reason = NULL, updated_at = NOW() 
-                                  WHERE id = :id");
-            $stmt->execute([':id' => $reg_id]);
-            header("Location: " . app_url('/manager/participants.php?session_id=' . $reg['session_id'] . '&msg=approved'));
-            exit;
-        } elseif ($decision === 'reject') {
-            $reason = trim($_POST['rejection_reason'] ?? '');
-            if (empty($reason)) {
-                $error = "Please provide a specific reason for rejecting the receipt.";
+        $db->beginTransaction();
+        try {
+            // Same lock order as reservation and organiser cancellation: session, registration.
+            $q = $db->prepare("SELECT id FROM sessions WHERE id=? FOR UPDATE");
+            $q->execute([$reg["session_id"]]);
+            $q = $db->prepare($sql . " FOR UPDATE");
+            $q->execute([$reg_id]);
+            $reg = $q->fetch();
+            $cancelling = !empty($reg["cancellation_requested_at"]) || $reg["session_status"] === "cancelled";
+            $decision = $_POST["decision"] ?? "";
+            $reason = trim($_POST["rejection_reason"] ?? "");
+            if ($reg["status"] !== "awaiting_approval" || !$reg["receipt_path"]) {
+                $error =
+                    "This receipt is no longer awaiting a decision. Return to participants for its current status.";
+            } elseif (!in_array($decision, ["approve", "reject"], true)) {
+                $error = "Choose a payment decision.";
+            } elseif ($decision === "reject" && ($reason === "" || mb_strlen($reason) > 255)) {
+                $error = "Enter a rejection reason of 1–255 characters.";
             } else {
-                // Calculate new 24h window capped at session start
-                $session_start = strtotime($reg['session_date'] . ' ' . $reg['start_time']);
-                $twenty_four_hours_later = time() + (24 * 3600);
-                $new_deadline_ts = min($twenty_four_hours_later, $session_start);
-                $new_deadline = date('Y-m-d H:i:s', $new_deadline_ts);
-
-                $stmt = $db->prepare("UPDATE registrations 
-                                      SET status = 'payment_rejected', rejection_reason = :reason, 
-                                          payment_deadline = :deadline, updated_at = NOW() 
-                                      WHERE id = :id");
-                $stmt->execute([
-                    ':reason' => $reason,
-                    ':deadline' => $new_deadline,
-                    ':id' => $reg_id,
-                ]);
-                header("Location: " . app_url('/manager/participants.php?session_id=' . $reg['session_id'] . '&msg=rejected'));
-                exit;
+                if ($decision === "approve") {
+                    $next = $cancelling ? "cancellation_pending" : "confirmed";
+                    $q = $db->prepare(
+                        "UPDATE registrations SET status=?,rejection_reason=NULL,updated_at=NOW() WHERE id=?",
+                    );
+                    $q->execute([$next, $reg_id]);
+                } else {
+                    $deadline = date(
+                        "Y-m-d H:i:s",
+                        min(time() + 86400, strtotime($reg["session_date"] . " " . $reg["start_time"])),
+                    );
+                    $next = $cancelling ? "cancelled" : "payment_rejected";
+                    $q = $db->prepare(
+                        "UPDATE registrations SET status=?,rejection_reason=?,payment_deadline=?,updated_at=NOW() WHERE id=?",
+                    );
+                    $q->execute([$next, $reason, $deadline, $reg_id]);
+                }
+                $db->commit();
+                header(
+                    "Location: " .
+                        app_url(
+                            "/manager/participants.php?session_id=" .
+                                $reg["session_id"] .
+                                "&msg=" .
+                                ($decision === "approve" ? "approved" : "rejected"),
+                        ),
+                );
+                exit();
             }
+            $db->rollBack();
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            throw $e;
         }
     }
 }
-
-$page_title = "Review Receipt · " . $reg['student_name'];
-require_once __DIR__ . '/../includes/header.php';
+$cancelling = !empty($reg["cancellation_requested_at"]) || $reg["session_status"] === "cancelled";
+$can_review = $reg["status"] === "awaiting_approval" && !empty($reg["receipt_path"]) && !$is_self;
+$page_title = "Review payment evidence";
+require_once __DIR__ . "/../includes/header.php";
 ?>
-
-<div style="max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem;">
-    <!-- Breadcrumb -->
-    <div style="margin-bottom: 2rem;">
-        <a href="<?= app_url('/manager/participants.php?session_id=' . $reg['session_id']) ?>" style="color: #6e6e73; text-decoration: none; font-size: 0.88rem;">← Back to Participants</a>
-        <h1 style="font-size: 2rem; font-weight: 800; color: #1d1d1f; margin: 0.5rem 0 0; letter-spacing: -0.02em;">
-            Review Payment Receipt
-        </h1>
-    </div>
-
-    <?php if ($error): ?>
-        <div style="background: #fff2f2; border: 1px solid #fecdd3; color: #c81e27; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
-            <?= e($error) ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if ($is_self): ?>
-        <div style="background: #fff2f2; border: 1px solid #fecdd3; color: #c81e27; padding: 1.25rem; border-radius: 16px; margin-bottom: 2rem;">
-            <strong>Self-Approval Restriction:</strong> You are the participant for this registration. Per Taylor's SportsHub audit rules, another club manager or administrator must review and approve your payment.
-        </div>
-    <?php endif; ?>
-
-    <div style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.04); padding: 2.5rem; margin-bottom: 2rem;">
-        <!-- Student & Session info -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; border-bottom: 1px solid #f0f0f2; padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
-            <div>
-                <span style="font-size: 0.8rem; text-transform: uppercase; color: #86868b; font-weight: 600; display: block; margin-bottom: 0.25rem;">Participant</span>
-                <strong style="font-size: 1.1rem; color: #1d1d1f; display: block;"><?= e($reg['student_name']) ?></strong>
-                <span style="font-size: 0.88rem; color: #6e6e73;"><?= e($reg['student_email']) ?></span>
-            </div>
-            <div>
-                <span style="font-size: 0.8rem; text-transform: uppercase; color: #86868b; font-weight: 600; display: block; margin-bottom: 0.25rem;">Amount Quoted</span>
-                <strong style="font-size: 1.35rem; color: #c8102e;"><?= format_price($reg['price_snapshot']) ?></strong>
-                <span style="font-size: 0.82rem; color: #86868b; display: block;">Uploaded <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?></span>
-            </div>
-        </div>
-
-        <!-- Receipt preview -->
-        <div style="margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                <span style="font-size: 0.88rem; font-weight: 600; color: #1d1d1f;">Submitted Transfer Evidence:</span>
-                <?php if (!empty($reg['receipt_path']) && !str_ends_with(strtolower($reg['receipt_path']), '.pdf')): ?>
-                    <button type="button" class="btn-secondary-sm" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>" data-receipt-title="Payment Receipt · <?= e($reg['student_name']) ?> (<?= format_price($reg['price_snapshot']) ?>)" data-receipt-caption="Uploaded by <?= e($reg['student_name']) ?> on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>" style="font-size: 0.82rem; padding: 4px 12px; border-radius: 980px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                        🔍 Click to Zoom & Inspect
-                    </button>
-                <?php endif; ?>
-            </div>
-
-            <?php if (!empty($reg['receipt_path'])): ?>
-                <?php $is_pdf = str_ends_with(strtolower($reg['receipt_path']), '.pdf'); ?>
-                <?php if ($is_pdf): ?>
-                    <div style="padding: 2.5rem 1.5rem; background: #fafafa; border: 1px dashed #d2d2d7; border-radius: 16px; text-align: center;">
-                        <span style="font-size: 2.75rem; display: block; margin-bottom: 0.5rem;">📄</span>
-                        <div style="font-weight: 700; color: #1d1d1f; font-size: 1rem; margin-bottom: 0.25rem;">PDF Payment Receipt</div>
-                        <p style="color: #6e6e73; font-size: 0.85rem; margin: 0 0 1.25rem;"><?= basename($reg['receipt_path']) ?></p>
-                        <a href="<?= app_url('/' . $reg['receipt_path']) ?>" target="_blank" class="btn-hero-secondary" style="display: inline-block;">
-                            Open PDF Receipt in New Tab ↗
-                        </a>
-                    </div>
-                <?php else: ?>
-                    <div style="border: 1px solid #e5e5ea; border-radius: 16px; overflow: hidden; background: #fbfbfd; text-align: center; padding: 1.25rem; position: relative;">
-                        <div style="position: relative; display: inline-block; cursor: zoom-in;" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>" data-receipt-title="Payment Receipt · <?= e($reg['student_name']) ?> (<?= format_price($reg['price_snapshot']) ?>)" data-receipt-caption="Uploaded by <?= e($reg['student_name']) ?> on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>">
-                            <img src="<?= app_url('/' . $reg['receipt_path']) ?>" alt="Payment Receipt" style="max-width: 100%; max-height: 500px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); transition: transform 0.2s ease; display: block;">
-                            <div style="position: absolute; bottom: 14px; right: 14px; background: rgba(0,0,0,0.74); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); pointer-events: none;">
-                                🔍 Click to Zoom (High-Res Inspect)
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            <?php else: ?>
-                <div style="color: #6e6e73; font-style: italic; background: #fafafa; border: 1px dashed #d2d2d7; border-radius: 14px; padding: 2rem; text-align: center;">No receipt file attached.</div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Decision Form -->
-        <?php if (!$is_self): ?>
-            <form method="POST" action="<?= $_SERVER['REQUEST_URI'] ?>" style="border-top: 1px solid #f0f0f2; padding-top: 2rem;">
-                <?= csrf_field() ?>
-
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="rejection_reason" style="display: block; font-size: 0.88rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.4rem;">
-                        Rejection Reason (only required if rejecting)
-                    </label>
-                    <input type="text" id="rejection_reason" name="rejection_reason" placeholder="e.g. Incomplete payment screenshot or amount mismatch..." style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box;">
-                    <span style="font-size: 0.8rem; color: #86868b; display: block; margin-top: 0.35rem;">
-                        Rejecting grants student an additional 24 hours (capped at session start) to resubmit evidence.
-                    </span>
-                </div>
-
-                <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-                    <button type="submit" name="decision" value="reject" style="padding: 0.85rem 1.5rem; background: #fff2f2; color: #c81e27; border: 1px solid #fecdd3; border-radius: 980px; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
-                        ✕ Reject Receipt
-                    </button>
-                    <button type="submit" name="decision" value="approve" class="btn-hero-primary" style="border: none; cursor: pointer;">
-                        ✓ Approve Payment
-                    </button>
-                </div>
-            </form>
-        <?php endif; ?>
-    </div>
+<div class="journey-page">
+ <header class="journey-header"><nav class="journey-breadcrumb" aria-label="Breadcrumb"><a href="<?= app_url(
+     "/manager/participants.php?session_id=" . $reg["session_id"],
+ ) ?>">Participants</a> / Payment review</nav><h1>Review payment evidence.</h1><p class="journey-subtitle"><?= e(
+    $reg["student_name"],
+) ?> · <?= e($reg["session_title"]) ?></p></header>
+ <?php if ($error): ?><div class="journey-notice notice-error" role="alert" tabindex="-1" data-focus-error><?= e(
+    $error,
+) ?></div><?php endif; ?>
+ <div class="journey-columns review">
+  <section class="journey-card"><h2>Receipt submission</h2><?= get_status_badge($reg["status"]) ?>
+   <?php if ($reg["receipt_path"] && is_file(__DIR__ . "/../" . $reg["receipt_path"])): ?>
+    <?php $evidence_url = app_url("/evidence.php?registration_id=" . $reg_id); ?>
+    <?php if (
+        !str_ends_with(strtolower($reg["receipt_path"]), ".pdf")
+    ): ?><img class="receipt-inline" src="<?= $evidence_url ?>" alt="Payment receipt submitted by <?= e(
+    $reg["student_name"],
+) ?>"><?php endif; ?>
+    <a class="journey-button" href="<?= $evidence_url ?>" target="_blank" rel="noopener">Open full receipt ↗</a>
+   <?php else: ?><div class="journey-callout"><strong>Receipt file unavailable</strong><p>No readable receipt is attached. Check with the participant through your existing contact channel.</p></div><?php endif; ?>
+   <p class="journey-help">Evidence is private to this participant and authorised club managers.</p>
+  </section>
+  <section class="journey-card"><h2>Payment decision</h2><dl class="journey-facts"><dt>Payer</dt><dd><?= e(
+      $reg["student_name"],
+  ) ?></dd><dt>Email</dt><dd><?= e($reg["student_email"]) ?></dd><dt>Quoted amount</dt><dd><?= format_price(
+    $reg["price_snapshot"],
+) ?></dd><dt>Reviewer</dt><dd><?= e($user["name"]) ?></dd><dt>Club</dt><dd><?= e(
+    $reg["club_name"],
+) ?></dd><dt>Submitted</dt><dd><?= format_deadline($reg["receipt_uploaded_at"]) ?></dd></dl>
+   <div class="journey-callout"><strong>Check external settlement first</strong><p>A receipt alone does not verify payment. Check the club’s bank records before deciding. You cannot review your own payment.</p></div>
+   <?php if (
+       $cancelling
+   ): ?><div class="journey-notice"><strong>Cancellation requested</strong><p>If money arrived, approve settlement to queue a full refund. Complete cancellation without refund only after checking that no transfer arrived.</p></div><?php endif; ?>
+   <?php if ($can_review): ?><form method="POST" autocomplete="off">
+     <?= csrf_field() ?>
+     <div class="journey-field"><label for="rejection_reason"><?= $cancelling
+         ? "Settlement check notes (required to complete without refund)"
+         : "Rejection reason (required when rejecting)" ?></label><textarea id="rejection_reason" name="rejection_reason" rows="3" maxlength="255" placeholder="Explain what needs correcting…"><?= e(
+    $_POST["rejection_reason"] ?? "",
+) ?></textarea><p class="journey-help"><?= $cancelling
+    ? "Record the external settlement check. A rejected receipt is not proof that no money arrived."
+    : "Rejection allows up to 24 hours to resubmit, capped at session start. Rejection at or after start allows no further upload." ?></p></div>
+     <div class="journey-actions"><button class="journey-button primary" type="submit" name="decision" value="approve" data-pending-label="Saving decision…"><?= $cancelling
+         ? "Payment received — queue refund"
+         : "Approve payment" ?></button><button class="journey-button" type="submit" name="decision" value="reject" data-pending-label="Saving decision…"><?= $cancelling
+    ? "No transfer received — complete cancellation"
+    : "Reject with reason" ?></button></div>
+   </form><?php else: ?><div class="journey-callout"><strong><?= $is_self
+    ? "Another reviewer is needed"
+    : "No decision available" ?></strong><p><?= $is_self
+    ? "Another authorised manager or setup admin must review this payment."
+    : "This record is no longer awaiting payment review. Its current status is shown above." ?></p></div><?php endif; ?>
+   <div class="journey-actions"><a class="journey-button" href="<?= app_url(
+       "/manager/participants.php?session_id=" . $reg["session_id"],
+   ) ?>">Back to participants</a></div>
+  </section>
+ </div>
 </div>
-
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . "/../includes/footer.php"; ?>

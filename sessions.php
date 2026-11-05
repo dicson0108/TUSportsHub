@@ -86,21 +86,21 @@ function pagination_url(int $p): string {
 }
 ?>
 
-<div class="app-container" style="max-width: 1200px; margin: 0 auto; padding: 32px 1.5rem 64px;">
+<div class="sessions-container">
     <!-- Page Header -->
-    <div style="margin-bottom: 28px;">
-        <div class="section-label" style="font-size: 11.5px; font-weight: 700; color: #c8102e; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px;">
+    <div class="sessions-header">
+        <div class="sessions-eyebrow">
             DISCOVER / CAMPUS SPORTS 2026
         </div>
-        <h1 style="font-size: 40px; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 8px; color: #1d1d1f; line-height: 1.1;">
+        <h1 class="sessions-title">
             Find your next session.
         </h1>
-        <p style="font-size: 15.5px; color: var(--text-secondary, #424245); margin: 0; max-width: 600px; line-height: 1.5;">
+        <p class="sessions-subtitle">
             Explore approved student sports sessions across campus, from casual open rallies to structured clinics.
         </p>
     </div>
 
-    <!-- Filter Form (Apple Frosted Glass Panel matching 26TUEventManagement) -->
+    <!-- Filter Form (Matching 26TUEventManagement Apple-styled frosted glass) -->
     <div class="filter-container">
         <form method="GET" action="<?= APP_BASE_PATH ?>/sessions.php">
             <div class="search-field-main">
@@ -108,15 +108,15 @@ function pagination_url(int $p): string {
                     <svg class="search-icon-inside" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     <input type="text" name="q" value="<?= e($search) ?>" placeholder="Search by session title, venue, or club" class="input-text-standard" aria-label="Search sessions">
                 </div>
-                <button type="submit" class="btn-primary" style="padding: 10px 24px; font-size: 14.5px; font-weight: 600; border-radius: 980px; background: #c8102e; color: #fff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <button type="submit" class="btn-filter-search">
                     <span>Search sessions</span>
                 </button>
             </div>
 
             <div class="filter-row">
-                <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                    <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #1d1d1f; text-transform: uppercase; letter-spacing: 0.04em;">Sport</label>
-                    <select name="sport" class="form-select" onchange="this.form.submit()" style="padding: 10px 14px; border-radius: 12px; border: 1px solid #d2d2d7; background: #fff; font-size: 14px; color: #1d1d1f;">
+                <div class="filter-group">
+                    <label class="form-label">Sport</label>
+                    <select name="sport" class="form-select" onchange="this.form.submit()">
                         <option value="">All sports</option>
                         <?php foreach ($sports as $sp): ?>
                             <option value="<?= e($sp) ?>" <?= $sport_filter === $sp ? 'selected' : '' ?>>
@@ -126,9 +126,9 @@ function pagination_url(int $p): string {
                     </select>
                 </div>
 
-                <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                    <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #1d1d1f; text-transform: uppercase; letter-spacing: 0.04em;">Date</label>
-                    <select name="date" class="form-select" onchange="this.form.submit()" style="padding: 10px 14px; border-radius: 12px; border: 1px solid #d2d2d7; background: #fff; font-size: 14px; color: #1d1d1f;">
+                <div class="filter-group">
+                    <label class="form-label">Date</label>
+                    <select name="date" class="form-select" onchange="this.form.submit()">
                         <option value="">Any upcoming date</option>
                         <option value="today" <?= $date_filter === 'today' ? 'selected' : '' ?>>Today</option>
                         <option value="week" <?= $date_filter === 'week' ? 'selected' : '' ?>>This week</option>
@@ -137,9 +137,9 @@ function pagination_url(int $p): string {
                     </select>
                 </div>
 
-                <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
-                    <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #1d1d1f; text-transform: uppercase; letter-spacing: 0.04em;">Price</label>
-                    <select name="price" class="form-select" onchange="this.form.submit()" style="padding: 10px 14px; border-radius: 12px; border: 1px solid #d2d2d7; background: #fff; font-size: 14px; color: #1d1d1f;">
+                <div class="filter-group">
+                    <label class="form-label">Price</label>
+                    <select name="price" class="form-select" onchange="this.form.submit()">
                         <option value="">All prices</option>
                         <option value="free" <?= $price_filter === 'free' ? 'selected' : '' ?>>Free only</option>
                         <option value="paid" <?= $price_filter === 'paid' ? 'selected' : '' ?>>Paid only</option>
@@ -147,7 +147,7 @@ function pagination_url(int $p): string {
                 </div>
 
                 <div>
-                    <a href="<?= APP_BASE_PATH ?>/sessions.php" class="btn-link" style="color: #c8102e; font-size: 13.5px; font-weight: 600; text-decoration: none; padding-bottom: 10px; display: inline-block;">Reset filters</a>
+                    <a href="<?= APP_BASE_PATH ?>/sessions.php" class="filter-reset-link">Reset filters</a>
                 </div>
             </div>
         </form>
@@ -160,13 +160,13 @@ function pagination_url(int $p): string {
         </div>
 
         <div class="sort-group">
-            <span style="font-size: 13px; color: var(--text-muted, #6e6e73);">Sort by</span>
+            <span>Sort by</span>
             <form method="GET" action="<?= APP_BASE_PATH ?>/sessions.php" style="display: inline-flex; align-items: center; gap: 8px; margin: 0;">
                 <input type="hidden" name="q" value="<?= e($search) ?>">
                 <input type="hidden" name="sport" value="<?= e($sport_filter) ?>">
                 <input type="hidden" name="date" value="<?= e($date_filter) ?>">
                 <input type="hidden" name="price" value="<?= e($price_filter) ?>">
-                <select name="sort" class="form-select" style="padding: 6px 12px; font-size: 13px; border-radius: 10px; border: 1px solid #d2d2d7; background: #fff; color: #1d1d1f;" onchange="this.form.submit()">
+                <select name="sort" class="sort-select" onchange="this.form.submit()">
                     <option value="date_asc" <?= $sort === 'date_asc' ? 'selected' : '' ?>>Date: soonest first</option>
                     <option value="date_desc" <?= $sort === 'date_desc' ? 'selected' : '' ?>>Date: latest first</option>
                     <option value="popular" <?= $sort === 'popular' ? 'selected' : '' ?>>Most popular</option>
@@ -176,72 +176,73 @@ function pagination_url(int $p): string {
         </div>
     </div>
 
-    <!-- Sessions Cards Grid -->
+    <!-- Sessions Cards Grid (Entire card clickable, no inner button, refer to 26TUEventManagement) -->
     <?php if (empty($sessions)): ?>
-        <div style="background: #fff; border-radius: 20px; padding: 4rem 2rem; text-align: center; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-            <div style="font-size: 2.75rem; margin-bottom: 1rem;">🔍</div>
-            <h3 style="font-size: 1.35rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.02em;">No sessions match your search</h3>
-            <p style="color: #6e6e73; font-size: 0.95rem; margin: 0 0 1.5rem; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.5;">Try adjusting your keywords, sport categories, or date filters to find upcoming games.</p>
+        <div class="empty-state-box">
+            <svg class="empty-state-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <h3 class="empty-state-title">No sessions match your search</h3>
+            <p class="empty-state-desc">Try adjusting your keywords, sport categories, or date filters to find upcoming games.</p>
             <div style="display: flex; gap: 0.75rem; justify-content: center; align-items: center; flex-wrap: wrap;">
-                <a href="<?= APP_BASE_PATH ?>/sessions.php" style="display: inline-block; padding: 0.65rem 1.5rem; background: #f5f5f7; color: #1d1d1f; border-radius: 980px; text-decoration: none; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7;">Reset all filters</a>
-                <a href="<?= APP_BASE_PATH ?>/clubs.php" class="btn-hero-primary" style="display: inline-block; padding: 0.65rem 1.5rem; font-size: 0.92rem;">Explore Sports Clubs →</a>
+                <a href="<?= APP_BASE_PATH ?>/sessions.php" class="btn-secondary" style="padding: 0.65rem 1.5rem; border-radius: 980px;">Reset all filters</a>
+                <a href="<?= APP_BASE_PATH ?>/clubs.php" class="btn-primary" style="padding: 0.65rem 1.5rem; border-radius: 980px;">Explore Sports Clubs →</a>
             </div>
         </div>
     <?php else: ?>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; margin-bottom: 48px;">
+        <div class="sessions-grid">
             <?php foreach ($sessions as $sess): 
                 $seat_info = get_session_seat_info($sess['id']);
                 $cover_url = get_session_cover_url($sess);
             ?>
-                <article class="session-card" style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 2px 8px rgba(0,0,0,0.03); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;">
-                    <div style="position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; background: #141824;">
-                        <img src="<?= e($cover_url) ?>" alt="<?= e($sess['title']) ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy">
-                        <div style="position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); padding: 0.3rem 0.65rem; border-radius: 980px;">
+                <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $sess['id'] ?>" class="session-card-link">
+                    <div class="session-card-media">
+                        <img src="<?= e($cover_url) ?>" alt="<?= e($sess['title']) ?>" loading="lazy">
+                        <div class="session-badge-overlay">
+                            <span class="badge-sport">
                                 <?= e($sess['sport_type']) ?>
                             </span>
-                            <span style="font-size: 0.88rem; font-weight: 700; color: #1d1d1f; background: #fff; padding: 0.3rem 0.75rem; border-radius: 980px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
+                            <span class="badge-price">
                                 <?= format_price($sess['price']) ?>
                             </span>
                         </div>
                     </div>
-                    <div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1; justify-content: space-between;">
+                    <div class="session-card-body">
                         <div>
-                            <h3 style="font-size: 1.25rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.4rem; line-height: 1.3;">
+                            <h3 class="session-card-title">
                                 <?= e($sess['title']) ?>
                             </h3>
-                            <div style="font-size: 0.88rem; color: #86868b; margin-bottom: 0.85rem;">
-                                Hosted by <a href="<?= APP_BASE_PATH ?>/club.php?id=<?= $sess['club_id'] ?>" style="color: #424245; text-decoration: none; font-weight: 500;"><?= e($sess['club_name']) ?></a>
+                            <div class="session-card-host">
+                                Hosted by <?= e($sess['club_name']) ?>
                             </div>
-                            <div style="font-size: 0.88rem; color: #424245; display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1.25rem;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span>📅</span>
+                            <div class="session-card-meta-list">
+                                <div class="session-meta-item">
+                                    <svg class="session-meta-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
                                     <span><?= format_session_date($sess['session_date']) ?></span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span>⏰</span>
+                                <div class="session-meta-item">
+                                    <svg class="session-meta-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                     <span><?= format_session_time_range($sess['start_time'], $sess['end_time']) ?></span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span>📍</span>
+                                <div class="session-meta-item">
+                                    <svg class="session-meta-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                                     <span><?= e($sess['venue']) ?></span>
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 1rem; font-size: 0.88rem;">
-                            <span style="font-weight: 600; color: <?= $seat_info['is_full'] ? '#d70015' : '#248a3d' ?>;">
+                        <div class="session-card-footer">
+                            <span class="seats-status <?= $seat_info['is_full'] ? 'full' : 'open' ?>">
                                 <?php if ($seat_info['is_full']): ?>
                                     Full (<?= $seat_info['capacity'] ?> / <?= $seat_info['capacity'] ?>)
                                 <?php else: ?>
                                     <?= $seat_info['seats_left'] ?> places left
                                 <?php endif; ?>
                             </span>
-                            <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $sess['id'] ?>" class="btn-primary" style="padding: 7px 16px; font-size: 13.5px; text-decoration: none; border-radius: 980px; background: #c8102e; color: #fff; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-                                View &amp; Join →
-                            </a>
+                            <span class="card-action-indicator">
+                                <span>View session</span>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </span>
                         </div>
                     </div>
-                </article>
+                </a>
             <?php endforeach; ?>
         </div>
 

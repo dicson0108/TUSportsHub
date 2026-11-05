@@ -63,6 +63,19 @@ try {
         exit;
     }
 
+    // Do not erase financial evidence or mix old refund totals into a new attempt.
+    // ponytail: latest-record schema; a linked attempt/history model is needed for financial rebooking.
+    if ($existing) {
+        $history = $db->prepare('SELECT COUNT(*) FROM refund_records WHERE registration_id=?');
+        $history->execute([$existing['id']]);
+        if ($existing['receipt_path'] || (int)$history->fetchColumn() > 0) {
+            $db->rollBack();
+            header('Location: ' . app_url('/payment.php?id=' . $existing['id'] . '&msg=history_retained'));
+            exit;
+        }
+        $db->prepare('UPDATE registrations SET cancellation_requested_at=NULL,cancellation_reason=NULL,recipient_bank_name=NULL,recipient_account_name=NULL,recipient_account_number=NULL WHERE id=?')->execute([$existing['id']]);
+    }
+
     // Check capacity atomically
     $stmt = $db->prepare("SELECT COUNT(*) FROM registrations 
                           WHERE session_id = :id 

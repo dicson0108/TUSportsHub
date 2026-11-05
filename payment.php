@@ -1,261 +1,192 @@
 <?php
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/helpers.php';
-
+require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/includes/helpers.php";
 $user = require_login();
-$reg_id = (int)($_GET['id'] ?? 0);
+$reg_id = (int) ($_GET["id"] ?? 0);
 $db = get_db_connection();
-
 expire_overdue_reservations();
-
-$stmt = $db->prepare("SELECT r.*, s.title, s.sport_type, s.venue, s.session_date, s.start_time, s.end_time, s.status AS session_status, 
-                             c.id AS club_id, c.name AS club_name, c.bank_name, c.account_holder, c.account_number 
-                      FROM registrations r 
-                      INNER JOIN sessions s ON r.session_id = s.id 
-                      INNER JOIN clubs c ON s.club_id = c.id 
-                      WHERE r.id = :id LIMIT 1");
-$stmt->execute([':id' => $reg_id]);
+$stmt = $db->prepare(
+    "SELECT r.*, s.title,s.sport_type,s.venue,s.session_date,s.start_time,s.end_time,s.status AS session_status,s.cancellation_reason AS session_cancellation_reason,c.id AS club_id,c.name AS club_name,c.duitnow_qr_path FROM registrations r INNER JOIN sessions s ON r.session_id=s.id INNER JOIN clubs c ON s.club_id=c.id WHERE r.id=?",
+);
+$stmt->execute([$reg_id]);
 $reg = $stmt->fetch();
-
 if (!$reg) {
     render_error_page(404);
 }
-
-// Access check: only the participant or an authorised club manager / admin can view
-if ($reg['user_id'] !== $user['id'] && !is_club_manager($reg['club_id'], $user['id'])) {
+if ($reg["user_id"] !== $user["id"] && !is_club_manager($reg["club_id"], $user["id"])) {
     render_error_page(403);
 }
-
-$deadline_ts = strtotime($reg['payment_deadline'] ?? '');
-$is_expired = ($reg['status'] === 'expired' || ($deadline_ts && $deadline_ts <= time() && in_array($reg['status'], ['awaiting_payment', 'payment_rejected'])));
-
-$page_title = "Payment & Receipt Submission · " . $reg['title'];
-require_once __DIR__ . '/includes/header.php';
+$is_owner = $reg["user_id"] === $user["id"];
+$can_upload =
+    $is_owner &&
+    in_array($reg["status"], ["awaiting_payment", "payment_rejected"], true) &&
+    $reg["session_status"] !== "cancelled" &&
+    strtotime($reg["payment_deadline"] ?? "") > time() &&
+    strtotime($reg["session_date"] . " " . $reg["start_time"]) > time();
+$stmt = $db->prepare(
+    "SELECT amount,reason,created_at,id,proof_path FROM refund_records WHERE registration_id=? ORDER BY created_at,id",
+);
+$stmt->execute([$reg_id]);
+$refunds = $stmt->fetchAll();
+$refunded = array_sum(array_column($refunds, "amount"));
+$remaining = max(0, (float) $reg["price_snapshot"] - $refunded);
+$is_refund = $reg["status"] === "cancellation_pending" || !empty($refunds);
+$page_title = "Registration · " . $reg["title"];
+require_once __DIR__ . "/includes/header.php";
 ?>
+<div class="journey-page">
+  <header class="journey-header">
+    <nav class="journey-breadcrumb" aria-label="Breadcrumb"><a href="<?= app_url(
+        "/my-activities.php",
+    ) ?>">My Activities</a> / Registration</nav>
+    <h1><?= $can_upload
+        ? ($reg["status"] === "payment_rejected"
+            ? "Resubmit your receipt."
+            : "Complete your payment.")
+        : ($is_refund
+            ? "Cancellation & refund."
+            : "Your registration.") ?></h1>
+    <p class="journey-subtitle"><?= e($reg["title"]) ?> · <?= format_session_date(
+     $reg["session_date"],
+ ) ?> · <?= format_session_time_range($reg["start_time"], $reg["end_time"]) ?></p>
+  </header>
+  <?php journey_feedback(); ?>
+  <?php if ($reg["session_status"] === "cancelled"): ?>
+    <div class="journey-notice notice-error"><strong>Session cancelled by organiser</strong><p><?= e(
+        $reg["session_cancellation_reason"],
+    ) ?></p><p>New reservations and receipt uploads are closed. Payment and refund resolution remain separate.</p></div>
+  <?php endif; ?>
+  <div class="journey-columns">
+    <!-- Payment & Actions Column (Left / Primary) -->
+    <div>
+      <?php if ($can_upload): ?>
+        <section class="journey-card" aria-labelledby="pay-heading">
+          <h2 id="pay-heading">Pay <?= format_price($reg["price_snapshot"]) ?></h2>
+          
+          <!-- Bank Transfer Instructions on Left, DuitNow QR on Right (Side by Side on same line) -->
+          <div class="payment-transfer-split">
+            <div class="payment-instructions-col">
+              <div class="journey-callout">
+                <strong>Bank transfer instructions</strong>
+                <p style="white-space:pre-line; margin-top: 6px;"><?= e(
+                    $reg["payment_instructions_snapshot"] ?:
+                    "Instructions unavailable. Contact your club organiser before transferring.",
+                ) ?></p>
+              </div>
+              <p class="journey-help">These instructions were saved when you reserved. Keep your transfer receipt. A transfer alone does not submit it to SportsHub.</p>
+            </div>
+            <div class="payment-qr-col">
+              <div class="duitnow-qr-card">
+                <span class="duitnow-qr-badge">DuitNow National QR</span>
+                <div class="duitnow-qr-image-wrapper">
+                  <img src="<?= app_url('/' . ltrim($reg['duitnow_qr_path'] ?: 'assets/images/payment/duitnow-qr.webp', '/')) ?>" alt="DuitNow QR Code" class="duitnow-qr-img" width="180" height="205">
+                </div>
+                <div class="duitnow-qr-caption">
+                  <strong>Scan with Bank or E-Wallet</strong>
+                  <p>Supports Maybank, Touch 'n Go, CIMB & all DuitNow apps.</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-<div style="max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem;">
-    <!-- Breadcrumb -->
-    <div style="font-size: 0.88rem; color: #86868b; margin-bottom: 1.5rem;">
-        <a href="<?= app_url('/my-activities.php') ?>" style="color: #6e6e73; text-decoration: none;">My Activities</a>
-        <span> · </span>
-        <span>Payment & Receipt</span>
+          <h2>Upload your receipt</h2>
+          <form method="POST" action="<?= app_url(
+              "/upload-receipt.php",
+          ) ?>" enctype="multipart/form-data" autocomplete="off">
+            <?= csrf_field() ?><input type="hidden" name="registration_id" value="<?= $reg_id ?>">
+            <div class="journey-field upload-dropzone" id="receipt-dropzone">
+              <label for="receipt">Receipt file</label>
+              <p class="journey-help" id="receipt-hint">JPG, PNG, WebP or PDF · Up to 5 MB. Choose a file or drop it here.</p>
+              <input type="file" id="receipt" name="receipt" accept="image/jpeg,image/png,image/webp,application/pdf" required aria-describedby="receipt-hint receipt-error">
+              <p id="receipt-error" class="field-error" aria-live="polite"></p>
+            </div>
+            <div id="receipt-upload-preview" hidden class="journey-callout" aria-live="polite"><span class="preview-name"></span><span class="preview-size"></span></div>
+            <button type="submit" class="journey-button primary" data-pending-label="Submitting receipt…">Submit receipt</button>
+            <p class="journey-help">Submit before <?= format_deadline(
+                $reg["payment_deadline"],
+            ) ?>. Timely submission holds your place while an authorised manager checks external settlement.</p>
+          </form>
+        </section>
+      <?php endif; ?>
+      <?php if ($is_refund): ?>
+        <section class="journey-card" aria-labelledby="refund-heading">
+          <h2 id="refund-heading"><?= $remaining < 0.001 ? "Refund recorded in full" : "Refund in progress" ?></h2>
+          <dl class="journey-facts"><dt>Refund entitlement</dt><dd><?= format_price(
+              $reg["price_snapshot"],
+          ) ?></dd><dt>Recorded so far</dt><dd>RM <?= number_format(
+    $refunded,
+    2,
+) ?></dd><dt>Remaining</dt><dd>RM <?= number_format($remaining, 2) ?></dd></dl>
+          <p class="journey-help">Refunds happen externally. This page shows transfers recorded by your organiser; SportsHub does not move money.</p>
+          <?php if ($reg["recipient_account_number"]): ?>
+            <div class="journey-callout"><strong>Private refund recipient</strong><p><?= e(
+                $reg["recipient_bank_name"],
+            ) ?><br><?= e($reg["recipient_account_name"]) ?><br><?= e($reg["recipient_account_number"]) ?></p></div>
+          <?php elseif (
+              $remaining > 0.001
+          ): ?><div class="journey-callout"><strong>Recipient details needed</strong><p>Contact your club organiser through your existing private channel to arrange the refund. No turnaround time has been set.</p></div><?php endif; ?>
+          <?php foreach ($refunds as $refund): ?><div class="journey-callout"><strong>RM <?= number_format(
+    (float) $refund["amount"],
+    2,
+) ?> recorded</strong><p><?= format_deadline($refund["created_at"]) ?><br><?= e($refund["reason"]) ?></p><?php if (
+    $refund["proof_path"]
+): ?><a href="<?= app_url(
+    "/evidence.php?registration_id=" . $reg_id . "&refund_id=" . $refund["id"],
+) ?>" target="_blank" rel="noopener">View refund evidence ↗</a><?php endif; ?></div><?php endforeach; ?>
+        </section>
+      <?php endif; ?>
+      <?php if ($reg["receipt_path"]): ?>
+        <section class="journey-card"><h2>Submitted evidence</h2><p class="journey-help">A receipt is evidence of a claimed transfer. Only organiser review confirms settlement.</p><a class="journey-button" href="<?= app_url(
+            "/evidence.php?registration_id=" . $reg_id,
+        ) ?>" target="_blank" rel="noopener">Open receipt ↗</a></section>
+      <?php endif; ?>
+      <?php if (!$can_upload && !$is_refund && !$reg["receipt_path"]): ?><section class="journey-card"><h2><?= $reg[
+    "status"
+] === "expired"
+    ? "Your place was released"
+    : "Registration details" ?></h2><p><?= e(
+    registration_next_step($reg),
+) ?></p><a class="journey-button" href="<?= app_url(
+    "/my-activities.php",
+) ?>">Back to My Activities</a></section><?php endif; ?>
     </div>
 
-    <!-- Status Alert Header -->
-    <div style="background: #fff; border-radius: 24px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.04); padding: 2.5rem; margin-bottom: 2rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
-            <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #c8102e; background: #fdf2f4; padding: 0.35rem 0.75rem; border-radius: 980px;">
-                <?= e($reg['sport_type']) ?>
-            </span>
-            <div>
-                <?= get_status_badge($reg['status']) ?>
-            </div>
-        </div>
-
-        <h1 style="font-size: 1.85rem; font-weight: 800; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.02em;">
-            <?= e($reg['title']) ?>
-        </h1>
-        <div style="color: #6e6e73; font-size: 0.95rem; margin-bottom: 1.5rem;">
-            <?= e($reg['club_name']) ?> · <?= format_session_date($reg['session_date']) ?>, <?= format_session_time_range($reg['start_time'], $reg['end_time']) ?>
-        </div>
-
-        <!-- Summary Amount Card -->
-        <div style="background: #fafafa; border-radius: 16px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border: 1px solid #ebebed;">
-            <div>
-                <span style="font-size: 0.82rem; text-transform: uppercase; font-weight: 600; color: #86868b; display: block; margin-bottom: 0.2rem;">Amount Due</span>
-                <span style="font-size: 1.75rem; font-weight: 800; color: #c8102e;"><?= format_price($reg['price_snapshot']) ?></span>
-            </div>
-            <div style="text-align: right;">
-                <span style="font-size: 0.82rem; text-transform: uppercase; font-weight: 600; color: #86868b; display: block; margin-bottom: 0.2rem;">Reservation Deadline</span>
-                <span style="font-size: 0.95rem; font-weight: 600; color: <?= $is_expired ? '#d70015' : '#1d1d1f' ?>;">
-                    <?php if ($is_expired): ?>
-                        Expired
-                    <?php else: ?>
-                        <?= format_session_time($reg['payment_deadline']) ?> · <?= format_session_date($reg['payment_deadline']) ?>
-                    <?php endif; ?>
-                </span>
-            </div>
-        </div>
-
-        <?php if ($reg['status'] === 'payment_rejected'): ?>
-            <div style="background: #fff2f2; border: 1px solid #fecdd3; border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem;">
-                <h4 style="color: #c81e27; margin: 0 0 0.35rem; font-size: 1rem; font-weight: 700;">Previous Receipt Rejected by Manager</h4>
-                <p style="color: #424245; font-size: 0.92rem; margin: 0 0 0.5rem;">
-                    <strong>Reason:</strong> <?= e($reg['rejection_reason'] ?: 'Evidence could not be verified.') ?>
-                </p>
-                <p style="color: #6e6e73; font-size: 0.85rem; margin: 0;">
-                    Please check the transfer details below and upload an updated payment receipt before your deadline expires.
-                </p>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($reg['status'] === 'awaiting_approval'): ?>
-            <div style="background: #f0f7ff; border: 1px solid #cce5ff; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
-                    <div>
-                        <h4 style="color: #004085; margin: 0 0 0.35rem; font-size: 1.05rem; font-weight: 700;">Receipt Submitted · Under Review</h4>
-                        <p style="color: #424245; font-size: 0.92rem; margin: 0;">
-                            Your transfer slip was submitted on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>. Your spot is reserved while the club manager verifies payment.
-                        </p>
-                    </div>
-                    <?php if (!empty($reg['receipt_path'])): ?>
-                        <?php $is_pdf = str_ends_with(strtolower($reg['receipt_path']), '.pdf'); ?>
-                        <?php if ($is_pdf): ?>
-                            <a href="<?= app_url('/' . $reg['receipt_path']) ?>" target="_blank" class="btn-hero-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-                                📄 Open PDF Receipt ↗
-                            </a>
-                        <?php else: ?>
-                            <button type="button" class="btn-hero-secondary" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>" data-receipt-title="Payment Receipt · <?= e($reg['title']) ?>" data-receipt-caption="Submitted on <?= date('j M Y, g:i A', strtotime($reg['receipt_uploaded_at'])) ?>" style="font-size: 0.85rem; padding: 0.5rem 1rem; cursor: pointer;">
-                                🔍 Zoom & Preview Receipt
-                            </button>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </div>
-
-                <?php if (!empty($reg['receipt_path']) && !str_ends_with(strtolower($reg['receipt_path']), '.pdf')): ?>
-                    <div style="margin-top: 1.25rem; display: flex; align-items: center; gap: 1rem; background: #fff; padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #d0e3ff;">
-                        <img src="<?= app_url('/' . $reg['receipt_path']) ?>" alt="Receipt" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; cursor: pointer;" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>">
-                        <div style="flex: 1;">
-                            <div style="font-size: 0.88rem; font-weight: 600; color: #1d1d1f;"><?= basename($reg['receipt_path']) ?></div>
-                            <span style="font-size: 0.8rem; color: #0071e3; cursor: pointer;" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>">Click to view enlarged receipt modal</span>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($reg['status'] === 'confirmed'): ?>
-            <div style="background: #f2faf3; border: 1px solid #d1e7dd; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
-                    <div>
-                        <h4 style="color: #0f5132; margin: 0 0 0.35rem; font-size: 1.05rem; font-weight: 700;">Registration Confirmed</h4>
-                        <p style="color: #424245; font-size: 0.92rem; margin: 0;">
-                            Your booking has been approved and confirmed. See you at <?= e($reg['venue']) ?> on <?= format_session_date($reg['session_date']) ?>!
-                        </p>
-                    </div>
-                    <?php if (!empty($reg['receipt_path'])): ?>
-                        <?php $is_pdf = str_ends_with(strtolower($reg['receipt_path']), '.pdf'); ?>
-                        <?php if ($is_pdf): ?>
-                            <a href="<?= app_url('/' . $reg['receipt_path']) ?>" target="_blank" class="btn-hero-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
-                                📄 View PDF Receipt ↗
-                            </a>
-                        <?php else: ?>
-                            <button type="button" class="btn-hero-secondary" data-receipt-zoom="<?= app_url('/' . $reg['receipt_path']) ?>" data-receipt-title="Confirmed Receipt · <?= e($reg['title']) ?>" style="font-size: 0.85rem; padding: 0.5rem 1rem; cursor: pointer;">
-                                🔍 View Receipt Modal
-                            </button>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- Official Bank / DuitNow Instructions -->
-        <?php if (in_array($reg['status'], ['awaiting_payment', 'payment_rejected'])): ?>
-            <div style="margin-bottom: 2.5rem;">
-                <h3 style="font-size: 1.15rem; font-weight: 700; color: #1d1d1f; margin: 0 0 1rem;">
-                    Step 1: Transfer Externally
-                </h3>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; background: #fff; border: 1px solid #e5e5ea; border-radius: 16px; padding: 1.5rem;">
-                    <!-- DuitNow QR simulation card -->
-                    <div style="border: 2px dashed #d2d2d7; border-radius: 14px; padding: 1.5rem; text-align: center; background: #fafafa;">
-                        <div style="display: inline-block; padding: 0.25rem 0.65rem; background: #e30613; color: #fff; font-size: 0.75rem; font-weight: 800; border-radius: 6px; margin-bottom: 0.75rem;">
-                            DuitNow QR
-                        </div>
-                        <div style="width: 140px; height: 140px; margin: 0 auto 0.75rem; background: #fff; border: 1px solid #d2d2d7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
-                            📱
-                        </div>
-                        <span style="font-size: 0.8rem; color: #86868b; display: block;">Scan with any Malaysian banking app</span>
-                    </div>
-
-                    <!-- Bank details -->
-                    <div>
-                        <div style="margin-bottom: 1rem;">
-                            <span style="font-size: 0.78rem; text-transform: uppercase; color: #86868b; font-weight: 600; display: block;">Bank Name</span>
-                            <span style="font-size: 1rem; font-weight: 600; color: #1d1d1f;"><?= e($reg['bank_name']) ?></span>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <span style="font-size: 0.78rem; text-transform: uppercase; color: #86868b; font-weight: 600; display: block;">Account Holder</span>
-                            <span style="font-size: 1rem; font-weight: 600; color: #1d1d1f;"><?= e($reg['account_holder']) ?></span>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <span style="font-size: 0.78rem; text-transform: uppercase; color: #86868b; font-weight: 600; display: block;">Account Number</span>
-                            <span style="font-size: 1.15rem; font-weight: 700; color: #c8102e; letter-spacing: 0.05em;"><?= e($reg['account_number']) ?></span>
-                        </div>
-                        <p style="font-size: 0.82rem; color: #86868b; margin: 0; line-height: 1.4;">
-                            * Make payment via DuitNow or Online Banking transfer. Save or take a screenshot of your transfer confirmation slip.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Receipt Upload Form -->
-            <div>
-                <h3 style="font-size: 1.15rem; font-weight: 700; color: #1d1d1f; margin: 0 0 1rem;">
-                    Step 2: Upload Payment Receipt
-                </h3>
-
-                <form method="POST" action="<?= app_url('/upload-receipt.php') ?>" enctype="multipart/form-data" style="background: #fafafa; border: 1px solid #e5e5ea; border-radius: 20px; padding: 2rem;">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="registration_id" value="<?= $reg['id'] ?>">
-
-                    <div style="margin-bottom: 1.5rem;">
-                        <label for="receipt" style="display: block; font-size: 0.92rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.65rem;">
-                            Transfer Evidence Slip
-                        </label>
-
-                        <!-- Apple Drag & Drop Zone -->
-                        <div class="upload-dropzone" id="receipt-dropzone" onclick="document.getElementById('receipt').click()">
-                            <input type="file" id="receipt" name="receipt" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required style="display: none;">
-                            <div style="font-size: 2.25rem; margin-bottom: 0.5rem;">📤</div>
-                            <div style="font-weight: 700; font-size: 1rem; color: #1d1d1f; margin-bottom: 0.35rem;">
-                                Choose a file or drag & drop here
-                            </div>
-                            <p style="color: #6e6e73; font-size: 0.88rem; margin: 0 0 0.85rem;">
-                                Upload proof of transfer (transaction slip or banking screenshot)
-                            </p>
-                            <div style="display: flex; gap: 0.4rem; justify-content: center; align-items: center; flex-wrap: wrap;">
-                                <span class="format-pill">JPG</span>
-                                <span class="format-pill">PNG</span>
-                                <span class="format-pill">WEBP</span>
-                                <span class="format-pill">PDF</span>
-                                <span style="font-size: 0.8rem; color: #86868b; margin-left: 6px;">· Max 5 MB</span>
-                            </div>
-                        </div>
-
-                        <!-- Live File Preview -->
-                        <div id="receipt-upload-preview" style="display: none; align-items: center; gap: 1rem; margin-top: 1rem; background: #fff; padding: 1rem; border-radius: 12px; border: 1px solid #d2d2d7;">
-                            <div class="preview-thumb" style="width: 54px; height: 54px; background: #f5f5f7; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;"></div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div class="preview-name" style="font-weight: 600; font-size: 0.92rem; color: #1d1d1f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
-                                <div class="preview-size" style="font-size: 0.82rem; color: #6e6e73; margin-top: 2px;"></div>
-                            </div>
-                            <span style="font-size: 0.8rem; color: #248a3d; font-weight: 600;">Ready to upload ✓</span>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                        <span style="font-size: 0.82rem; color: #6e6e73;">
-                            Submission locks your place while managers review settlement.
-                        </span>
-                        <button type="submit" class="btn-hero-primary" style="border: none; cursor: pointer; padding: 0.75rem 1.85rem;">
-                            Submit Receipt →
-                        </button>
-                    </div>
-                </form>
-            </div>
-        <?php endif; ?>
-
-        <!-- Voluntary Cancellation -->
-        <?php if (!in_array($reg['status'], ['cancelled', 'expired'])): ?>
-            <div style="margin-top: 2.5rem; border-top: 1px solid #f0f0f2; padding-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem;">
-                <span style="color: #86868b;">Need to change plans?</span>
-                <a href="<?= app_url('/cancel-registration.php?id=' . $reg['id']) ?>" style="color: #c81e27; text-decoration: none; font-weight: 500;">
-                    Cancel this registration
-                </a>
-            </div>
-        <?php endif; ?>
-    </div>
+    <!-- Your Reservation Summary Column (Right / Sidebar) -->
+    <section class="journey-card" aria-labelledby="reservation-heading">
+      <h2 id="reservation-heading">Your reservation</h2>
+      <?= get_status_badge($reg["status"]) ?>
+      <dl class="journey-facts">
+        <dt><?= $can_upload ? "Amount due" : "Quoted amount" ?></dt><dd><?= format_price($reg["price_snapshot"]) ?></dd>
+        <dt>Club</dt><dd><?= e($reg["club_name"]) ?></dd>
+        <dt>Where</dt><dd><?= e($reg["venue"]) ?></dd>
+        <?php if ($can_upload): ?><dt>Receipt deadline</dt><dd><?= format_deadline(
+    $reg["payment_deadline"],
+) ?></dd><?php endif; ?>
+        <dt>Session starts</dt><dd><?= format_deadline($reg["session_date"] . " " . $reg["start_time"]) ?></dd>
+        <?php if ($reg["receipt_uploaded_at"]): ?><dt>Receipt submitted</dt><dd><?= format_deadline(
+    $reg["receipt_uploaded_at"],
+) ?></dd><?php endif; ?>
+      </dl>
+      <div class="journey-callout"><strong>Next step</strong><p><?= e(registration_next_step($reg)) ?></p></div>
+      <?php if (
+          $reg["rejection_reason"]
+      ): ?><div class="journey-notice notice-error"><strong>Rejection reason</strong><p><?= e(
+    $reg["rejection_reason"],
+) ?></p></div><?php endif; ?>
+      <?php if ($reg["cancellation_reason"]): ?><p class="journey-help"><strong>Cancellation reason:</strong> <?= e(
+    $reg["cancellation_reason"],
+) ?></p><?php endif; ?>
+      <div class="journey-actions">
+        <a class="journey-button" href="<?= app_url("/session-detail.php?id=" . $reg["session_id"]) ?>">View session</a>
+        <?php if ($is_owner && can_cancel_registration($reg)): ?><a class="journey-button" href="<?= app_url(
+    "/cancel-registration.php?id=" . $reg_id,
+) ?>">Cancel registration</a><?php endif; ?>
+        <?php if (!$is_owner): ?><a class="journey-button" href="<?= app_url(
+    "/manager/participants.php?session_id=" . $reg["session_id"],
+) ?>">Back to participants</a><?php endif; ?>
+      </div>
+    </section>
+  </div>
+  </div>
 </div>
-
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . "/includes/footer.php"; ?>

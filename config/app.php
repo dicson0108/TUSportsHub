@@ -1,4 +1,6 @@
 <?php
+// All stored session/deadline values are Malaysia local time, regardless of host config.
+date_default_timezone_set('Asia/Kuala_Lumpur');
 // Auto-detect URL prefix for this installation dynamically
 if (!defined('APP_BASE_PATH')) {
     $base = '';

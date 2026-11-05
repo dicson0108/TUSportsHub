@@ -54,6 +54,77 @@
   box-shadow: 0 0 0 3.5px rgba(215, 0, 21, 0.14) !important;
 }
 
+.auth-poster-card {
+  position: relative;
+  border-radius: var(--radius-xl, 24px);
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  background: #141824;
+  aspect-ratio: 16 / 10;
+}
+
+.auth-poster-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.auth-poster-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.78) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+  color: #ffffff;
+}
+
+.auth-poster-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fecdd3;
+  margin-bottom: 6px;
+}
+
+.auth-poster-tag.signup-tag {
+  color: #a7f3d0;
+}
+
+.auth-poster-title {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.auth-poster-desc {
+  font-size: 13.5px;
+  color: #d1d5db;
+}
+
+.auth-body {
+  background: var(--bg-surface-subtle, #fbfbfd);
+}
+
+.auth-header {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0.75rem 1.5rem;
+}
+
+.auth-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* Responsive */
 @media (max-width: 992px) {
   .auth-split-layout {

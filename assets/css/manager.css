@@ -1,0 +1,266 @@
+/* ==========================================================================
+   Club Manager Portal Styles (manager.css)
+   ========================================================================== */
+
+.manager-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 40px 24px 64px 24px;
+}
+
+.manager-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.manager-title-group h1 {
+  font-size: 30px;
+  font-weight: 800;
+  color: #1d1d1f;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.025em;
+}
+
+.manager-title-group p {
+  color: #6e6e73;
+  font-size: 14.5px;
+  margin: 0;
+}
+
+.manager-filter-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.manager-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-full, 980px);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  background: #f5f5f7;
+  color: #424245;
+  transition: all 0.2s ease;
+}
+
+.manager-tab:hover {
+  background: #e8e8ed;
+}
+
+.manager-tab.active {
+  background: #1d1d1f;
+  color: #ffffff;
+}
+
+/* Manager Card & List */
+.manager-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.manager-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg, 20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  transition: box-shadow 0.2s ease;
+}
+
+.manager-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.manager-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 8px 0;
+}
+
+.manager-meta-row {
+  font-size: 13.5px;
+  color: #424245;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.manager-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #555558;
+}
+
+.manager-meta-item svg {
+  color: #86868b;
+  flex-shrink: 0;
+}
+
+.manager-stat-badge {
+  text-align: center;
+  padding: 8px 14px;
+  background: #fafafa;
+  border-radius: 12px;
+  border: 1px solid #ebebed;
+}
+
+.manager-stat-badge.alert {
+  background: #fff2f2;
+  border-color: #fecdd3;
+}
+
+.manager-stat-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+.manager-stat-badge.alert .manager-stat-val {
+  color: var(--color-primary, #c8102e);
+}
+
+.manager-stat-label {
+  font-size: 11px;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Empty State */
+.manager-empty-state {
+  background: #ffffff;
+  border-radius: var(--radius-lg, 20px);
+  padding: 64px 24px;
+  text-align: center;
+  border: 1px solid #e5e5ea;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.manager-empty-icon {
+  width: 48px;
+  height: 48px;
+  color: #86868b;
+  margin: 0 auto 16px auto;
+  stroke-width: 1.5;
+}
+
+.manager-empty-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.015em;
+}
+
+.manager-empty-desc {
+  color: #6e6e73;
+  font-size: 14.5px;
+  margin: 0 auto 24px auto;
+  max-width: 440px;
+  line-height: 1.5;
+}
+
+/* Action Buttons */
+.manager-btn-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.manager-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: var(--radius-full, 980px);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.manager-btn-primary {
+  background: var(--color-primary, #c8102e);
+  color: #ffffff;
+}
+
+.manager-btn-primary:hover {
+  background: #9e141c;
+  color: #ffffff;
+}
+
+.manager-btn-secondary {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border-color: #d2d2d7;
+}
+
+.manager-btn-secondary:hover {
+  background: #e8e8ed;
+}
+
+.manager-btn-danger {
+  background: #fff2f2;
+  color: #c8102e;
+  border-color: #fecdd3;
+}
+
+.manager-btn-danger:hover {
+  background: #fee2e2;
+}
+
+/* Participants Table */
+.manager-table-wrapper {
+  background: #ffffff;
+  border-radius: var(--radius-lg, 20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  overflow-x: auto;
+}
+
+.manager-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13.5px;
+}
+
+.manager-table th {
+  background: #fafafa;
+  padding: 14px 18px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #86868b;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.manager-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #f2f2f7;
+  color: #1d1d1f;
+  vertical-align: middle;
+}
+
+.manager-table tr:last-child td {
+  border-bottom: none;
+}

@@ -15,7 +15,7 @@ ob_start();
 require __DIR__ . '/../sessions.php';
 $out2 = ob_get_clean();
 echo "sessions.php length: " . strlen($out2) . "\n";
-assert(str_contains($out2, "Explore Sports Sessions"));
+assert(str_contains($out2, "Find your next session."));
 
 $_GET['id'] = 1;
 $_SERVER['SCRIPT_NAME'] = '/MyProject/27TUSportsHub/session-detail.php';

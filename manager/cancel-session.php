@@ -30,6 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $db->beginTransaction();
             try {
+                $lock = $db->prepare('SELECT status FROM sessions WHERE id=? FOR UPDATE');
+                $lock->execute([$session_id]);
+                if ($lock->fetchColumn() === 'cancelled') {
+                    $db->rollBack();
+                    header('Location: ' . app_url('/manager/sessions.php?msg=session_cancelled'));
+                    exit;
+                }
                 // Cancel session
                 $stmt = $db->prepare("UPDATE sessions SET status = 'cancelled', cancellation_reason = :reason, updated_at = NOW() WHERE id = :id");
                 $stmt->execute([':reason' => $reason, ':id' => $session_id]);
@@ -40,6 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                           cancellation_reason = :reason, updated_at = NOW() 
                                       WHERE session_id = :sid AND status = 'confirmed' AND price_snapshot > 0");
                 $stmt->execute([':reason' => 'Session cancelled by organiser: ' . $reason, ':sid' => $session_id]);
+
+                // Uploaded evidence needs an external settlement decision even after cancellation.
+                $stmt = $db->prepare("UPDATE registrations SET cancellation_requested_at=COALESCE(cancellation_requested_at,NOW()), cancellation_reason=:reason WHERE session_id=:sid AND status='awaiting_approval' AND price_snapshot>0");
+                $stmt->execute([':reason'=>'Session cancelled by organiser: '.$reason, ':sid'=>$session_id]);
+                $stmt = $db->prepare("UPDATE registrations SET status='cancelled', cancellation_reason=:reason, updated_at=NOW() WHERE session_id=:sid AND status IN ('awaiting_payment','payment_rejected')");
+                $stmt->execute([':reason'=>'Session cancelled by organiser: '.$reason, ':sid'=>$session_id]);
 
                 // Update free or awaiting registrations -> cancelled
                 $stmt = $db->prepare("UPDATE registrations 

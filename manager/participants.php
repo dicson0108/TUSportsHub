@@ -35,7 +35,8 @@ $page_title = "Participants · " . $session['title'];
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem;">
+<div class="journey-page participants-page">
+    <?php journey_feedback(); ?>
     <!-- Breadcrumb & Header -->
     <div style="margin-bottom: 2rem;">
         <a href="<?= app_url('/manager/sessions.php') ?>" style="color: #6e6e73; text-decoration: none; font-size: 0.88rem;">← Back to Workbench Sessions</a>
@@ -95,17 +96,19 @@ require_once __DIR__ . '/../includes/header.php';
 
         <?php if (empty($participants)): ?>
             <div style="padding: 4.5rem 2rem; text-align: center; color: #6e6e73;">
-                <div style="font-size: 3rem; margin-bottom: 0.75rem;">👥</div>
+                <svg class="manager-empty-icon" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 <h3 style="font-size: 1.35rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem; letter-spacing: -0.015em;">No registrations yet</h3>
                 <p style="color: #6e6e73; font-size: 0.95rem; margin: 0 0 1.75rem; max-width: 440px; margin-left: auto; margin-right: auto; line-height: 1.5;">
                     Students haven't registered for this session yet. Share your session link with students or promote it during club practice!
                 </p>
                 <div style="display: flex; gap: 0.85rem; justify-content: center; align-items: center; flex-wrap: wrap;">
                     <a href="<?= app_url('/session-detail.php?id=' . $session['id']) ?>" target="_blank" class="btn-hero-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
-                        View Public Session Page ↗
+                        <span>View Public Session Page</span>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 17L17 7M7 7h10v10"/></svg>
                     </a>
                     <button type="button" data-copy-link="<?= app_url('/session-detail.php?id=' . $session['id']) ?>" class="btn-hero-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        📋 Copy Session Link
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copy Session Link</span>
                     </button>
                     <a href="<?= app_url('/manager/sessions.php') ?>" style="display: inline-block; padding: 0.75rem 1.4rem; background: #f5f5f7; color: #1d1d1f; border-radius: 980px; text-decoration: none; font-weight: 600; font-size: 0.92rem; border: 1px solid #d2d2d7;">
                         Back to Sessions
@@ -113,7 +116,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
         <?php else: ?>
-            <div style="overflow-x: auto;">
+            <div class="journey-table-wrap" tabindex="0" role="region" aria-label="Participant records; scroll horizontally for actions">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem;">
                     <thead>
                         <tr style="background: #fafafa; border-bottom: 1px solid #e5e5ea; color: #86868b; font-size: 0.8rem; text-transform: uppercase;">
@@ -136,11 +139,12 @@ require_once __DIR__ . '/../includes/header.php';
                                 </td>
                                 <td style="padding: 1rem;">
                                     <?= get_status_badge($p['status']) ?>
-                                    <?php if ($p['status'] === 'awaiting_payment'): ?>
+                                    <?php if (in_array($p['status'], ['awaiting_payment','payment_rejected'])): ?>
                                         <div style="font-size: 0.75rem; color: #86868b; margin-top: 0.25rem;">
-                                            Due: <?= date('j M, g:i A', strtotime($p['payment_deadline'])) ?>
+                                            Due: <?= format_deadline($p['payment_deadline']) ?>
                                         </div>
                                     <?php endif; ?>
+                                    <?php if ($p['cancellation_requested_at'] && $p['status']==='awaiting_approval'): ?><div class="journey-help">Cancellation requested; check settlement</div><?php endif; ?>
                                 </td>
                                 <td style="padding: 1rem; font-weight: 600; color: #1d1d1f;">
                                     <?= format_price($p['price_snapshot']) ?>
@@ -159,12 +163,14 @@ require_once __DIR__ . '/../includes/header.php';
                                         </a>
                                     <?php elseif (!empty($p['receipt_path'])): ?>
                                         <?php if (str_ends_with(strtolower($p['receipt_path']), '.pdf')): ?>
-                                            <a href="<?= app_url('/' . $p['receipt_path']) ?>" target="_blank" style="color: #0071e3; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
-                                                📄 View PDF ↗
+                                            <a href="<?= app_url('/evidence.php?registration_id=' . $p['id']) ?>" target="_blank" rel="noopener" style="color: #0071e3; text-decoration: none; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                                <span>View PDF ↗</span>
                                             </a>
                                         <?php else: ?>
-                                            <button type="button" class="btn-secondary-sm" data-receipt-zoom="<?= app_url('/' . $p['receipt_path']) ?>" data-receipt-title="Receipt · <?= e($p['name']) ?> (<?= format_price($p['price_snapshot']) ?>)" style="padding: 4px 10px; font-size: 0.82rem; border-radius: 980px; cursor: pointer;">
-                                                🔍 View Receipt
+                                            <button type="button" class="btn-secondary-sm" data-receipt-zoom="<?= app_url('/evidence.php?registration_id=' . $p['id']) ?>" data-receipt-title="Receipt · <?= e($p['name']) ?> (<?= format_price($p['price_snapshot']) ?>)" style="padding: 4px 10px; font-size: 0.82rem; border-radius: 980px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                                <span>View Receipt</span>
                                             </button>
                                         <?php endif; ?>
                                     <?php else: ?>

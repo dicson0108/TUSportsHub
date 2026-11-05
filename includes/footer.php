@@ -26,21 +26,21 @@
             </div>
 
             <div>
-                <h4 class="footer-col-title">Campus Sports</h4>
+                <h4 class="footer-col-title">Legal & Campus</h4>
                 <ul class="footer-links-list">
-                    <li><a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Badminton" class="footer-link">Badminton Club</a></li>
-                    <li><a href="<?= APP_BASE_PATH ?>/sessions.php?sport=Basketball" class="footer-link">Basketball Club</a></li>
-                    <li><a href="mailto:sportshub@taylors.edu.my" class="footer-link">Contact Sports Complex</a></li>
+                    <li><a href="<?= APP_BASE_PATH ?>/privacy.php" class="footer-link">Privacy policy (PDPA)</a></li>
+                    <li><a href="<?= APP_BASE_PATH ?>/terms.php" class="footer-link">Terms of use</a></li>
+                    <li><span class="footer-link" style="color: var(--text-muted, #86868b);">Lakeside Sports Centre</span></li>
                 </ul>
             </div>
         </div>
 
         <div class="footer-bottom-bar">
-            <span>© <?= date('Y') ?> Taylor's University SportsHub. All rights reserved.</span>
+            <span>© <?= date('Y') ?> Taylor's University. All rights reserved.</span>
             <div style="display:flex; gap:20px; align-items:center;">
-                <span style="color:var(--text-muted)">Subang Jaya, Selangor</span>
-                <span style="color:var(--text-muted)">·</span>
-                <span style="color:var(--text-muted)">Malaysia Time (MYT)</span>
+                <a href="<?= APP_BASE_PATH ?>/privacy.php" class="footer-link">Privacy policy</a>
+                <a href="<?= APP_BASE_PATH ?>/terms.php" class="footer-link">Terms of use</a>
+                <span style="color:var(--text-muted)">Lakeside Campus, Malaysia</span>
             </div>
         </div>
     </div>

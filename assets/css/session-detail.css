@@ -1,0 +1,328 @@
+/* ==========================================================================
+   Session Detail Page Styles (session-detail.css)
+   Matching Figma UIUX Designs (05-session-detail-student.png)
+   ========================================================================== */
+
+.session-detail-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.session-detail-breadcrumb {
+  margin-bottom: 12px;
+}
+
+.session-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary, #c8102e);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.session-detail-title {
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--text-main, #1d1d1f);
+  line-height: 1.1;
+  margin: 0 0 8px;
+}
+
+.session-detail-subtitle {
+  font-size: 16px;
+  color: var(--text-muted, #6e6e73);
+  margin: 0 0 28px;
+}
+
+.session-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Left Column: Media & Explanations */
+.session-detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.session-media-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  border-radius: var(--radius-xl, 24px);
+  overflow: hidden;
+  background: #141824;
+  box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.session-media-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.session-info-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e5ea;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.session-info-section h2 {
+  font-size: 20px;
+  font-weight: 750;
+  color: var(--text-main, #1d1d1f);
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+}
+
+.session-info-section p {
+  font-size: 15px;
+  color: var(--text-secondary, #424245);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Right Column: Sticky Summary Card */
+.session-detail-sidebar {
+  position: sticky;
+  top: 90px;
+}
+
+.session-summary-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e5ea;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.summary-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.summary-card-title {
+  font-size: 20px;
+  font-weight: 750;
+  color: var(--text-main, #1d1d1f);
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+.session-status-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 980px;
+  letter-spacing: 0.01em;
+}
+.session-status-badge.open {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.session-status-badge.full {
+  background: #ffebee;
+  color: #c62828;
+}
+.session-status-badge.closed {
+  background: #f5f5f7;
+  color: #6e6e73;
+}
+.session-status-badge.started {
+  background: #fff3e0;
+  color: #e65100;
+}
+.session-status-badge.cancelled {
+  background: #ffebee;
+  color: #c81e27;
+}
+
+.session-facts-table {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.fact-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 14.5px;
+  line-height: 1.4;
+}
+
+.fact-label {
+  color: var(--text-muted, #86868b);
+  font-weight: 450;
+}
+
+.fact-value {
+  color: var(--text-main, #1d1d1f);
+  font-weight: 600;
+  text-align: right;
+}
+
+.fact-value.price {
+  color: var(--color-primary, #c8102e);
+  font-weight: 700;
+}
+
+.session-callout-box {
+  background: #f5f5f7;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+
+.session-callout-box h4 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main, #1d1d1f);
+  margin: 0 0 4px;
+}
+
+.session-callout-box p {
+  font-size: 13px;
+  color: var(--text-secondary, #424245);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.btn-reserve {
+  width: 100%;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  background: var(--color-primary, #c8102e);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(200, 30, 39, 0.2);
+  transition: background 0.15s ease, transform var(--transition-press);
+}
+
+.btn-reserve:hover {
+  background: #a60d26;
+}
+
+.btn-reserve:active {
+  transform: scale(0.98);
+}
+
+.session-registered-box {
+  background: #fbfbfd;
+  border: 1px solid #e5e5ea;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.session-registered-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.session-state-banner {
+  background: #f5f5f7;
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary, #424245);
+  font-weight: 500;
+}
+
+.session-state-banner.alert {
+  background: #fff2f2;
+  color: #c81e27;
+  border: 1px solid #fecdd3;
+}
+
+.manager-quick-box {
+  margin-top: 20px;
+  padding: 16px;
+  background: #fff8f8;
+  border: 1px dashed #fecdd3;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.manager-quick-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary, #c8102e);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.manager-quick-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.manager-pill-btn {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 980px;
+  text-decoration: none;
+  background: #ffffff;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+  transition: all 0.15s ease;
+}
+
+.manager-pill-btn:hover {
+  border-color: #c8102e;
+  color: #c8102e;
+}
+
+.manager-pill-btn.primary {
+  background: #c8102e;
+  color: #ffffff;
+  border-color: #c8102e;
+}
+
+.manager-pill-btn.primary:hover {
+  background: #a60d26;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .session-detail-layout {
+    grid-template-columns: 1fr;
+  }
+  .session-detail-sidebar {
+    position: static;
+  }
+  .session-detail-title {
+    font-size: 32px;
+  }
+}

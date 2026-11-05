@@ -21,9 +21,9 @@ INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role`, `status`, `
 (5, 'Danial Hakim', 'danial@sd.taylors.edu.my', '$2y$10$OCr7hFX/AMZBn.PsFEehs.86WDY0A8U85s1hlaSZlLLiFUIKY42VO', 'student', 'active', '+60123456704');
 
 -- Seed Clubs
-INSERT INTO `clubs` (`id`, `name`, `slug`, `description`, `sport_type`, `logo_path`, `banner_path`, `bank_name`, `account_holder`, `account_number`, `status`) VALUES
-(1, "Taylor's Badminton Club", 'taylors-badminton-club', "The official Taylor's University Badminton Club organizing weekly sparring sessions, footwork clinics, and campus tournaments.", 'Badminton', 'assets/images/logo/logo.webp', 'assets/images/sports/badminton-banner.webp', 'Maybank', "Taylor's Badminton Club", '514012345678', 'active'),
-(2, "Taylor's Basketball Club", 'taylors-basketball-club', "Taylor's University Basketball Club connecting campus hoopers for regular open runs, league matches, and skill development.", 'Basketball', 'assets/images/logo/logo.webp', 'assets/images/sports/basketball-banner.webp', 'CIMB Bank', "Taylor's Basketball Club", '800987654321', 'active');
+INSERT INTO `clubs` (`id`, `name`, `slug`, `description`, `sport_type`, `logo_path`, `banner_path`, `bank_name`, `account_holder`, `account_number`, `duitnow_qr_path`, `status`) VALUES
+(1, "Taylor's Badminton Club", 'taylors-badminton-club', "The official Taylor's University Badminton Club organizing weekly sparring sessions, footwork clinics, and campus tournaments.", 'Badminton', 'assets/images/logo/logo.webp', 'assets/images/sports/badminton-banner.webp', 'Maybank', "Taylor's Badminton Club", '514012345678', 'assets/images/payment/duitnow-qr.webp', 'active'),
+(2, "Taylor's Basketball Club", 'taylors-basketball-club', "Taylor's University Basketball Club connecting campus hoopers for regular open runs, league matches, and skill development.", 'Basketball', 'assets/images/logo/logo.webp', 'assets/images/sports/basketball-banner.webp', 'CIMB Bank', "Taylor's Basketball Club", '800987654321', 'assets/images/payment/duitnow-qr.webp', 'active');
 
 -- Appoint Club Manager (Alex Wong manages Badminton Club)
 INSERT INTO `club_managers` (`id`, `club_id`, `user_id`, `appointed_by`) VALUES

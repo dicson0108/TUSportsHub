@@ -22,212 +22,183 @@ $seat_info = get_session_seat_info($session_id);
 $current_user = current_user();
 $existing_reg = $current_user ? get_user_session_registration($session_id, $current_user['id']) : null;
 $is_mgr = $current_user ? is_club_manager($session['club_id'], $current_user['id']) : false;
+if ($session['status'] === 'draft' && !$is_mgr) render_error_page(404);
+$signup_status = $session['status'];
+if ($signup_status === 'published' && $seat_info['is_started']) $signup_status = 'started';
+elseif ($signup_status === 'published' && $seat_info['is_full']) $signup_status = 'full';
 
 $page_title = $session['title'];
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div style="max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem;">
+<div class="session-detail-page">
+    <?php journey_feedback(); ?>
+
     <!-- Breadcrumb -->
-    <div style="font-size: 0.88rem; color: #86868b; margin-bottom: 1.5rem;">
-        <a href="<?= app_url('/sessions.php') ?>" style="color: #6e6e73; text-decoration: none;">Explore Sessions</a>
-        <span> · </span>
-        <a href="<?= app_url('/club.php?id=' . $session['club_id']) ?>" style="color: #6e6e73; text-decoration: none;"><?= e($session['club_name']) ?></a>
-        <span> · </span>
-        <span><?= e($session['title']) ?></span>
+    <div class="session-detail-breadcrumb">
+        <span class="session-eyebrow">SPORTSHUB / SESSIONS</span>
     </div>
 
-    <!-- Main Detail Card -->
-    <div style="background: #fff; border-radius: 24px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 6px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem;">
-        <!-- Session Photographic Hero Banner -->
-        <div style="position: relative; width: 100%; height: 280px; background: #141824; overflow: hidden;">
-            <img src="<?= e(get_session_cover_url($session)) ?>" alt="<?= e($session['title']) ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-            <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%); display: flex; align-items: flex-end; padding: 24px;">
-                <div style="color: #fff;">
-                    <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; background: rgba(200, 16, 46, 0.9); padding: 4px 10px; border-radius: 980px; display: inline-block; margin-bottom: 8px;">
-                        <?= e($session['sport_type']) ?>
-                    </span>
-                    <h2 style="font-size: 1.75rem; font-weight: 800; color: #fff; margin: 0 0 4px; letter-spacing: -0.02em; line-height: 1.2;">
-                        <?= e($session['title']) ?>
-                    </h2>
-                    <div style="font-size: 13.5px; color: #e5e7eb;">
-                        📍 <?= e($session['venue']) ?> · Hosted by <?= e($session['club_name']) ?>
+    <!-- Header Titles -->
+    <h1 class="session-detail-title"><?= e($session['title']) ?></h1>
+    <div class="session-detail-subtitle">
+        <?= e($session['club_name']) ?> · Individual session
+    </div>
+
+    <!-- Two-Column UIUX Layout -->
+    <div class="session-detail-layout">
+        <!-- Left Main Column: Media & Explanations -->
+        <div class="session-detail-main">
+            <div class="session-media-frame">
+                <img src="<?= e(get_session_cover_url($session)) ?>" alt="<?= e($session['title']) ?>">
+            </div>
+
+            <div class="session-info-card">
+                <div class="session-info-section">
+                    <h2>Your session, explained</h2>
+                    <p><?= nl2br(e($session['description'])) ?></p>
+                </div>
+
+                <div class="session-info-section">
+                    <h2>Before you join</h2>
+                    <p>Taylor's student accounts only. No membership needed. Registration confirms a place, not attendance.</p>
+                </div>
+
+                <div class="session-info-section">
+                    <h2>Cancellation terms</h2>
+                    <p>Request cancellation before the session starts for a full refund. Refunds are transferred externally and recorded by the organiser.</p>
+                </div>
+
+                <?php if ($session['status'] === 'cancelled'): ?>
+                    <div class="session-state-banner alert">
+                        <strong>Session Cancelled by Organiser</strong>
+                        <p style="margin: 4px 0 0;"><?= e($session['cancellation_reason'] ?: 'No reason provided.') ?></p>
                     </div>
-                </div>
+                <?php endif; ?>
             </div>
         </div>
 
-        <div style="padding: 2.25rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="font-size: 0.88rem; color: #86868b;">Club: <a href="<?= app_url('/club.php?id=' . $session['club_id']) ?>" style="color: #1d1d1f; font-weight: 600; text-decoration: none;"><?= e($session['club_name']) ?></a></span>
-                </div>
-                <div>
-                    <?= get_status_badge($session['status']) ?>
-                </div>
-            </div>
-
-        <!-- Key Details Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; background: #fafafa; border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
-            <div>
-                <span style="display: block; font-size: 0.8rem; color: #86868b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Date</span>
-                <span style="font-size: 1rem; font-weight: 600; color: #1d1d1f;"><?= format_session_date($session['session_date']) ?></span>
-            </div>
-            <div>
-                <span style="display: block; font-size: 0.8rem; color: #86868b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Time</span>
-                <span style="font-size: 1rem; font-weight: 600; color: #1d1d1f;"><?= format_session_time_range($session['start_time'], $session['end_time']) ?></span>
-            </div>
-            <div>
-                <span style="display: block; font-size: 0.8rem; color: #86868b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Price</span>
-                <span style="font-size: 1.15rem; font-weight: 700; color: #c8102e;"><?= format_price($session['price']) ?></span>
-            </div>
-            <div>
-                <span style="display: block; font-size: 0.8rem; color: #86868b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.25rem;">Places Available</span>
-                <span style="font-size: 1rem; font-weight: 600; color: <?= $seat_info['is_full'] ? '#d70015' : '#248a3d' ?>;">
-                    <?= $seat_info['seats_left'] ?> of <?= $seat_info['capacity'] ?> places left
-                </span>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 2rem;">
-            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem;">Venue</h3>
-            <p style="font-size: 0.95rem; color: #424245; margin: 0;">📍 <?= e($session['venue']) ?></p>
-        </div>
-
-        <div style="margin-bottom: 2rem;">
-            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1d1d1f; margin: 0 0 0.5rem;">Session Overview</h3>
-            <p style="font-size: 1rem; color: #424245; line-height: 1.6; margin: 0; white-space: pre-line;"><?= e($session['description']) ?></p>
-        </div>
-
-        <!-- Session Cancellation Policy Visual Indicator -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 24px; margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 16px;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px;">
-                🛡️
-            </div>
-            <div style="flex: 1;">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
-                    <strong style="font-size: 14.5px; color: #1d1d1f;">Taylor's SportsHub Fair Play &amp; Cancellation Policy</strong>
-                    <span style="font-size: 11.5px; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 3px 9px; border-radius: 980px; letter-spacing: 0.04em; text-transform: uppercase;">
-                        24-Hour Window
+        <!-- Right Column: Sticky Summary & Reservation Card -->
+        <aside class="session-detail-sidebar">
+            <div class="session-summary-card">
+                <div class="summary-card-header">
+                    <h3 class="summary-card-title">Session details</h3>
+                    <span class="session-status-badge <?= e($signup_status) ?>">
+                        <?= ucfirst(e($signup_status)) ?>
                     </span>
                 </div>
-                <p style="font-size: 13.5px; color: #475569; line-height: 1.5; margin: 0 0 10px;">
-                    Cancel freely up to <strong>24 hours before session start</strong> with full refund eligibility. Paid sessions cancelled under 24 hours require manager review. Free sessions release your court spot immediately for fellow students.
-                </p>
-                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: #64748b;">
-                    <span>✓ Immediate spot release</span>
-                    <span>✓ DuitNow / Bank Transfer reversal for paid games</span>
-                    <span>✓ Recorded in My Activities</span>
-                </div>
-            </div>
-        </div>
 
-        <?php if ($session['status'] === 'cancelled'): ?>
-            <div style="background: #fff2f2; border: 1px solid #fecdd3; border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem;">
-                <h4 style="color: #c81e27; margin: 0 0 0.25rem; font-size: 1rem;">Session Cancelled by Organiser</h4>
-                <p style="color: #6e6e73; font-size: 0.9rem; margin: 0;"><?= e($session['cancellation_reason'] ?: 'No reason provided.') ?></p>
-            </div>
-        <?php endif; ?>
-
-        <!-- Action / Booking Area -->
-        <div style="border-top: 1px solid #f0f0f2; padding-top: 2rem;">
-            <?php if (!$current_user): ?>
-                <div style="text-align: center; padding: 1.5rem; background: #fafafa; border-radius: 16px;">
-                    <p style="font-size: 1rem; color: #424245; margin: 0 0 1rem;">Sign in with your Taylor's student email to join this session.</p>
-                    <a href="<?= app_url('/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI'] ?? '/sessions.php')) ?>" class="btn-hero-primary" style="display: inline-block;">
-                        Sign in to Register
-                    </a>
-                </div>
-            <?php elseif ($existing_reg && in_array($existing_reg['status'], ['confirmed', 'awaiting_payment', 'awaiting_approval', 'payment_rejected', 'cancellation_pending'])): ?>
-                <!-- User has an active registration -->
-                <div style="background: #fafafa; border-radius: 16px; padding: 1.75rem; border: 1px solid #e5e5ea;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-                        <div>
-                            <span style="font-size: 0.85rem; color: #86868b;">Your Registration Status:</span>
-                            <div style="margin-top: 0.35rem;"><?= get_status_badge($existing_reg['status']) ?></div>
-                        </div>
-                        <?php if ($existing_reg['status'] === 'awaiting_payment' || $existing_reg['status'] === 'payment_rejected'): ?>
-                            <a href="<?= app_url('/payment.php?id=' . $existing_reg['id']) ?>" class="btn-hero-primary" style="display: inline-block; font-size: 0.92rem;">
-                                Complete Payment & Upload Receipt →
-                            </a>
-                        <?php elseif ($existing_reg['status'] === 'confirmed'): ?>
-                            <a href="<?= app_url('/cancel-registration.php?id=' . $existing_reg['id']) ?>" style="color: #c81e27; text-decoration: none; font-size: 0.88rem; font-weight: 500;">
-                                Cancel Registration
-                            </a>
-                        <?php endif; ?>
+                <div class="session-facts-table">
+                    <div class="fact-row">
+                        <span class="fact-label">Date</span>
+                        <span class="fact-value"><?= format_session_date($session['session_date']) ?></span>
                     </div>
-
-                    <?php if ($existing_reg['status'] === 'awaiting_payment'): ?>
-                        <p style="font-size: 0.88rem; color: #6e6e73; margin: 0;">
-                            Place held! Please transfer <?= format_price($existing_reg['price_snapshot']) ?> and upload your receipt before <?= format_session_time($existing_reg['payment_deadline']) ?> on <?= format_session_date($existing_reg['payment_deadline']) ?>.
-                        </p>
-                    <?php elseif ($existing_reg['status'] === 'awaiting_approval'): ?>
-                        <p style="font-size: 0.88rem; color: #6e6e73; margin: 0;">
-                            Receipt uploaded. The club manager will review your submission soon. Your place is secured during review.
-                        </p>
-                    <?php elseif ($existing_reg['status'] === 'payment_rejected'): ?>
-                        <p style="font-size: 0.88rem; color: #d70015; margin: 0;">
-                            Receipt rejected: <?= e($existing_reg['rejection_reason']) ?>. You have a new 24h window to resubmit your transfer receipt.
-                        </p>
-                    <?php endif; ?>
+                    <div class="fact-row">
+                        <span class="fact-label">Time</span>
+                        <span class="fact-value"><?= format_session_time_range($session['start_time'], $session['end_time']) ?> MYT</span>
+                    </div>
+                    <div class="fact-row">
+                        <span class="fact-label">Venue</span>
+                        <span class="fact-value"><?= e($session['venue']) ?></span>
+                    </div>
+                    <div class="fact-row">
+                        <span class="fact-label">Price</span>
+                        <span class="fact-value price"><?= format_price($session['price']) ?></span>
+                    </div>
+                    <div class="fact-row">
+                        <span class="fact-label">Places</span>
+                        <span class="fact-value"><?= $seat_info['occupied'] ?> / <?= $seat_info['capacity'] ?> occupied</span>
+                    </div>
+                    <div class="fact-row">
+                        <span class="fact-label">Available</span>
+                        <span class="fact-value"><?= $seat_info['seats_left'] ?> places</span>
+                    </div>
                 </div>
-            <?php elseif ($session['status'] !== 'published' || $seat_info['is_started']): ?>
-                <div style="background: #f5f5f7; border-radius: 14px; padding: 1.25rem; text-align: center; color: #6e6e73;">
-                    <?php if ($session['status'] === 'closed'): ?>
-                        Registration for this session has been closed by the organiser.
-                    <?php elseif ($session['status'] === 'cancelled'): ?>
-                        This session is cancelled.
-                    <?php elseif ($seat_info['is_started']): ?>
-                        This session has already commenced. Registration is closed.
+
+                <!-- Callout Box -->
+                <div class="session-callout-box">
+                    <?php if ((float)$session['price'] > 0): ?>
+                        <h4>Payment required</h4>
+                        <p>Reserve a place, pay externally and upload your receipt within 24 hours or before start, whichever is earlier.</p>
                     <?php else: ?>
-                        This session is currently in draft mode.
+                        <h4>Free session</h4>
+                        <p>Instant confirmation upon reservation. No payment or receipt required.</p>
                     <?php endif; ?>
                 </div>
-            <?php elseif ($seat_info['is_full']): ?>
-                <div style="background: #fff2f2; border-radius: 14px; padding: 1.25rem; text-align: center; color: #c81e27; font-weight: 600;">
-                    This session is currently full (<?= $seat_info['capacity'] ?> / <?= $seat_info['capacity'] ?>). Check back later if a spot opens up.
-                </div>
-            <?php else: ?>
-                <!-- Can Register -->
-                <form method="POST" action="<?= app_url('/reserve.php') ?>">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="session_id" value="<?= $session['id'] ?>">
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                        <div>
-                            <div style="font-size: 1.1rem; font-weight: 700; color: #1d1d1f;">
-                                <?= (float)$session['price'] <= 0 ? 'Join Free Session' : 'Reserve Place for ' . format_price($session['price']) ?>
+                <!-- Booking / Action Area -->
+                <div class="session-action-area">
+                    <?php if (!$current_user && $session['status'] === 'published' && !$seat_info['is_started'] && !$seat_info['is_full']): ?>
+                        <a href="<?= app_url('/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI'] ?? '/sessions.php')) ?>" class="btn-reserve">
+                            Sign in to reserve
+                        </a>
+                    <?php elseif ($existing_reg && in_array($existing_reg['status'], ['confirmed', 'awaiting_payment', 'awaiting_approval', 'payment_rejected', 'cancellation_pending'])): ?>
+                        <div class="session-registered-box">
+                            <div class="session-registered-header">
+                                <span style="font-size: 12.5px; color: var(--text-muted);">Your Registration:</span>
+                                <div><?= get_status_badge($existing_reg['status']) ?></div>
                             </div>
-                            <div style="font-size: 0.85rem; color: #86868b;">
-                                <?= (float)$session['price'] <= 0 ? 'Instant confirmation' : '24-hour hold to complete bank transfer & receipt upload' ?>
-                            </div>
+                            <?php if ($existing_reg['status'] === 'awaiting_payment'): ?>
+                                <p style="font-size: 12.5px; color: var(--text-secondary); margin: 6px 0 12px;">
+                                    Place held! Submit receipt before <?= format_session_time($existing_reg['payment_deadline']) ?> on <?= format_session_date($existing_reg['payment_deadline']) ?>.
+                                </p>
+                            <?php elseif ($existing_reg['status'] === 'awaiting_approval'): ?>
+                                <p style="font-size: 12.5px; color: var(--text-secondary); margin: 6px 0 12px;">
+                                    Receipt uploaded. Your place is held during organiser review.
+                                </p>
+                            <?php elseif ($existing_reg['status'] === 'payment_rejected'): ?>
+                                <p style="font-size: 12.5px; color: #d70015; margin: 6px 0 12px;">
+                                    Receipt rejected: <?= e($existing_reg['rejection_reason']) ?>.
+                                </p>
+                            <?php endif; ?>
+                            <a href="<?= app_url('/payment.php?id=' . $existing_reg['id']) ?>" class="btn-reserve">
+                                View registration & next step
+                            </a>
                         </div>
-
-                        <button type="submit" class="btn-hero-primary" style="border: none; cursor: pointer;">
-                            <?= (float)$session['price'] <= 0 ? 'Join Session Now' : 'Reserve Place →' ?>
-                        </button>
-                    </div>
-                </form>
-            <?php endif; ?>
-
-            <!-- Manager Controls Banner if User is Club Manager -->
-            <?php if ($is_mgr): ?>
-                <div style="margin-top: 2rem; padding: 1.25rem; background: #fdf2f4; border: 1px dashed #fecdd3; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                    <div>
-                        <strong style="color: #c8102e; font-size: 0.95rem;">Manager Quick Actions</strong>
-                        <div style="font-size: 0.85rem; color: #6e6e73;">You are an authorised manager for <?= e($session['club_name']) ?>.</div>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <a href="<?= app_url('/manager/participants.php?session_id=' . $session['id']) ?>" style="padding: 0.5rem 1rem; background: #c8102e; color: #fff; text-decoration: none; border-radius: 980px; font-size: 0.85rem; font-weight: 600;">
-                            View Participants (<?= $seat_info['occupied'] ?>)
-                        </a>
-                        <a href="<?= app_url('/manager/session-edit.php?id=' . $session['id']) ?>" style="padding: 0.5rem 1rem; background: #fff; color: #1d1d1f; text-decoration: none; border-radius: 980px; font-size: 0.85rem; font-weight: 500; border: 1px solid #d2d2d7;">
-                            Session Settings
-                        </a>
-                    </div>
+                    <?php elseif ($session['status'] !== 'published' || $seat_info['is_started']): ?>
+                        <div class="session-state-banner">
+                            <?php if ($session['status'] === 'closed'): ?>
+                                Registration for this session has been closed by the organiser.
+                            <?php elseif ($session['status'] === 'cancelled'): ?>
+                                This session is cancelled.
+                            <?php elseif ($seat_info['is_started']): ?>
+                                This session has already commenced. Registration is closed.
+                            <?php else: ?>
+                                This session is currently in draft mode.
+                            <?php endif; ?>
+                        </div>
+                    <?php elseif ($seat_info['is_full']): ?>
+                        <div class="session-state-banner alert">
+                            This session is currently full (<?= $seat_info['capacity'] ?> / <?= $seat_info['capacity'] ?>). Check back later if a spot opens up.
+                        </div>
+                    <?php else: ?>
+                        <!-- Can Register -->
+                        <form method="POST" action="<?= app_url('/reserve.php') ?>">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="session_id" value="<?= $session['id'] ?>">
+                            <button type="submit" class="btn-reserve">
+                                <?= (float)$session['price'] <= 0 ? 'Join free session' : 'Reserve place · ' . format_price($session['price']) ?>
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
-        </div>
+
+                <!-- Manager Controls Quick Panel -->
+                <?php if ($is_mgr): ?>
+                    <div class="manager-quick-box">
+                        <span class="manager-quick-title">Manager Actions</span>
+                        <div class="manager-quick-links">
+                            <a href="<?= app_url('/manager/participants.php?session_id=' . $session['id']) ?>" class="manager-pill-btn primary">
+                                Participants (<?= $seat_info['occupied'] ?>)
+                            </a>
+                            <a href="<?= app_url('/manager/session-edit.php?id=' . $session['id']) ?>" class="manager-pill-btn">
+                                Edit Settings
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </aside>
     </div>
 </div>
 

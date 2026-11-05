@@ -13,7 +13,7 @@ function start_session_safe(): void {
 // Student email validation - student accounts must use @sd.taylors.edu.my
 function is_valid_student_email(string $email): bool {
     $email = strtolower(trim($email));
-    return (bool) preg_match('/^[a-zA-Z0-9._%+-]+@(sd\.)?taylors\.edu\.my$/', $email);
+    return (bool) preg_match('/^[a-zA-Z0-9._%+-]+@sd\.taylors\.edu\.my$/', $email);
 }
 
 function is_logged_in(): bool {

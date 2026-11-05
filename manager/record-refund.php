@@ -1,192 +1,166 @@
 <?php
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/helpers.php';
-
+require_once __DIR__ . "/../includes/auth.php";
+require_once __DIR__ . "/../includes/helpers.php";
 $user = require_login();
-$reg_id = (int)($_GET['id'] ?? 0);
 $db = get_db_connection();
-
-$stmt = $db->prepare("SELECT r.*, u.name AS student_name, u.email AS student_email, 
-                             s.title AS session_title, s.club_id, s.session_date 
-                      FROM registrations r 
-                      INNER JOIN users u ON r.user_id = u.id 
-                      INNER JOIN sessions s ON r.session_id = s.id 
-                      WHERE r.id = :id LIMIT 1");
-$stmt->execute([':id' => $reg_id]);
-$reg = $stmt->fetch();
-
+$reg_id = (int) ($_GET["id"] ?? 0);
+$sql =
+    "SELECT r.*,u.name AS student_name,s.title AS session_title,s.club_id FROM registrations r JOIN users u ON r.user_id=u.id JOIN sessions s ON r.session_id=s.id WHERE r.id=?";
+$q = $db->prepare($sql);
+$q->execute([$reg_id]);
+$reg = $q->fetch();
 if (!$reg) {
     render_error_page(404);
 }
-
-if (!is_club_manager($reg['club_id'], $user['id'])) {
+if (!is_club_manager($reg["club_id"], $user["id"])) {
     render_error_page(403);
 }
-
-// Anti-self-refund rule
-$is_self = ($reg['user_id'] === $user['id']);
-
-// Calculate previously refunded amount
-$stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM refund_records WHERE registration_id = :id");
-$stmt->execute([':id' => $reg_id]);
-$total_refunded = (float)$stmt->fetchColumn();
-$price_owed = (float)$reg['price_snapshot'];
-$remaining_owed = max(0.00, $price_owed - $total_refunded);
-
+$is_self = $reg["user_id"] === $user["id"];
 $error = null;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $error = "Session expired. Please try again.";
+$sum = $db->prepare("SELECT COALESCE(SUM(amount),0) FROM refund_records WHERE registration_id=?");
+$sum->execute([$reg_id]);
+$total_refunded = (float) $sum->fetchColumn();
+$remaining = max(0, (float) $reg["price_snapshot"] - $total_refunded);
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if (!verify_csrf_token($_POST["csrf_token"] ?? "")) {
+        $error = "Your form session expired. Reload and try again.";
     } elseif ($is_self) {
-        $error = "Conflict of interest: You cannot record your own refund. Another authorised manager or administrator must record it.";
+        $error = "Another authorised manager must record your refund.";
     } else {
-        $amount = (float)($_POST['amount'] ?? 0);
-        $reason = trim($_POST['reason'] ?? '');
-
-        if ($amount <= 0 || $amount > ($remaining_owed + 0.001)) {
-            $error = "Refund amount must be positive and cannot exceed the remaining balance of " . format_price($remaining_owed) . ".";
-        } elseif (empty($reason)) {
-            $error = "Please provide an explicit reason or transaction reference for this refund.";
-        } else {
+        $db->beginTransaction();
+        $saved_file = null;
+        try {
+            $q = $db->prepare("SELECT * FROM registrations WHERE id=? FOR UPDATE");
+            $q->execute([$reg_id]);
+            $fresh = $q->fetch();
+            $sum->execute([$reg_id]);
+            $total_refunded = (float) $sum->fetchColumn();
+            $remaining = max(0, (float) $fresh["price_snapshot"] - $total_refunded);
+            $amount_text = trim($_POST["amount"] ?? "");
+            $amount = round((float) $amount_text, 2);
+            $reason = trim($_POST["reason"] ?? "");
+            if ($fresh["status"] !== "cancellation_pending") {
+                $error = "This registration is not awaiting a refund. Return to participants for its current status.";
+            } elseif (
+                !preg_match('/^\d+(?:\.\d{1,2})?$/', $amount_text) ||
+                $amount <= 0 ||
+                (int) round($amount * 100) > (int) round($remaining * 100)
+            ) {
+                $error =
+                    "Enter a positive amount up to RM " .
+                    number_format($remaining, 2) .
+                    ", with at most 2 decimal places.";
+            } elseif ($reason === "" || mb_strlen($reason) > 255) {
+                $error = "Enter a reason or transfer reference of 1–255 characters.";
+            }
             $proof_path = null;
-            if (!empty($_FILES['proof']) && $_FILES['proof']['error'] === UPLOAD_ERR_OK) {
-                $file = $_FILES['proof'];
-                if ($file['size'] <= 5 * 1024 * 1024) {
-                    $finfo = new finfo(FILEINFO_MIME_TYPE);
-                    $mime = $finfo->file($file['tmp_name']);
-                    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'application/pdf' => 'pdf'];
-                    if (isset($allowed[$mime])) {
-                        $ext = $allowed[$mime];
-                        $filename = 'refund_' . $reg_id . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
-                        $dir = __DIR__ . '/../assets/uploads/refunds';
-                        if (!is_dir($dir)) mkdir($dir, 0755, true);
-                        if (move_uploaded_file($file['tmp_name'], $dir . '/' . $filename)) {
-                            $proof_path = 'assets/uploads/refunds/' . $filename;
+            if (!$error && isset($_FILES["proof"]) && $_FILES["proof"]["error"] !== UPLOAD_ERR_NO_FILE) {
+                $file = $_FILES["proof"];
+                if ($file["error"] !== UPLOAD_ERR_OK || $file["size"] > 5 * 1024 * 1024) {
+                    $error = "Refund proof was not saved. Choose a file up to 5 MB and retry. No refund was recorded.";
+                } else {
+                    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file["tmp_name"]);
+                    $allowed = [
+                        "image/jpeg" => "jpg",
+                        "image/png" => "png",
+                        "image/webp" => "webp",
+                        "application/pdf" => "pdf",
+                    ];
+                    if (!isset($allowed[$mime])) {
+                        $error = "Choose JPG, PNG, WebP or PDF proof. No refund was recorded.";
+                    } else {
+                        $filename = "refund_" . $reg_id . "_" . bin2hex(random_bytes(8)) . "." . $allowed[$mime];
+                        $dir = __DIR__ . "/../assets/uploads/refunds";
+                        if (!is_dir($dir)) {
+                            mkdir($dir, 0755, true);
+                        }
+                        $saved_file = $dir . "/" . $filename;
+                        if (!move_uploaded_file($file["tmp_name"], $saved_file)) {
+                            $error = "Refund proof could not be saved. Retry; no refund was recorded.";
+                        } else {
+                            $proof_path = "assets/uploads/refunds/" . $filename;
                         }
                     }
                 }
             }
-
-            $db->beginTransaction();
-            try {
-                $stmt = $db->prepare("INSERT INTO refund_records (registration_id, amount, reason, proof_path, recorded_by) 
-                                      VALUES (:rid, :amt, :reason, :proof, :rec_by)");
-                $stmt->execute([
-                    ':rid' => $reg_id,
-                    ':amt' => $amount,
-                    ':reason' => $reason,
-                    ':proof' => $proof_path,
-                    ':rec_by' => $user['id'],
-                ]);
-
-                // Check if now fully refunded
-                $new_total = $total_refunded + $amount;
-                if ($new_total >= ($price_owed - 0.001)) {
-                    $stmt = $db->prepare("UPDATE registrations SET status = 'cancelled', updated_at = NOW() WHERE id = :id");
-                    $stmt->execute([':id' => $reg_id]);
+            if ($error) {
+                $db->rollBack();
+            } else {
+                $q = $db->prepare(
+                    "INSERT INTO refund_records (registration_id,amount,reason,proof_path,recorded_by) VALUES (?,?,?,?,?)",
+                );
+                $q->execute([$reg_id, $amount, $reason, $proof_path, $user["id"]]);
+                if (
+                    (int) round(($total_refunded + $amount) * 100) >= (int) round((float) $reg["price_snapshot"] * 100)
+                ) {
+                    $q = $db->prepare("UPDATE registrations SET status='cancelled',updated_at=NOW() WHERE id=?");
+                    $q->execute([$reg_id]);
                 }
-
                 $db->commit();
-                header("Location: " . app_url('/manager/participants.php?session_id=' . $reg['session_id'] . '&msg=refund_logged'));
-                exit;
-            } catch (Throwable $e) {
-                if ($db->inTransaction()) {
-                    $db->rollBack();
-                }
-                throw $e;
+                header(
+                    "Location: " .
+                        app_url("/manager/participants.php?session_id=" . $reg["session_id"] . "&msg=refund_logged"),
+                );
+                exit();
             }
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            if ($saved_file && is_file($saved_file)) {
+                unlink($saved_file);
+            }
+            throw $e;
         }
     }
 }
-
-$page_title = "Record Refund · " . $reg['student_name'];
-require_once __DIR__ . '/../includes/header.php';
+$page_title = "Record external refund";
+require_once __DIR__ . "/../includes/header.php";
 ?>
-
-<div style="max-width: 700px; margin: 0 auto; padding: 3rem 1.5rem;">
-    <!-- Breadcrumb -->
-    <div style="margin-bottom: 2rem;">
-        <a href="<?= app_url('/manager/participants.php?session_id=' . $reg['session_id']) ?>" style="color: #6e6e73; text-decoration: none; font-size: 0.88rem;">← Back to Participants</a>
-        <h1 style="font-size: 2rem; font-weight: 800; color: #1d1d1f; margin: 0.5rem 0 0; letter-spacing: -0.02em;">
-            Record External Refund
-        </h1>
-    </div>
-
-    <?php if ($error): ?>
-        <div style="background: #fff2f2; border: 1px solid #fecdd3; color: #c81e27; padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
-            <?= e($error) ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if ($is_self): ?>
-        <div style="background: #fff2f2; border: 1px solid #fecdd3; color: #c81e27; padding: 1.25rem; border-radius: 16px; margin-bottom: 2rem;">
-            <strong>Self-Refund Restriction:</strong> You are the participant for this registration. Per Taylor's SportsHub rules, another club manager or administrator must record this refund.
-        </div>
-    <?php endif; ?>
-
-    <div style="background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.04); padding: 2.5rem;">
-        <!-- Recipient Information (Private Bank Details) -->
-        <div style="background: #fafafa; border-radius: 16px; border: 1px solid #e5e5ea; padding: 1.5rem; margin-bottom: 2rem;">
-            <span style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #c8102e; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">
-                Student Recipient Bank Details (Private)
-            </span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div>
-                    <span style="font-size: 0.8rem; color: #86868b; display: block;">Recipient Name</span>
-                    <strong style="color: #1d1d1f;"><?= e($reg['recipient_account_name'] ?: $reg['student_name']) ?></strong>
-                </div>
-                <div>
-                    <span style="font-size: 0.8rem; color: #86868b; display: block;">Bank Name</span>
-                    <strong style="color: #1d1d1f;"><?= e($reg['recipient_bank_name'] ?: 'Not provided yet') ?></strong>
-                </div>
-                <div>
-                    <span style="font-size: 0.8rem; color: #86868b; display: block;">Account Number</span>
-                    <strong style="color: #1d1d1f; font-family: monospace;"><?= e($reg['recipient_account_number'] ?: 'Not provided yet') ?></strong>
-                </div>
-                <div>
-                    <span style="font-size: 0.8rem; color: #86868b; display: block;">Remaining Refund Due</span>
-                    <strong style="color: #c8102e; font-size: 1.15rem;"><?= format_price($remaining_owed) ?></strong>
-                </div>
-            </div>
-        </div>
-
-        <?php if (!$is_self): ?>
-            <form method="POST" action="<?= $_SERVER['REQUEST_URI'] ?>" enctype="multipart/form-data">
-                <?= csrf_field() ?>
-
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="amount" style="display: block; font-size: 0.88rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.4rem;">
-                        Refund Amount (MYR)
-                    </label>
-                    <input type="number" step="0.01" min="0.01" max="<?= $remaining_owed ?>" id="amount" name="amount" value="<?= $remaining_owed ?>" required style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 1rem; box-sizing: border-box;">
-                </div>
-
-                <div style="margin-bottom: 1.5rem;">
-                    <label for="reason" style="display: block; font-size: 0.88rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.4rem;">
-                        Refund Reason & Reference
-                    </label>
-                    <input type="text" id="reason" name="reason" placeholder="e.g. DuitNow Ref #98124 - Session cancelled full refund" required style="width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 0.95rem; box-sizing: border-box;">
-                </div>
-
-                <div style="margin-bottom: 2rem;">
-                    <label for="proof" style="display: block; font-size: 0.88rem; font-weight: 600; color: #1d1d1f; margin-bottom: 0.4rem;">
-                        Transfer Proof Screenshot (optional)
-                    </label>
-                    <input type="file" id="proof" name="proof" accept="image/png,image/jpeg,image/webp,application/pdf" style="width: 100%; padding: 0.75rem; background: #fafafa; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 0.9rem;">
-                </div>
-
-                <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-                    <a href="<?= app_url('/manager/participants.php?session_id=' . $reg['session_id']) ?>" class="btn-hero-secondary" style="display: inline-block;">
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn-hero-primary" style="border: none; cursor: pointer;">
-                        Record Refund Completed
-                    </button>
-                </div>
-            </form>
-        <?php endif; ?>
-    </div>
+<div class="journey-page narrow">
+ <header class="journey-header"><nav class="journey-breadcrumb" aria-label="Breadcrumb"><a href="<?= app_url(
+     "/manager/participants.php?session_id=" . $reg["session_id"],
+ ) ?>">Participants</a> / Refund</nav><h1>Record external refund.</h1><p class="journey-subtitle"><?= e(
+    $reg["student_name"],
+) ?> · <?= e($reg["session_title"]) ?></p></header>
+ <?php if ($error): ?><div class="journey-notice notice-error" role="alert" tabindex="-1" data-focus-error><?= e(
+    $error,
+) ?></div><?php endif; ?>
+ <section class="journey-card"><h2>Refund progress</h2><?= get_status_badge(
+     $reg["status"],
+ ) ?><dl class="journey-facts"><dt>Approved payment</dt><dd><?= format_price(
+    $reg["price_snapshot"],
+) ?></dd><dt>Already recorded</dt><dd>RM <?= number_format(
+    $total_refunded,
+    2,
+) ?></dd><dt>Remaining refund</dt><dd>RM <?= number_format($remaining, 2) ?></dd></dl>
+  <div class="journey-callout"><strong>Private refund recipient</strong><p><?= e(
+      $reg["recipient_bank_name"] ?: "Bank details not provided",
+  ) ?><br><?= e($reg["recipient_account_name"] ?: $reg["student_name"]) ?><br><?= e(
+    $reg["recipient_account_number"] ?: "Arrange recipient details through your existing private contact channel.",
+) ?></p></div>
+  <?php if (!$is_self && $reg["status"] === "cancellation_pending" && $remaining > 0.001): ?>
+   <div class="journey-callout"><strong>Record a transfer already made</strong><p>SportsHub does not send money. Record the actual external transfer, including partial refunds. Cancellation stays pending until the full refund is recorded.</p></div>
+   <form method="POST" enctype="multipart/form-data" autocomplete="off"><?= csrf_field() ?>
+    <div class="journey-field"><label for="amount">Amount transferred (MYR)</label><input id="amount" name="amount" type="number" inputmode="decimal" min="0.01" max="<?= number_format(
+        $remaining,
+        2,
+        ".",
+        "",
+    ) ?>" step="0.01" required value="<?= e($_POST["amount"] ?? number_format($remaining, 2, ".", "")) ?>"></div>
+    <div class="journey-field"><label for="reason">Reason or transfer reference</label><input id="reason" name="reason" maxlength="255" required value="<?= e(
+        $_POST["reason"] ?? "",
+    ) ?>" placeholder="External transfer reference…"></div>
+    <div class="journey-field"><label for="proof">Transfer proof (optional)</label><input type="file" id="proof" name="proof" accept="image/jpeg,image/png,image/webp,application/pdf" aria-describedby="proof-hint"><p id="proof-hint" class="journey-help">JPG, PNG, WebP or PDF · Up to 5 MB. A supplied file must save successfully before the record is accepted.</p></div>
+    <div class="journey-actions"><button class="journey-button primary" type="submit" data-pending-label="Recording refund…">Record refund transfer</button><a class="journey-button" href="<?= app_url(
+        "/manager/participants.php?session_id=" . $reg["session_id"],
+    ) ?>">Back to participants</a></div>
+   </form>
+  <?php else: ?><div class="journey-callout"><strong><?= $is_self
+    ? "Another manager must record your refund"
+    : "No refund action available" ?></strong><p>Check the current registration status and recorded transfers before proceeding.</p></div><a class="journey-button" href="<?= app_url(
+    "/manager/participants.php?session_id=" . $reg["session_id"],
+) ?>">Back to participants</a><?php endif; ?>
+ </section>
 </div>
-
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . "/../includes/footer.php"; ?>
