@@ -1,7 +1,5 @@
 # Taylor's University SportsHub Web App
 
-> **Repository Description:** A PHP/MySQL web application connecting student signups with organiser management for university sports club sessions, featuring atomic capacity reservations, receipt review workflows, external refund tracking, and manager operations.
-
 A campus sports platform for Taylor's University students, club managers, and administrators. Adapted and evolved from `26TUEventManagement`, SportsHub replaces fragmented WhatsApp announcements, manual spreadsheets, and unorganized bank receipt submissions with a single structured hub for physical club sports sessions.
 
 ---
