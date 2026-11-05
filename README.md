@@ -1,216 +1,205 @@
-# Taylor's University SportsHub Web App
+# SportsHub
 
-A campus sports platform for Taylor's University students, club managers, and administrators. Adapted and evolved from `26TUEventManagement`, SportsHub replaces fragmented WhatsApp announcements, manual spreadsheets, and unorganized bank receipt submissions with a single structured hub for physical club sports sessions.
+SportsHub is a PHP web application for campus sports sessions. Students can discover sessions, reserve places, submit payment receipts, and track registrations. Club managers can publish sessions, review receipts, and record external refunds.
 
----
+The application is configured for Taylor's University student email addresses. It includes demonstration data and prototype features; it is not a payment gateway.
 
 ## Features
 
-### Student Experience
-- **Domain-Restricted Authentication**: Only active Taylor's student emails (`@sd.taylors.edu.my`) can self-register. Session-based authentication with BCrypt password hashing, session regeneration, and CSRF protection.
-- **Session Discovery & Filtering**: Search upcoming sessions by keyword (title, venue, club), sport type (e.g. Badminton, Basketball), and price tier (Free or Paid).
-- **Session Detail & Dynamic Availability**: Live capacity counter showing finite capacity, currently occupied seats, and remaining places.
-- **Atomic Capacity Reservation**:
-  - Free sessions confirm immediately with zero financial friction.
-  - Paid sessions lock finite capacity atomically via database row locks and start a **24-hour reservation countdown** (capped at session start time) for external payment and receipt upload.
-- **DuitNow QR & Bank Transfer Instructions**: Instant snapshot of the organising club's official bank details (Bank name, account holder, account number, and simulated DuitNow QR code).
-- **Receipt Upload & Review Tracking**: Secure receipt upload (PNG, JPG, WebP, PDF <= 5MB). Submitting evidence holds the seat past start time while the club manager verifies external settlement.
-- **Resubmission Window**: If a receipt is rejected by a manager, the student receives the specific rejection reason and a fresh 24-hour window (capped at session start) to upload corrected evidence.
-- **My Activities Dashboard**: Split view of active/upcoming sessions and concluded/historical sessions with Apple-inspired status badges.
-- **Voluntary Withdrawal & Full Refund**:
-  - Free and unpaid reservations cancel immediately before start time and release capacity.
-  - Confirmed paid participants cancelling before start time are entitled to a 100% full external refund. The system privately collects the student's receiving bank details and queues the record into `Cancellation Pending` until the manager logs the transfer.
-- **Static Inbox Preview**: Read-only prototype interface showing simulated automated notifications for confirmations, cancellations, and club announcements.
+### Students
 
-### Club Manager & Administrator Experience
-- **Scoped Manager Workbench**: Club managers access operations strictly for clubs they are appointed to. Platform administrators (`@taylors.edu.my`) hold global oversight across all clubs.
-- **Session Lifecycle Management**:
-  - Create and save draft sessions or publish immediately.
-  - **Fixed Published Terms**: In accordance with sports hub governance, published date, time, venue, price, and capacity remain immutable to protect enrolled students. Schedule changes require cancellation and replacement.
-  - Close signup manually before start time while preserving existing 24-hour payment windows for reserved students.
-  - Cancel sessions with a required public reason, which cascades all paid confirmed participants into `Cancellation Pending` for full refund logging.
-- **Participant Roster**: Live roster showing student names, student emails, phone numbers, quoted prices, registration timestamps, and current state badges.
-- **Receipt Verification**: Inspect uploaded payment slips in full resolution. Approve valid transfers or reject with a required reason.
-- **Anti-Self-Approval Guardrail**: Per audit rules, club managers cannot approve their own payment receipts or record their own refunds; another appointed manager or admin must act.
-- **External Refund Recording**: View student's private bank details, enter the refund amount and transfer reference, upload transfer screenshot evidence, and log the actor. The registration updates to `Cancelled` and frees capacity once the full amount is satisfied.
+- Browse clubs and published sessions without signing in.
+- Search and filter sessions by keyword, sport, date, and price.
+- Create a student account, sign in, and manage profile details.
+- Join free sessions immediately or reserve a paid place.
+- Upload payment evidence and view receipt decisions and submission history.
+- Follow registration status, deadlines, cancellations, and refund progress in My Activities.
+- Request cancellation before a session starts.
 
----
+### Club managers and administrators
 
-## Payment & Capacity State Machine
+- Manage sessions and participants within authorised clubs.
+- Create drafts, publish sessions, close signup, and cancel sessions with a reason.
+- Review payment evidence and reject receipts with an explanation.
+- Record partial or full refunds made outside the application.
+- Access protected evidence and retained receipt history.
 
-Capacity is strictly bounded. The following states **occupy** 1 place atomically:
-1. `confirmed`: Free session signup or manager-approved paid registration.
-2. `awaiting_payment`: Seat held under the 24-hour countdown timer.
-3. `awaiting_approval`: Receipt submitted, holding seat during manager review.
-4. `payment_rejected`: Receipt rejected with reason, holding seat during 24-hour resubmission window.
-5. `cancellation_pending`: Paid confirmed spot cancelled before start, holding place until manager records the external refund.
+Manager permissions come from club appointments, not from an email address or club membership. Seeded administrators have cross-club authority. Users cannot assign themselves these roles through signup.
 
-The following states **release** the place:
-- `cancelled`: Voluntary cancellation before payment, or after external refund completed.
-- `expired`: Unpaid reservation where the 24-hour or session-start deadline passed without receipt upload.
+## Registration and payments
 
----
+Free signup confirms immediately. A paid reservation holds one place until the earlier of 24 hours after reservation or session start. The participant must pay externally and upload evidence before that deadline.
 
-## Tech Stack
+A timely receipt holds the place during review, including after session start. A manager checks external settlement before approving or rejecting it. Rejection opens a new resubmission window capped at session start.
 
-- **Backend**: Native PHP 8.2+ (PDO MySQL, prepared statements, strict parameter binding, transaction locks)
-- **Database**: MySQL 5.7+ / MariaDB 10.4+ (`InnoDB`, `utf8mb4_unicode_ci`)
-- **Frontend**: Semantic HTML5, CSS3 (Taylor's crimson `#c8102e`, Apple fluid layouts, responsive squircle cards), Vanilla JS
-- **Security**: CSRF tokens on all POST endpoints, strict `@sd.taylors.edu.my` domain filter, BCrypt password hashing, session cookie security (`HttpOnly`, `SameSite=Lax`)
-- **Testing**: Native PHP CLI end-to-end integration test suite (`tests/test_e2e.php`)
+| Status | Holds a place | Meaning |
+| --- | --- | --- |
+| `awaiting_payment` | Yes, until expiry | Paid reservation awaiting evidence. |
+| `awaiting_approval` | Yes | Evidence awaits a manager's decision. |
+| `payment_rejected` | Yes, until expiry | Corrected evidence may be submitted within the remaining window. |
+| `confirmed` | Yes | Free signup or an approved paid registration. |
+| `cancellation_pending` | Yes | Cancellation awaits a full recorded external refund. |
+| `expired` | No | The payment or resubmission deadline passed. |
+| `cancelled` | No | Cancellation and any required refund recording are complete. |
 
----
+Student cancellation closes at session start. Free and unpaid places can be released immediately; approved paid places require a full external refund. Cancellation while a receipt is under review requires a settlement decision first.
 
-## Getting Started
+SportsHub records payment and refund evidence. It does not transfer money or verify bank settlement automatically. Registration confirmation does not record attendance.
 
-These instructions assume **XAMPP or MAMP is installed** with PHP 8.2+ and `pdo_mysql`.
+## Requirements
 
-### 1. Place the project in `htdocs`
+- PHP 8.2 or later with `pdo_mysql`, `mbstring`, and `fileinfo` enabled.
+- MySQL or MariaDB with InnoDB support.
+- Apache configured to honour the repository's `.htaccess` files.
+- Write permission for `assets/uploads/` when testing financial uploads.
+- A modern browser.
 
-Ensure the folder is located directly in your web server's document root named **`27TUSportsHub`**:
-- **Windows (XAMPP)**: `C:\xampp\htdocs\MyProject\27TUSportsHub`
-- **macOS (XAMPP)**: `/Applications/XAMPP/xamppfiles/htdocs/MyProject/27TUSportsHub`
-- **macOS (MAMP)**: `/Applications/MAMP/htdocs/MyProject/27TUSportsHub`
+XAMPP or MAMP can provide a local Apache/PHP/database environment. The application does not require Composer, npm, or a frontend build step to run. Browser tests have separate Node.js dependencies.
 
-### 2. Start Apache and MySQL
+## Local setup
 
-Open your XAMPP Control Panel and start **Apache** and **MySQL**.
+### 1. Get the source
 
-### 3. Check Database Settings
+Clone or download this repository into a directory served by Apache. For example:
 
-Open [config/db.php](config/db.php). The default settings connect to local MySQL on port `3306`:
-
-```php
-define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'tu_sportshub');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_PORT', 3306);
+```text
+<apache-document-root>/sportshub/
 ```
 
-### 4. Automatic Database Initialization
+These examples use [http://localhost/sportshub/](http://localhost/sportshub/). Substitute your own host, port, and directory prefix throughout the instructions.
 
-On first visit, the system acquires an advisory setup lock, creates `tu_sportshub`, builds the core tables from [database/schema.sql](database/schema.sql), and imports seeded users, clubs, and sessions from [database/seed.sql](database/seed.sql). It also applies [database/receipt-history.sql](database/receipt-history.sql) to fresh and existing installations without resetting data. **No manual SQL import is needed.**
+### 2. Configure the database
 
-Every new receipt submission retains its file, review decision, rejection reason, reviewer and decision time. Students and authorised club managers can open prior submissions through the protected evidence endpoint. Existing current receipt references are backfilled; previously overwritten references and unrecorded reviewer identities/times cannot be reconstructed.
+Start Apache and your database server. Open [config/db.php](config/db.php) and set the database host, database name, username, and password for your local environment.
 
-To initialize manually via CLI:
-```powershell
-Get-Content database/schema.sql | & "C:\xampp\mysql\bin\mysql.exe" -u root
-Get-Content database/seed.sql | & "C:\xampp\mysql\bin\mysql.exe" -u root
-Get-Content database/receipt-history.sql | & "C:\xampp\mysql\bin\mysql.exe" -u root tu_sportshub
+Use a dedicated development database. Initial setup needs permission to create the database and tables and load demonstration records. Existing installations also need the permissions required by the receipt-history migration.
+
+The current PDO connection uses the database server's default port. For a non-default port, update the DSN in `get_db_connection()`; the declared `DB_PORT` constant is not currently passed to PDO.
+
+### 3. Configure the URL prefix
+
+Normal application links detect the installation prefix automatically. Apache's error-document paths in [.htaccess](.htaccess) must match your installation directory. For the example above, use:
+
+```apache
+ErrorDocument 403 /sportshub/403.php
+ErrorDocument 404 /sportshub/404.php
+ErrorDocument 500 /sportshub/500.php
 ```
 
-### 5. Access the Web Application
+For an installation at the domain root, use `/403.php`, `/404.php`, and `/500.php` instead.
 
-Open your browser to:
-[http://localhost/MyProject/27TUSportsHub/](http://localhost/MyProject/27TUSportsHub/)
+Apache must also honour [assets/uploads/.htaccess](assets/uploads/.htaccess), which blocks direct access to financial uploads. Authorised access is provided through [evidence.php](evidence.php). PHP's built-in server does not apply these Apache rules.
 
----
+### 4. Open the application
 
-## Seeded Demonstration Accounts
+Visit your local application URL. On a fresh installation, [config/setup.php](config/setup.php) creates the schema, imports demonstration data, and applies the receipt-history migration. No manual SQL import is needed.
 
-All accounts use the password: `Password123!`
+Do not manually rerun [database/seed.sql](database/seed.sql) against data you want to keep: it clears the seeded application tables.
 
-| Role | Name | Email | Permissions & Seeded Data |
-| :--- | :--- | :--- | :--- |
-| **Club Manager** | Alex Wong | `alex@sd.taylors.edu.my` | Manager of Taylor's Badminton Club (Manager Workbench access) |
-| **Student** | Liam Tan | `liam@sd.taylors.edu.my` | Registered for Free Sunday Open Play (`confirmed`) |
-| **Student** | Chloe Lee | `chloe@sd.taylors.edu.my` | Registered for Paid Footwork Clinic (`awaiting_approval`) |
-| **Student** | Danial Hakim | `danial@sd.taylors.edu.my` | Reserved place for Paid Footwork Clinic (`awaiting_payment`) |
-| **Global Admin** | SportsHub Admin | `admin@taylors.edu.my` | Pre-seeded platform administrator with global oversight |
+Create a student account to explore the student journey. The configured signup domain is `@sd.taylors.edu.my`; this format check does not verify university identity. Local manager and administrator demonstration accounts are defined in the seed file. This guide intentionally does not reproduce account identities or credentials.
 
----
+Use demonstration accounts and payment material only in an isolated development environment. Replace them and configure real operating procedures before public deployment.
 
-## Project Structure
+## Using the application
 
-```
-.
-├── .gitignore                   # Shared exclusions (uploads, logs, temp files)
-├── .htaccess                    # Standalone Apache error document routes
-├── 403.php                      # Access denied error view
-├── 404.php                      # Page not found error view
-├── 500.php                      # Internal server error view
-├── README.md                    # System documentation and operational guide
-├── cancel-registration.php      # Student voluntary withdrawal and refund bank details form
-├── club.php                     # Public sports club profile with active sessions list
-├── clubs.php                    # Public directory of campus sports clubs
-├── index.php                    # SportsHub homepage with hero banner, stats, and session grid
-├── inbox.php                    # Static prototype preview with synthetic notifications
-├── login.php                    # Student and staff admin authentication
-├── logout.php                   # CSRF-protected session termination
-├── my-activities.php            # Student dashboard for active places and past session history
-├── payment.php                  # 24h timer countdown, DuitNow QR, bank instructions, and receipt form
-├── register.php                 # Strict Taylor's student account registration (@sd.taylors.edu.my)
-├── reserve.php                  # Atomic capacity lock and session reservation handler
-├── session-detail.php           # Comprehensive session overview with real-time seat counts
-├── sessions.php                 # Public session discovery with keyword, sport, and price filters
-├── upload-receipt.php           # Secure receipt file upload handler (PNG, JPG, WebP, PDF)
-├── assets/
-│   ├── css/
-│   │   └── style.css            # Apple-calibrated design system & Taylor's red palette
-│   └── uploads/
-│       ├── .gitkeep             # Uploads placeholder
-│       ├── receipts/            # Uploaded student payment slips
-│       └── refunds/             # Uploaded manager refund evidence
-├── config/
-│   ├── app.php                  # Base path auto-detection and URL builder
-│   ├── db.php                   # Database credentials and PDO singleton connection
-│   └── setup.php                # Auto-installer with advisory concurrency locks
-├── database/
-│   ├── schema.sql               # Tables: users, clubs, club_managers, sessions, registrations, refund_records
-│   └── seed.sql                 # Seed accounts, pilot clubs, synthetic sessions, and registrations
-├── includes/
-│   ├── auth.php                 # Authentication guards, CSRF helper, and club manager checks
-│   ├── error.php                # Standalone error page renderer and exception catcher
-│   ├── footer.php               # Shared global footer
-│   ├── header.php               # Responsive Apple-style navigation header with user dropdown
-│   └── helpers.php              # Seat calculation, status badge helpers, and expiry sweeps
-├── manager/
-│   ├── cancel-session.php       # Organizer session cancellation with cascade to refund queue
-│   ├── close-signup.php         # Manual signup closure preserving active payment holds
-│   ├── participants.php         # Scoped participant roster with receipt review buttons
-│   ├── record-refund.php        # External bank refund recording with proof upload
-│   ├── review-receipt.php       # Manager receipt inspection, approval, or rejection with reason
-│   ├── session-edit.php         # Session creator and draft editor with immutable published terms
-│   └── sessions.php             # Club manager operations dashboard
-└── tests/
-    ├── test_m3.php              # Public discovery and page rendering test
-    ├── test_m4.php              # Atomic capacity and 24h reservation timer test
-    ├── test_m5.php              # Manager scope, receipt approval, and refund test
-    ├── test_m6.php              # Student activities and voluntary cancellation test
-    └── test_e2e.php             # Full 8-stage automated integration test suite
-```
+| User | Typical workflow |
+| --- | --- |
+| Visitor | Open Explore Sessions or Sports Clubs, then view a session's details and availability. |
+| Student | Sign up or sign in, join or reserve a session, submit evidence if required, and check My Activities for the next step. |
+| Club manager | Open Manager Workspace, create or select a session, inspect participants, review receipts, and record external refunds where required. |
+| Administrator | Use the same protected manager operations with cross-club authority. There is no separate general-purpose admin dashboard. |
 
----
+Published session terms remain fixed, including title, club, sport, venue, date, times, price, and capacity. Managers may update descriptions and covers. Changed schedules or prices require cancellation and a replacement session with fresh signup.
 
-## Automated Test Suite
+Managers cannot approve their own payment or record their own refund; another authorised manager or administrator must act.
 
-To run the automated end-to-end integration and concurrency test suite:
+## Project layout
 
-```powershell
+| Path | Purpose |
+| --- | --- |
+| `index.php`, `sessions.php`, `session-detail.php` | Home page and session discovery. |
+| `clubs.php`, `club.php` | Club directory and profiles. |
+| `register.php`, `login.php`, `profile.php` | Account registration, authentication, and profile settings. |
+| `reserve.php`, `payment.php`, `upload-receipt.php`, `cancel-registration.php` | Registration and payment-evidence journey. |
+| `my-activities.php` | The signed-in student's registration status and history. |
+| `manager/` | Club-scoped session, participant, review, and refund operations. |
+| `includes/` | Shared authentication, branding, navigation, error handling, and helpers. |
+| `config/` | Application paths, database connection, setup, and migrations. |
+| `database/` | Schema, demonstration seed data, and receipt-history migration. |
+| `assets/css/`, `assets/js/`, `assets/images/` | Frontend styles, interactions, and imagery. |
+| `assets/uploads/` | Private financial uploads, excluded from version control. |
+| `tests/` | PHP checks, browser regressions, and disposable test fixtures. |
+
+## Testing
+
+Run commands from the repository root. Use a local development installation with Apache and the database running. PHP must be available on the command line.
+
+### PHP suites
+
+Run the end-to-end state/helper suite through the disposable-database runner:
+
+```sh
 php -d zend.assertions=1 -d assert.exception=1 tests/run-existing.php test_e2e.php
 ```
 
-Targeted HTTP/browser regressions for signup, immutable terms, receipt history/access, keyboard menus and explicit CSS transitions:
+The runner creates and drops a separate test database, so the test database account needs permission for both operations. Keep assertions enabled and use the runner rather than executing the seed-dependent test files directly.
 
-```powershell
-# NODE_PATH must point to existing Playwright test tools; Chrome and local Apache/MySQL must be running.
-node tests/noted-gaps.cjs
+Other suites are `test_m3.php`, `test_m4.php`, `test_m5.php`, `test_m6.php`, and `test_receipt_history.php`. Replace the last filename in the command to run one of them.
+
+These PHP suites cover public-page rendering, reservation/capacity helpers, manager scope, review and cancellation states, refunds, and receipt-history migration. Browser tests provide real HTTP-handler and concurrent-reservation coverage.
+
+### Browser suites
+
+Install Node.js, npm, and Google Chrome. Install the test dependencies outside the application checkout:
+
+```sh
+npm install --prefix ../sportshub-test-tools --no-save playwright @axe-core/playwright
 ```
 
-### Verified Test Assertions:
-1. `Strict student email validation (@sd.taylors.edu.my)`
-2. `Club manager scope isolation and admin authority`
-3. `Multi-state atomic capacity calculations (confirmed, awaiting payment/approval/refund)`
-4. `Overdue reservation expiry sweep`
-5. `Receipt review approval and rejection state transitions`
-6. `Paid voluntary cancellation and private bank details capture`
-7. `External refund recording and seat release`
-8. `Session cancellation cascade to cancellation_pending`
+Set `NODE_PATH` to that directory's `node_modules` and `SPORTSHUB_URL` to your running application URL.
 
----
+PowerShell:
+
+```powershell
+$env:NODE_PATH = (Resolve-Path ../sportshub-test-tools/node_modules).Path
+$env:SPORTSHUB_URL = 'http://localhost/sportshub'
+node tests/noted-gaps.cjs
+node tests/ux-journey.cjs
+```
+
+macOS or Linux shell:
+
+```sh
+export NODE_PATH="$PWD/../sportshub-test-tools/node_modules"
+export SPORTSHUB_URL='http://localhost/sportshub'
+node tests/noted-gaps.cjs
+node tests/ux-journey.cjs
+```
+
+Run the browser suites sequentially; they share a disposable-fixture state file. They create generated test accounts and records and clean them up after execution. Browser requests can also run the application's normal overdue-reservation expiry checks.
+
+- `noted-gaps.cjs` checks targeted handler, receipt-history, keyboard-navigation, responsive-layout, and styling regressions.
+- `ux-journey.cjs` checks registration, upload, review, cancellation, refunds, access boundaries, and final-place concurrency. It also runs axe checks and writes local screenshots/results to `docs/ux-evidence/`.
+
+Finite automated checks do not establish complete security, accessibility, usability, or concurrency coverage. Real bank transfers and real-world organiser workflows are not exercised by these suites.
+
+## Current limitations
+
+- Inbox is a static sample preview, without live messages or notifications.
+- Membership applications, guest participation, member discounts, and some club statistics are presentation-only content.
+- Forgot password is a placeholder; Remember me does not implement persistent login tokens.
+- Reservation expiry is request-driven; no scheduled cleanup worker is included.
+- Date filters include fixed demonstration months. Discovery can display already-started published sessions, although reservation handlers enforce the start boundary.
+- The quoted amount and bank-instruction text are saved with a reservation; the QR image is not an immutable reservation snapshot or a verified payment destination.
+- Receipt history is retained, but complete linked registration-attempt history is not implemented. Rebooking with existing financial evidence is blocked to preserve that evidence.
+- Exceptional post-start withdrawal and late-discovered-transfer reconciliation have no dedicated workflow.
+
+## Reporting issues and contributing
+
+When reporting a problem, include the affected route, reproduction steps, expected and actual behaviour, and relevant PHP/browser versions. Remove names, account details, passwords, tokens, payment receipts, and other private information from reports, logs, and screenshots.
+
+Keep changes focused, run the relevant suites, and describe the behaviour changed and how it was verified. Never commit real database credentials, financial evidence, production data, or local test-output folders.
 
 ## License
 
-Developed for Taylor's University SportsHub. All rights reserved.
+All rights reserved. No separate license file is currently included in this repository.
