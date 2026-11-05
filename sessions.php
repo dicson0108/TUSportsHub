@@ -146,7 +146,7 @@ function pagination_url(int $p): string {
                     </select>
                 </div>
 
-                <div>
+                <div class="filter-reset-wrap">
                     <a href="<?= APP_BASE_PATH ?>/sessions.php" class="filter-reset-link">Reset filters</a>
                 </div>
             </div>
@@ -182,9 +182,9 @@ function pagination_url(int $p): string {
             <svg class="empty-state-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <h3 class="empty-state-title">No sessions match your search</h3>
             <p class="empty-state-desc">Try adjusting your keywords, sport categories, or date filters to find upcoming games.</p>
-            <div style="display: flex; gap: 0.75rem; justify-content: center; align-items: center; flex-wrap: wrap;">
-                <a href="<?= APP_BASE_PATH ?>/sessions.php" class="btn-secondary" style="padding: 0.65rem 1.5rem; border-radius: 980px;">Reset all filters</a>
-                <a href="<?= APP_BASE_PATH ?>/clubs.php" class="btn-primary" style="padding: 0.65rem 1.5rem; border-radius: 980px;">Explore Sports Clubs →</a>
+            <div class="empty-state-actions">
+                <a href="<?= APP_BASE_PATH ?>/sessions.php" class="empty-state-btn empty-state-btn-secondary">Reset all filters</a>
+                <a href="<?= APP_BASE_PATH ?>/clubs.php" class="empty-state-btn empty-state-btn-primary">Explore Sports Clubs →</a>
             </div>
         </div>
     <?php else: ?>
