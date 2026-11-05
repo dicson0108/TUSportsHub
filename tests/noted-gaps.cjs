@@ -163,6 +163,47 @@ const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
             assert.equal(await student.locator('.mobile-drawer button[type=submit]').isVisible(),true);
             await student.keyboard.press('Escape');
         });
+        await check('reset/popular actions and editable-field feedback are consistent across pages', async () => {
+            const publicPage = await browser.newPage();
+            const feedback = async (page,selector) => {
+                const field = page.locator(selector).first();
+                await field.blur(); await field.hover(); await page.waitForTimeout(220);
+                const read = () => field.evaluate(el=>{const s=getComputedStyle(el);return {background:s.backgroundColor,border:s.borderColor,shadow:s.boxShadow,outline:s.outlineStyle}});
+                const hover = await read();
+                await field.focus(); await page.waitForTimeout(220);
+                return {hover,focus:await read()};
+            };
+            try {
+                await publicPage.goto(base+'/sessions.php');
+                const reset = publicPage.locator('.filter-reset-link');
+                const popular = publicPage.locator('.sessions-filter-link').last();
+                const readLink = el=>{const s=getComputedStyle(el);return Object.fromEntries(['padding','borderRadius','fontSize','fontWeight','color','minHeight','backgroundColor'].map(key=>[key,s[key]]))};
+                await publicPage.mouse.move(0,0);
+                assert.deepEqual(await reset.evaluate(readLink),await popular.evaluate(readLink));
+                await reset.hover(); await publicPage.waitForTimeout(220); const hoverLink = await reset.evaluate(readLink);
+                await popular.hover(); await publicPage.waitForTimeout(220); assert.deepEqual(await popular.evaluate(readLink),hoverLink);
+                const reference = await feedback(publicPage,'.input-text-standard');
+                assert.deepEqual(await feedback(publicPage,'.form-select'),reference);
+                for (const [route,selector] of [['/index.php','.hero-search-input'],['/login.php','[name=email]'],['/register.php','[name=name]']]) {
+                    await publicPage.goto(base+route);
+                    assert.deepEqual(await feedback(publicPage,selector),reference,route);
+                    if (route==='/index.php') {
+                        assert.equal(await publicPage.locator('.hero-search-bar').evaluate(el=>getComputedStyle(el).borderColor),'rgba(0, 0, 0, 0.1)');
+                    }
+                }
+                await student.goto(base+'/profile.php');
+                const disabled = student.locator('#user_email');
+                const before = await disabled.evaluate(el=>getComputedStyle(el).backgroundColor);
+                await disabled.hover(); await student.waitForTimeout(220);
+                assert.equal(await disabled.evaluate(el=>getComputedStyle(el).backgroundColor),before);
+                for (const selector of ['#full_name','#faculty_select']) assert.deepEqual(await feedback(student,selector),reference,selector);
+                const reg = JSON.parse(fixture('read'));
+                await student.goto(base+`/cancel-registration.php?id=${reg.id}`);
+                assert.deepEqual(await feedback(student,'#recipient_bank_name'),reference);
+                await manager.goto(base+`/manager/session-edit.php?id=${f.sessions.free}`);
+                for (const selector of ['#club_id','#title','#session_date','textarea']) assert.deepEqual(await feedback(manager,selector),reference,selector);
+            } finally { await publicPage.close(); }
+        });
         await check('shared registration feedback retains hover, focus and reduced-motion behavior', async () => {
             await student.goto(base+`/session-detail.php?id=${f.sessions.paid}`);
             const reserve = student.locator('.btn-reserve').first();

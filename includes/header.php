@@ -44,8 +44,9 @@ if ($is_manager_route) {
     <?php if ($page_css && file_exists(__DIR__ . '/../assets/css/' . $page_css)): ?>
         <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/<?= e($page_css) ?>?v=<?= filemtime(__DIR__ . '/../assets/css/' . $page_css) ?>">
     <?php endif; ?>
+    <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/form-controls.css?v=<?= filemtime(__DIR__ . '/../assets/css/form-controls.css') ?>">
 </head>
-<body>
+<body class="site-form-controls">
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
 <header class="site-header">

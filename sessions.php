@@ -147,7 +147,7 @@ function pagination_url(int $p): string {
                 </div>
 
                 <div class="filter-reset-wrap">
-                    <a href="<?= APP_BASE_PATH ?>/sessions.php" class="filter-reset-link">Reset filters</a>
+                    <a href="<?= APP_BASE_PATH ?>/sessions.php" class="btn-link sessions-filter-link filter-reset-link">Reset filters</a>
                 </div>
             </div>
         </form>
@@ -172,7 +172,7 @@ function pagination_url(int $p): string {
                     <option value="popular" <?= $sort === 'popular' ? 'selected' : '' ?>>Most popular</option>
                 </select>
             </form>
-            <a href="<?= APP_BASE_PATH ?>/sessions.php?sort=popular" class="btn-link" style="font-size: 13px; color: #c8102e; font-weight: 600; text-decoration: none;">Most popular</a>
+            <a href="<?= APP_BASE_PATH ?>/sessions.php?sort=popular" class="btn-link sessions-filter-link">Most popular</a>
         </div>
     </div>
 

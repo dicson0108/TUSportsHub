@@ -67,12 +67,6 @@
   padding-left: 46px;
 }
 
-/* Use the field border and soft focus halo without a second outer outline. */
-.filter-container .input-text-standard:focus-visible,
-.filter-container .form-select:focus-visible {
-  outline: none !important;
-}
-
 .search-icon-inside {
   position: absolute;
   left: 16px;
@@ -127,29 +121,11 @@
   align-items: center;
 }
 
-.filter-reset-link {
-  color: var(--color-primary, #c8102e);
+.sessions-filter-link {
   font-size: 13px;
   font-weight: 600;
+  color: var(--color-primary, #c8102e);
   text-decoration: none;
-  min-height: 44px;
-  padding: 10px 0;
-  border-radius: var(--radius-full, 980px);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, transform var(--transition-press);
-  white-space: nowrap;
-}
-
-.filter-reset-link:hover {
-  color: #a60d26;
-  text-decoration: underline;
-}
-
-.filter-reset-link:active {
-  transform: scale(0.97);
 }
 
 .empty-state-actions {

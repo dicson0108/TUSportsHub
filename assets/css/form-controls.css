@@ -1,0 +1,21 @@
+/* Shared editable-field feedback, matching the sessions filter controls.
+   Color overrides also cover legacy forms with inline border/background styles.
+   Native option menus, file pickers, toggles and validation states are preserved. */
+.site-form-controls :is(input, select, textarea):not(
+  [type="hidden"], [type="checkbox"], [type="radio"], [type="file"],
+  [type="submit"], [type="button"], [type="reset"], [type="range"], [type="color"]
+):not(:disabled, [readonly], .input-error, [aria-invalid="true"]):hover:not(:focus) {
+  background-color: rgba(0, 0, 0, 0.025) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  box-shadow: none;
+}
+
+.site-form-controls :is(input, select, textarea):not(
+  [type="hidden"], [type="checkbox"], [type="radio"], [type="file"],
+  [type="submit"], [type="button"], [type="reset"], [type="range"], [type="color"]
+):not(:disabled, [readonly], .input-error, [aria-invalid="true"]):focus {
+  background-color: #fff !important;
+  border-color: var(--color-primary, #c8102e) !important;
+  box-shadow: 0 0 0 3.5px var(--color-primary-glow, rgba(200, 16, 46, 0.14));
+  outline: none !important;
+}
