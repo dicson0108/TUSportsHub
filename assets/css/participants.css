@@ -1,0 +1,361 @@
+/* ==========================================================================
+   Participants Page Styles (participants.css)
+   Taylor's SportsHub - Clean Apple-Calibrated Layout
+   ========================================================================== */
+
+.participants-container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 36px 24px 64px 24px;
+}
+
+/* Breadcrumb & Header */
+.participants-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #6e6e73;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 18px;
+  transition: color 0.15s ease;
+}
+
+.participants-back-link:hover {
+  color: #1d1d1f;
+}
+
+.participants-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.participants-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #c8102e;
+  background: #fdf2f4;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 980px);
+  display: inline-block;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+
+.participants-title {
+  font-size: 30px;
+  font-weight: 800;
+  color: #1d1d1f;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.participants-meta {
+  color: #6e6e73;
+  font-size: 14.5px;
+}
+
+.participants-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-participants-control {
+  padding: 8px 16px;
+  border-radius: var(--radius-full, 980px);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease, transform var(--transition-press, 120ms ease);
+}
+
+.btn-participants-control:active {
+  transform: scale(0.97);
+}
+
+.btn-participants-control.secondary {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+}
+
+.btn-participants-control.secondary:hover {
+  background: #e8e8ed;
+}
+
+.btn-participants-control.danger {
+  background: #fff2f2;
+  color: #c81e27;
+  border: 1px solid #fecdd3;
+}
+
+.btn-participants-control.danger:hover {
+  background: #fee2e2;
+}
+
+/* Metrics Grid */
+.participants-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.participants-metric-card {
+  background: #ffffff;
+  padding: 18px 22px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.metric-card-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  color: #86868b;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+
+.metric-card-val {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1d1d1f;
+  line-height: 1.1;
+}
+
+.metric-card-val.color-green {
+  color: #248a3d;
+}
+
+.metric-card-val.color-red {
+  color: #d70015;
+}
+
+.metric-card-val.color-primary {
+  color: #c8102e;
+}
+
+/* Table Card */
+.participants-card {
+  background: #ffffff;
+  border-radius: var(--radius-xl, 20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.participants-card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid #f0f0f2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.participants-card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0;
+}
+
+.participants-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.participants-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.participants-table thead tr {
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5ea;
+  color: #86868b;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.participants-table th {
+  padding: 12px 20px;
+  font-weight: 600;
+}
+
+.participants-table th.col-action {
+  text-align: right;
+}
+
+.participants-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f2;
+  vertical-align: middle;
+}
+
+.student-name {
+  display: block;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 2px;
+}
+
+.student-email {
+  font-size: 13px;
+  color: #6e6e73;
+}
+
+.student-phone {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.deadline-note {
+  font-size: 12px;
+  color: #86868b;
+  margin-top: 4px;
+}
+
+.cancellation-note {
+  font-size: 12px;
+  color: #d70015;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.price-text {
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.date-text {
+  color: #6e6e73;
+  font-size: 13px;
+}
+
+.col-action-cell {
+  text-align: right;
+}
+
+/* Action Buttons */
+.btn-table-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 980px);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease, transform var(--transition-press, 120ms ease);
+}
+
+.btn-table-action:active {
+  transform: scale(0.97);
+}
+
+.btn-table-action.primary {
+  background: var(--color-primary, #c8102e);
+  color: #ffffff;
+}
+
+.btn-table-action.primary:hover {
+  background: #a60d26;
+}
+
+.btn-table-action.dark {
+  background: #1d1d1f;
+  color: #ffffff;
+}
+
+.btn-table-action.dark:hover {
+  background: #333336;
+}
+
+.btn-table-action.secondary {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+  font-weight: 500;
+}
+
+.btn-table-action.secondary:hover {
+  background: #e8e8ed;
+}
+
+.btn-table-action.link {
+  background: none;
+  color: #0071e3;
+  padding: 4px 8px;
+  font-weight: 500;
+}
+
+.btn-table-action.link:hover {
+  text-decoration: underline;
+}
+
+/* Empty State */
+.participants-empty {
+  padding: 64px 24px;
+  text-align: center;
+  color: #6e6e73;
+}
+
+.participants-empty-icon {
+  width: 48px;
+  height: 48px;
+  color: #aeaeb2;
+  margin-bottom: 12px;
+}
+
+.participants-empty-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.015em;
+}
+
+.participants-empty-desc {
+  font-size: 14.5px;
+  color: #6e6e73;
+  max-width: 440px;
+  margin: 0 auto 24px auto;
+  line-height: 1.5;
+}
+
+.participants-empty-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .participants-container {
+    padding: 24px 16px 48px 16px;
+  }
+  .participants-title {
+    font-size: 24px;
+  }
+}

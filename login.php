@@ -8,7 +8,7 @@ if (is_logged_in()) {
     exit;
 }
 
-$page_title = "Log in · Taylor's SportsHub";
+$page_title = "Log in";
 $error = null;
 $email_val = trim($_POST['email'] ?? '');
 $redirect = $_GET['redirect'] ?? $_POST['redirect'] ?? app_url('/sessions.php');
@@ -41,61 +41,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+require_once __DIR__ . '/includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($page_title) ?></title>
-    <link rel="icon" type="image/x-icon" href="<?= APP_BASE_PATH ?>/favicon.ico">
-    <link rel="icon" type="image/webp" href="<?= APP_BASE_PATH ?>/assets/images/logo/logo.webp">
-    <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/style.css">
-    <link rel="stylesheet" href="<?= APP_BASE_PATH ?>/assets/css/auth.css">
-</head>
-<body class="auth-body">
 
-<header class="site-header auth-header">
-    <div class="auth-header-inner">
-        <a href="<?= APP_BASE_PATH ?>/index.php" class="brand-group" aria-label="Taylor's SportsHub Home">
-            <?= get_site_logo_html() ?>
-            <div class="brand-text">
-                <span class="brand-title">Taylor's</span>
-                <span class="brand-subtitle">SPORTS HUB</span>
-            </div>
-        </a>
-
-        <nav class="nav-links">
-            <a href="<?= APP_BASE_PATH ?>/index.php" class="nav-link">Home</a>
-            <a href="<?= APP_BASE_PATH ?>/sessions.php" class="nav-link">Explore sessions</a>
-            <a href="<?= APP_BASE_PATH ?>/clubs.php" class="nav-link">Clubs</a>
-        </nav>
-    </div>
-</header>
-        </nav>
-
-        <div class="nav-actions" style="display: flex; align-items: center; gap: 0.75rem;">
-            <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-link" style="color: var(--text-main, #1d1d1f); font-weight: 600; text-decoration: none; font-size: 0.9rem; padding: 0.45rem 0.95rem;">Log in</a>
-            <a href="<?= APP_BASE_PATH ?>/register.php" class="btn-primary" style="background: #c8102e; color: #fff; padding: 0.45rem 1rem; border-radius: 980px; text-decoration: none; font-size: 0.9rem; font-weight: 500;">Register</a>
-        </div>
-    </div>
-</header>
-
-<main class="app-container" style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+<main class="auth-page-container">
     <div class="auth-split-layout">
         <!-- Left Hero -->
-        <div>
-            <div class="section-label" style="font-size: 11.5px; font-weight: 700; color: #c8102e; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px;">
-                WELCOME BACK TO CAMPUS LIFE
-            </div>
-            <h1 style="font-size: 46px; font-weight: 800; line-height: 1.1; margin-bottom: 16px; color: #1d1d1f; letter-spacing: -0.03em;">
+        <div class="auth-hero-col">
+            <span class="auth-hero-eyebrow">WELCOME BACK TO CAMPUS LIFE</span>
+            <h1 class="auth-hero-title">
                 Your next great<br>moment is waiting.
             </h1>
-            <p style="font-size: 16px; color: var(--text-secondary, #424245); margin-bottom: 32px; max-width: 440px; line-height: 1.5;">
+            <p class="auth-hero-desc">
                 Pick up where you left off. Your sports sessions, your community, all in one place.
             </p>
 
-            <div class="auth-poster-card" style="max-width: 460px;">
+            <div class="auth-poster-card">
                 <img src="<?= APP_BASE_PATH ?>/assets/images/sports/badminton-open-play.webp?v=<?= filemtime(__DIR__ . '/assets/images/sports/badminton-open-play.webp') ?>" alt="Taylor's Badminton Club Open Play">
                 <div class="auth-poster-overlay">
                     <span class="auth-poster-tag">TAYLOR'S BADMINTON CLUB</span>
@@ -107,18 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Right Card -->
         <div class="auth-form-card">
-            <div style="font-size: 11px; font-weight: 700; color: #c8102e; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px;">
-                TAYLOR'S SPORTS HUB
-            </div>
+            <span class="auth-card-eyebrow">TAYLOR'S SPORTS HUB</span>
             <h2 class="auth-card-title">Good to see you again.</h2>
             <p class="auth-card-sub">Log in with your Taylor's email to save your seat.</p>
 
             <?php if ($error): ?>
-                <div class="status-alert-box danger" style="display: flex; align-items: center; gap: 12px; background: #fff2f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 12px 16px; margin-bottom: 24px; color: #991b1b; font-size: 13.5px;">
+                <div class="auth-alert" role="alert">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-                    <div>
-                        <strong><?= e($error) ?></strong>
-                    </div>
+                    <strong><?= e($error) ?></strong>
                 </div>
             <?php endif; ?>
 
@@ -127,54 +85,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="hidden" name="redirect" value="<?= e($redirect) ?>">
 
                 <div class="form-field">
-                    <label class="form-label" style="font-size: 13.5px; font-weight: 600; margin-bottom: 6px; display: block; color: #1d1d1f;">Taylor's email</label>
+                    <label class="auth-label">Taylor's email</label>
                     <input type="email" name="email" value="<?= e($email_val ?: 'alex@sd.taylors.edu.my') ?>" 
-                           class="form-input <?= $error ? 'input-error' : '' ?>" required placeholder="name@sd.taylors.edu.my"
-                           style="width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 15px; box-sizing: border-box;">
+                           class="auth-input <?= $error ? 'input-error' : '' ?>" required placeholder="name@sd.taylors.edu.my">
                 </div>
 
                 <div class="form-field">
-                    <label class="form-label" style="font-size: 13.5px; font-weight: 600; margin-bottom: 6px; display: block; color: #1d1d1f;">Password</label>
-                    <input type="password" name="password" class="form-input <?= $error ? 'input-error' : '' ?>" 
-                           required value="Password123!" placeholder="••••••••••••"
-                           style="width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #d2d2d7; font-size: 15px; box-sizing: border-box;">
+                    <label class="auth-label">Password</label>
+                    <input type="password" name="password" class="auth-input <?= $error ? 'input-error' : '' ?>" 
+                           required value="Password123!" placeholder="••••••••••••">
                 </div>
 
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 24px; font-size:13px;">
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color: #424245;">
-                        <input type="checkbox" name="remember" checked style="accent-color:#c8102e;">
+                <div class="auth-checkbox-row">
+                    <label class="auth-checkbox-label">
+                        <input type="checkbox" name="remember" checked class="auth-checkbox">
                         <span>Remember me</span>
                     </label>
-                    <a href="#" style="color:#c8102e; font-weight:600; text-decoration: none;">Forgot password?</a>
+                    <a href="#" class="auth-forgot-link">Forgot password?</a>
                 </div>
 
-                <button type="submit" class="btn-primary" style="width:100%; padding:13px; font-size:15px; font-weight:600; margin-bottom: 24px; background:#c8102e; color:#fff; border:none; border-radius:980px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
-                    Log in
+                <button type="submit" class="auth-submit-btn">
+                    <span>Log in</span>
                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </button>
 
-                <div style="text-align:center; font-size: 13.5px; color: var(--text-secondary, #424245); padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.08);">
-                    New to Sports Hub? <a href="<?= APP_BASE_PATH ?>/register.php" style="color:#c8102e; font-weight:600; text-decoration: none;">Create an account</a>
+                <div class="auth-switch-prompt">
+                    New to Sports Hub? <a href="<?= APP_BASE_PATH ?>/register.php" class="auth-switch-link">Create an account</a>
                 </div>
 
-                <div style="font-size: 11.5px; color: var(--text-muted, #6e6e73); text-align:center; margin-top: 14px; line-height: 1.4;">
-                    Students and club managers use the same login. Manager workbench access is assigned by the university.
+                <div class="auth-disclaimer">
+                    Students and club managers use the same login. Manager workspace access is assigned by the university.
                 </div>
             </form>
         </div>
     </div>
 </main>
 
-<footer class="site-footer" style="border-top: 1px solid rgba(0,0,0,0.08); padding: 2rem 1.5rem; margin-top: 3rem; background: #fff;">
-    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 13px; color: #86868b;">
-        <span>© <?= date('Y') ?> Taylor's University SportsHub. All rights reserved.</span>
-        <div style="display:flex; gap:20px; align-items:center;">
-            <span>Lakeside Campus, Malaysia</span>
-            <span>·</span>
-            <span>Malaysia Time (MYT)</span>
-        </div>
-    </div>
-</footer>
-
-</body>
-</html>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
