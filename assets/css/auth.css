@@ -9,7 +9,6 @@ body {
   background-color: var(--bg-surface-subtle, #fbfbfd);
 }
 
-.auth-page-container,
 .app-container {
   max-width: var(--max-width, 1220px);
   margin: 0 auto;
@@ -36,8 +35,7 @@ body {
   justify-content: center;
 }
 
-.section-label,
-.auth-hero-eyebrow {
+.section-label {
   font-size: 11.5px;
   font-weight: 700;
   color: var(--color-primary, #c8102e);
@@ -235,7 +233,6 @@ body {
 }
 
 /* Action Buttons */
-.auth-submit-btn,
 .btn-primary.btn-auth-submit {
   width: 100%;
   padding: 12px 20px;
@@ -257,13 +254,11 @@ body {
   transition: background 0.18s ease, transform var(--transition-press, 120ms ease);
 }
 
-.auth-submit-btn:hover,
 .btn-primary.btn-auth-submit:hover {
   background: #a60d26;
   color: #ffffff;
 }
 
-.auth-submit-btn:active,
 .btn-primary.btn-auth-submit:active {
   transform: scale(0.98);
 }
@@ -298,9 +293,7 @@ body {
 /* ==========================================================================
    Status Alerts & Validation States
    ========================================================================== */
-.status-alert-box,
-.auth-alert,
-.auth-status-alert {
+.status-alert-box {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -311,16 +304,13 @@ body {
   margin-bottom: 24px;
 }
 
-.status-alert-box.danger,
-.auth-alert,
-.auth-status-alert.danger {
+.status-alert-box.danger {
   background: #fff2f2;
   border: 1px solid #fecdd3;
   color: #991b1b;
 }
 
-.status-alert-box.success,
-.auth-status-alert.success {
+.status-alert-box.success {
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
   color: #065f46;

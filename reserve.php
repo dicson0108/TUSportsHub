@@ -64,7 +64,7 @@ try {
     }
 
     // Do not erase financial evidence or mix old refund totals into a new attempt.
-    // ponytail: latest-record schema; a linked attempt/history model is needed for financial rebooking.
+    // ponytail: one registration per student/session; add linked attempts when financial rebooking is required.
     if ($existing) {
         $history = $db->prepare('SELECT COUNT(*) FROM refund_records WHERE registration_id=?');
         $history->execute([$existing['id']]);

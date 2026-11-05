@@ -78,14 +78,6 @@ function require_login(?string $redirect = null): array {
     return $user;
 }
 
-function require_admin(): array {
-    $user = require_login();
-    if ($user['role'] !== 'admin') {
-        render_error_page(403);
-    }
-    return $user;
-}
-
 function get_user_managed_clubs(int $user_id): array {
     $db = get_db_connection();
     $stmt = $db->prepare("SELECT c.* FROM clubs c INNER JOIN club_managers cm ON c.id = cm.club_id WHERE cm.user_id = :user_id");
@@ -93,30 +85,15 @@ function get_user_managed_clubs(int $user_id): array {
     return $stmt->fetchAll();
 }
 
-function is_club_manager(int $club_id, ?int $user_id = null): bool {
+function is_club_manager(int $club_id, int $user_id): bool {
     $db = get_db_connection();
-    if ($user_id === null) {
-        $user = current_user();
-        if (!$user) return false;
-        if ($user['role'] === 'admin') return true;
-        $user_id = $user['id'];
-    } else {
-        $stmt = $db->prepare("SELECT role FROM users WHERE id = :id LIMIT 1");
-        $stmt->execute([':id' => $user_id]);
-        if ($stmt->fetchColumn() === 'admin') return true;
-    }
+    $stmt = $db->prepare("SELECT role FROM users WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => $user_id]);
+    if ($stmt->fetchColumn() === 'admin') return true;
 
     $stmt = $db->prepare("SELECT 1 FROM club_managers WHERE club_id = :club_id AND user_id = :user_id LIMIT 1");
     $stmt->execute([':club_id' => $club_id, ':user_id' => $user_id]);
     return (bool) $stmt->fetchColumn();
-}
-
-function require_club_manager(int $club_id): array {
-    $user = require_login();
-    if (!is_club_manager($club_id, $user['id'])) {
-        render_error_page(403);
-    }
-    return $user;
 }
 
 // CSRF tokens

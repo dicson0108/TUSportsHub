@@ -18,18 +18,12 @@ $css_map = [
     'my-activities.php' => 'my-activities.css',
     'payment.php' => 'payment.css',
     'cancel-registration.php' => 'payment.css',
-    'upload-receipt.php' => 'payment.css',
-    'evidence.php' => 'payment.css',
     'profile.php' => 'profile.css',
     'inbox.php' => 'inbox.css',
     'login.php' => 'auth.css',
     'register.php' => 'auth.css',
     'privacy.php' => 'legal.css',
     'terms.php' => 'legal.css',
-    'participants.php' => 'participants.css',
-    '403.php' => 'errors.css',
-    '404.php' => 'errors.css',
-    '500.php' => 'errors.css',
 ];
 if ($is_manager_route) {
     $page_css = ($current_page === 'participants.php') ? 'participants.css' : 'manager.css';

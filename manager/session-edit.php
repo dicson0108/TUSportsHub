@@ -273,7 +273,7 @@ require_once __DIR__ . '/../includes/header.php';
                     $isSelected = ($image_path_val === $preset['path']);
                     $preset_v = file_exists(__DIR__ . '/../' . $preset['path']) ? filemtime(__DIR__ . '/../' . $preset['path']) : '1';
                 ?>
-                    <label class="image-picker-option <?= $isSelected ? 'selected' : '' ?>">
+                    <label class="image-picker-option">
                         <input type="radio" name="image_path" value="<?= e($preset['path']) ?>" <?= $isSelected ? 'checked' : '' ?>>
                         <img src="<?= app_url('/' . $preset['path']) ?>?v=<?= $preset_v ?>" alt="<?= e($preset['title']) ?>" class="image-picker-thumb" loading="lazy">
                         <div class="image-picker-label">

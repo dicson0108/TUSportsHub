@@ -52,11 +52,5 @@ function handle_app_exception(Throwable $error): void {
     while (ob_get_level() > 0) {
         ob_end_clean();
     }
-    if (str_starts_with($_SERVER['SCRIPT_NAME'] ?? '', defined('APP_BASE_PATH') ? APP_BASE_PATH . '/api/' : '/api/')) {
-        http_response_code(500);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['success' => false, 'error' => 'Server error occurred']);
-        exit;
-    }
     render_error_page(500);
 }

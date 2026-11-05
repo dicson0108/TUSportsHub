@@ -1,13 +1,12 @@
 /**
- * Taylor's University Event Management App
- * Client-side dynamic interactions (AJAX, Modals, Menus, Toasts, Responsive Navigation)
+ * SportsHub navigation, receipt preview/upload and form feedback.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
     // Enable instantaneous :active state on iOS Safari & mobile devices
     document.addEventListener('touchstart', () => {}, { passive: true });
 
-    // 1. Toast Notification System
+    // Toast Notification System
     window.showToast = function(message, type = 'info', duration = 3000) {
         let container = document.getElementById('toast-container');
         if (!container) {
@@ -30,20 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }, duration);
     };
 
-    // 3. User dropdown menu toggle & keyboard accessibility
+    // User dropdown menu toggle & keyboard accessibility
     const userMenuPill = document.querySelector('.user-menu-pill');
-    const userDropdown = document.querySelector('.user-dropdown') || document.querySelector('.user-dropdown-menu');
+    const userDropdown = document.querySelector('.user-dropdown');
     const setAccountMenuOpen = (open) => {
         if (!userDropdown || !userMenuPill) return;
         userDropdown.inert = !open;
         userDropdown.classList.toggle('show', open);
-        userDropdown.classList.toggle('is-open', open);
         userMenuPill.setAttribute('aria-expanded', String(open));
     };
     if (userMenuPill && userDropdown) {
         userMenuPill.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isOpen = userDropdown.classList.contains('show') || userDropdown.classList.contains('is-open');
+            const isOpen = userDropdown.classList.contains('show');
             setAccountMenuOpen(!isOpen);
         });
         document.addEventListener('click', (e) => {
@@ -54,14 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. Mobile Menu Drawer Navigation
+    // Mobile Menu Drawer Navigation
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const mobileDrawer = document.querySelector('.mobile-drawer');
     const mobileDrawerClose = document.querySelector('.mobile-drawer-close');
     const mobileDrawerBackdrop = document.querySelector('.mobile-drawer-backdrop');
     let closeDrawer = () => {};
     const setBackgroundInert = (active) => {
-        document.querySelectorAll('.site-nav, main, .site-footer').forEach(el => el.inert = active);
+        document.querySelectorAll('main, .site-footer').forEach(el => el.inert = active);
     };
     const trapFocus = (event, surface) => {
         if (event.key !== 'Tab') return;
@@ -93,120 +91,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mobileDrawerBackdrop) mobileDrawerBackdrop.addEventListener('click', () => toggleDrawer(false));
     }
 
-    // 5. Admin Mobile Sidebar Toggle
-    const adminMobileToggle = document.querySelector('.admin-mobile-toggle');
-    const adminSidebar = document.querySelector('.admin-sidebar');
-    if (adminMobileToggle && adminSidebar) {
-        adminMobileToggle.addEventListener('click', () => {
-            adminSidebar.classList.toggle('mobile-open');
-        });
-        document.addEventListener('click', (e) => {
-            if (!adminSidebar.contains(e.target) && !adminMobileToggle.contains(e.target)) {
-                adminSidebar.classList.remove('mobile-open');
-            }
-        });
-    }
-
-    // 6. Modal Close Handlers
-    document.querySelectorAll('[data-modal-close]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const modal = btn.closest('.modal-backdrop');
-            if (modal) {
-                modal.classList.remove('show');
-            }
-        });
-    });
-
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-        backdrop.addEventListener('click', (e) => {
-            if (e.target === backdrop) {
-                backdrop.classList.remove('show');
-            }
-        });
-    });
-
-    // Close any modal or dropdown with Escape key
+    // Close navigation with Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            document.querySelectorAll('.modal-backdrop.show').forEach(m => m.classList.remove('show'));
-            if (userDropdown && (userDropdown.classList.contains('show') || userDropdown.classList.contains('is-open'))) {
+            if (userDropdown && userDropdown.classList.contains('show')) {
                 setAccountMenuOpen(false);
                 userMenuPill.focus();
             }
             if (mobileDrawer && mobileDrawer.classList.contains('open')) {
                 closeDrawer();
             }
-            if (adminSidebar) adminSidebar.classList.remove('mobile-open');
         }
     });
 
-    // 7. Interactive Star Rating selector on review forms
-    const starContainer = document.querySelector('.star-rating-selector');
-    if (starContainer) {
-        const ratingInput = document.getElementById('selected-rating-input');
-        const stars = starContainer.querySelectorAll('.star-icon');
-        stars.forEach(star => {
-            star.addEventListener('click', () => {
-                const val = parseInt(star.getAttribute('data-val'), 10);
-                if (ratingInput) ratingInput.value = val;
-                stars.forEach(s => {
-                    const sVal = parseInt(s.getAttribute('data-val'), 10);
-                    s.classList.toggle('active', sVal <= val);
-                });
-            });
-        });
-    }
-
-    // 8. AJAX Registration action (Join, Leave, Waitlist, Leave Waitlist) with Toast & Confirm
-    document.querySelectorAll('[data-action-event]').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const eventId = btn.getAttribute('data-event-id');
-            const action = btn.getAttribute('data-action-event');
-            const csrfToken = btn.getAttribute('data-csrf') || document.querySelector('meta[name="csrf-token"]')?.content;
-
-            const isLeaveAction = action.includes('leave');
-            const confirmed = window.confirm(
-                isLeaveAction
-                    ? `Are you sure you want to cancel your spot? Your seat will be offered to waitlisted members.`
-                    : `Confirm registration for this event?`
-            );
-
-            if (!confirmed) return;
-
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = `<span class="btn-spinner"></span> Processing...`;
-
-            try {
-                const response = await fetch((document.querySelector('meta[name="app-base-path"]')?.content || '') + '/api/register-event.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        event_id: parseInt(eventId, 10),
-                        action: action,
-                        csrf_token: csrfToken
-                    })
-                });
-                const res = await response.json();
-                if (res.success) {
-                    window.showToast(res.message || 'Updated successfully!', 'success');
-                    setTimeout(() => window.location.reload(), 800);
-                } else {
-                    window.showToast(res.message || 'Action failed.', 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
-            } catch (err) {
-                console.error(err);
-                window.showToast('Network error occurred. Please try again.', 'error');
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-        });
-    });
-
-    // 10. Floating Back-to-Top Button Handler
+    // Floating Back-to-Top Button Handler
     const backToTopBtn = document.getElementById('back-to-top');
     if (backToTopBtn) {
         window.addEventListener('scroll', () => {
@@ -221,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 11. Receipt Modal Zoom & Preview Controller (Apple-calibrated Lightbox)
+    // Receipt Modal Zoom & Preview Controller (Apple-calibrated Lightbox)
     let receiptModal = document.getElementById('receipt-lightbox');
     let currentZoom = 1.0;
     let receiptTrigger = null;
@@ -349,20 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 12. Manager Session Image Picker
-    const imagePickerCards = document.querySelectorAll('.image-picker-option');
-    imagePickerCards.forEach(card => {
-        card.addEventListener('click', (e) => {
-            const radio = card.querySelector('input[type="radio"]');
-            if (radio) {
-                radio.checked = true;
-                imagePickerCards.forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-            }
-        });
-    });
-
-    // 13. Student Receipt Upload File Drag/Drop & Live Client Preview
+    // Student Receipt Upload File Drag/Drop & Live Client Preview
     const fileInput = document.getElementById('receipt');
     const dropzone = document.getElementById('receipt-dropzone');
     const previewContainer = document.getElementById('receipt-upload-preview');
@@ -392,23 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (previewContainer) {
                 const nameEl = previewContainer.querySelector('.preview-name');
                 const sizeEl = previewContainer.querySelector('.preview-size');
-                const thumbEl = previewContainer.querySelector('.preview-thumb');
                 const isPdf = file.type === 'application/pdf';
 
                 if (nameEl) nameEl.textContent = file.name;
                 if (sizeEl) sizeEl.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB · ${isPdf ? 'PDF Document' : 'Image Receipt'}`;
 
-                if (thumbEl) {
-                    if (isPdf) {
-                        thumbEl.innerHTML = `<svg width="28" height="28" fill="none" stroke="#c8102e" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-                    } else {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            thumbEl.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`;
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                }
                 previewContainer.style.display = 'flex';
                 previewContainer.hidden = false;
             }
@@ -464,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('pageshow', event => { if (event.persisted) window.location.reload(); });
     document.querySelector('[data-focus-error]')?.focus();
 
-    // 14. Clipboard Copy Button
+    // Clipboard Copy Button
     document.querySelectorAll('[data-copy-link]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();

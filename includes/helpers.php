@@ -267,10 +267,3 @@ function get_club_banner_url(array $club): string {
     $v = file_exists($full_path) ? filemtime($full_path) : '1';
     return app_url($p) . '?v=' . $v;
 }
-
-// Validate Taylor's University email domain
-function is_valid_taylors_email(string $email): bool {
-    $email = strtolower(trim($email));
-    return str_ends_with($email, '@sd.taylors.edu.my') || str_ends_with($email, '@taylors.edu.my');
-}
-

@@ -105,6 +105,31 @@ const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
             await post(manager,`/manager/review-receipt.php?id=${reg.id}`,{decision:'reject',rejection_reason:'Stale retry'});
             assert.equal(sql('SELECT decision FROM payment_receipts WHERE id=?',[receipts[1].id])[0].decision,'approved');
         });
+        await check('active receipt lightbox retains zoom, Escape and focus return', async () => {
+            await manager.goto(base+`/manager/participants.php?session_id=${f.sessions.paid}`);
+            const trigger = manager.locator('[data-receipt-zoom]').first();
+            await trigger.click();
+            assert.equal(await manager.locator('#receipt-lightbox').isVisible(),true);
+            await manager.locator('#receipt-zoom-in').click();
+            assert.equal(await manager.locator('#receipt-zoom-level').innerText(),'125%');
+            await manager.keyboard.press('Escape');
+            assert.equal(await manager.locator('#receipt-lightbox').isVisible(),false);
+            assert.equal(await trigger.evaluate(el=>el===document.activeElement),true);
+        });
+        await check('cover selection follows native radio state without JavaScript', async () => {
+            const context = await browser.newContext({javaScriptEnabled:false});
+            try {
+                await context.addCookies(await manager.context().cookies());
+                const page = await context.newPage();
+                await page.goto(base+`/manager/session-edit.php?id=${f.sessions.free}`);
+                const cards = page.locator('.image-picker-option');
+                await cards.nth(1).locator('input').check();
+                await page.mouse.move(0,0);
+                await page.screenshot({animations:'disabled'});
+                assert.equal(await cards.nth(1).evaluate(el=>getComputedStyle(el).borderColor),'rgb(200, 16, 46)');
+                assert.notEqual(await cards.first().evaluate(el=>getComputedStyle(el).borderColor),'rgb(200, 16, 46)');
+            } finally { await context.close(); }
+        });
         await check('account menu supports native Enter/Space, Escape, Tab and link navigation', async () => {
             await student.goto(base+'/my-activities.php');
             const toggle=student.locator('.user-menu-pill');
@@ -124,6 +149,17 @@ const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
             for (const file of fs.readdirSync(path.join(root,'assets/css')).filter(n=>n.endsWith('.css'))) {
                 assert.doesNotMatch(fs.readFileSync(path.join(root,'assets/css',file),'utf8'),/transition\s*:\s*all\b/,file);
             }
+        });
+        await check('standalone error pages resolve their styles under the installation path', async () => {
+            const page = await browser.newPage();
+            try {
+                for (const code of [403,404,500]) {
+                    const response = await page.goto(base+`/${code}.php`);
+                    assert.equal(response.status(),code);
+                    const styles = await page.locator('link[rel=stylesheet]').evaluateAll(links=>links.map(link=>link.href));
+                    for (const url of styles) assert.equal((await page.request.get(url)).status(),200,`missing stylesheet for ${code}`);
+                }
+            } finally { await page.close(); }
         });
     } finally {
         if (browser) await browser.close();
