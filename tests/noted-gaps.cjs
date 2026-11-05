@@ -150,12 +150,54 @@ const sql = (query, params=[]) => JSON.parse(execFileSync(php, ['-r',
                 assert.doesNotMatch(fs.readFileSync(path.join(root,'assets/css',file),'utf8'),/transition\s*:\s*all\b/,file);
             }
         });
+        await check('navigation has one account separator, no mobile identity line and a touch-sized reset', async () => {
+            await student.setViewportSize({width:1440,height:1000});
+            await student.goto(base+'/sessions.php');
+            const header = student.locator('.user-dropdown-header');
+            assert.equal(await header.evaluate(el=>el.nextElementSibling.classList.contains('dropdown-divider')),false);
+            assert.equal(await header.evaluate(el=>getComputedStyle(el).borderBottomWidth),'1px');
+            await student.setViewportSize({width:390,height:844});
+            assert.ok((await student.locator('.filter-reset-link').boundingBox()).height>=44);
+            await student.locator('.mobile-menu-btn').click();
+            assert.doesNotMatch(await student.locator('.mobile-drawer').innerText(),/Signed in as/);
+            assert.equal(await student.locator('.mobile-drawer button[type=submit]').isVisible(),true);
+            await student.keyboard.press('Escape');
+        });
+        await check('shared registration feedback retains hover, focus and reduced-motion behavior', async () => {
+            await student.goto(base+`/session-detail.php?id=${f.sessions.paid}`);
+            const reserve = student.locator('.btn-reserve').first();
+            assert.equal(await reserve.evaluate(el=>getComputedStyle(el).borderRadius),'9999px');
+            const reg = JSON.parse(fixture('read'));
+            await student.goto(base+`/cancel-registration.php?id=${reg.id}`);
+            const cancel = student.locator('.registration-cancel-button');
+            assert.equal(await cancel.count(),1);
+            const style = () => cancel.evaluate(el=>({background:getComputedStyle(el).backgroundColor,shadow:getComputedStyle(el).boxShadow}));
+            await student.mouse.move(0,0); await student.waitForTimeout(200);
+            const normal = await style();
+            await cancel.hover(); await student.waitForTimeout(200);
+            assert.notDeepEqual(await style(),normal);
+            await cancel.focus();
+            assert.equal(await cancel.evaluate(el=>getComputedStyle(el).outlineStyle),'solid');
+            await student.emulateMedia({reducedMotion:'reduce'});
+            try {
+                await cancel.hover(); await student.mouse.down(); await student.waitForTimeout(50);
+                assert.equal(await cancel.evaluate(el=>getComputedStyle(el).transform),'none');
+            } finally {
+                await student.mouse.move(0,0); await student.mouse.up();
+                await student.emulateMedia({reducedMotion:'no-preference'});
+            }
+        });
         await check('standalone error pages resolve their styles under the installation path', async () => {
             const page = await browser.newPage();
             try {
                 for (const code of [403,404,500]) {
                     const response = await page.goto(base+`/${code}.php`);
                     assert.equal(response.status(),code);
+                    const logo = page.locator('.error-header .brand-logo-img');
+                    assert.equal(await logo.count(),1);
+                    assert.equal(await logo.evaluate(el=>el.complete&&el.naturalWidth>0),true);
+                    assert.equal(new URL(await logo.getAttribute('src'),base).pathname,new URL(base).pathname+'/assets/images/logo/logo.webp');
+                    assert.equal(await page.locator('.error-header .brand-subtitle').innerText(),'SPORTS HUB');
                     const styles = await page.locator('link[rel=stylesheet]').evaluateAll(links=>links.map(link=>link.href));
                     for (const url of styles) assert.equal((await page.request.get(url)).status(),200,`missing stylesheet for ${code}`);
                 }

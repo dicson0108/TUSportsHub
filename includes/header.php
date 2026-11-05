@@ -92,7 +92,6 @@ if ($is_manager_route) {
                             <strong><?= e($current_user['name']) ?></strong>
                             <span><?= e($current_user['email']) ?></span>
                         </div>
-                        <div class="dropdown-divider"></div>
                         <a href="<?= APP_BASE_PATH ?>/profile.php" class="dropdown-item">My Profile</a>
                         <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="dropdown-item">My Activities</a>
                         <a href="<?= APP_BASE_PATH ?>/inbox.php" class="dropdown-item">Inbox (Preview)</a>
@@ -147,9 +146,6 @@ if ($is_manager_route) {
                 <a href="<?= APP_BASE_PATH ?>/manager/sessions.php" class="mobile-nav-link manager-nav-link">Manager Workspace</a>
             <?php endif; ?>
             <div class="mobile-drawer-footer">
-                <div class="mobile-drawer-user-info">
-                    Signed in as <strong><?= e($current_user['name']) ?></strong>
-                </div>
                 <form method="POST" action="<?= APP_BASE_PATH ?>/logout.php" class="logout-form">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn-secondary btn-full btn-danger-text">Log out</button>

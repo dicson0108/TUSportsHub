@@ -19,20 +19,6 @@ body.error-page {
   background: #fff;
 }
 
-.error-brand {
-  text-decoration: none;
-  color: #c8102e;
-  font-weight: 700;
-  font-size: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.error-brand span {
-  color: #1d1d1f;
-}
-
 .error-main {
   flex: 1;
   display: flex;

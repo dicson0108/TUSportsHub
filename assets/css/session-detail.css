@@ -3,6 +3,8 @@
    Matching Figma UIUX Designs (05-session-detail-student.png)
    ========================================================================== */
 
+@import url("registration-actions.css");
+
 .session-detail-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -240,8 +242,6 @@
   font-weight: 600;
   border-radius: var(--radius-full, 9999px);
   min-height: 44px;
-  background: var(--color-primary, #c8102e);
-  color: #ffffff;
   border: none;
   cursor: pointer;
   text-align: center;
@@ -250,30 +250,6 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 8px rgba(200, 30, 39, 0.2);
-  transition: background-color 150ms ease, box-shadow 150ms ease, transform var(--transition-press);
-}
-
-.btn-reserve:hover {
-  background: var(--color-primary-hover, #a60d26);
-  box-shadow: 0 4px 14px rgba(200, 16, 46, 0.32);
-}
-
-.btn-reserve:focus-visible {
-  outline: 3px solid var(--color-primary, #c8102e);
-  outline-offset: 3px;
-}
-
-.btn-reserve:active {
-  background: var(--color-primary-active, #8e0b20);
-  transform: scale(0.97);
-  transition: transform 100ms ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .btn-reserve:active {
-    transform: none !important;
-  }
 }
 
 .session-registered-box {

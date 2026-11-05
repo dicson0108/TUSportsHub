@@ -132,7 +132,8 @@
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  padding: 0 0 10px;
+  min-height: 44px;
+  padding: 10px 0;
   border-radius: var(--radius-full, 980px);
   display: inline-flex;
   align-items: center;

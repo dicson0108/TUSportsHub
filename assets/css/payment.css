@@ -3,6 +3,7 @@
    ========================================================================== */
 
 @import url("journey.css");
+@import url("registration-actions.css");
 
 /* DuitNow QR Card Presentation - Clean & Minimal */
 .duitnow-qr-card {
@@ -120,34 +121,4 @@
   color: var(--text-main, #1d1d1f);
   display: block;
   margin-bottom: 4px;
-}
-
-/* Cancellation actions share the same feedback for paid and free places. */
-.journey-button.cancel-spot-button {
-  background: var(--color-primary, #c8102e);
-  border-color: var(--color-primary, #c8102e);
-  box-shadow: 0 2px 8px rgba(200, 16, 46, 0.2);
-  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 100ms ease-out;
-}
-
-.journey-button.cancel-spot-button:hover {
-  background: var(--color-primary-hover, #a60d26);
-  border-color: var(--color-primary-hover, #a60d26);
-  box-shadow: 0 4px 14px rgba(200, 16, 46, 0.32);
-}
-
-.journey-button.cancel-spot-button:focus-visible {
-  outline: 3px solid var(--color-primary, #c8102e);
-  outline-offset: 3px;
-}
-
-.journey-button.cancel-spot-button:active {
-  background: var(--color-primary-active, #8e0b20);
-  transform: scale(0.97);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .journey-button.cancel-spot-button:active {
-    transform: none !important;
-  }
 }

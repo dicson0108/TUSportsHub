@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/branding.php';
 
 // Safe HTML escaping
 function e(?string $string): string {
@@ -198,21 +199,6 @@ function get_status_badge(string $status): string {
     ];
     [$label, $class] = $labels[$status] ?? [ucfirst(str_replace('_', ' ', $status)), 'badge-muted'];
     return '<span class="status-badge ' . $class . '">' . htmlspecialchars($label) . '</span>';
-}
-
-// Brand site logo HTML helper
-function get_site_logo_html(): string {
-    static $logo_html = null;
-    if ($logo_html !== null) {
-        return $logo_html;
-    }
-    $logo_path = '/assets/images/logo/logo.webp';
-    if (file_exists(__DIR__ . '/..' . $logo_path)) {
-        $logo_html = '<img src="' . e(app_url($logo_path)) . '" alt="Taylor\'s University" class="brand-logo-img">';
-    } else {
-        $logo_html = '<div class="brand-logo-icon" aria-hidden="true">t</div>';
-    }
-    return $logo_html;
 }
 
 // Session cover image resolver

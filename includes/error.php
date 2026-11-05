@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/branding.php';
 // Intentionally independent of authentication and database-backed site chrome.
 function render_error_page(int $status): void {
     $pages = [
@@ -19,14 +20,19 @@ function render_error_page(int $status): void {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#c8102e">
+    <link rel="icon" type="image/x-icon" href="<?= $base ?>/favicon.ico">
     <title><?= $status ?> · <?= htmlspecialchars($title) ?> · Taylor's SportsHub</title>
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/style.css">
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/errors.css">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/errors.css?v=<?= filemtime(__DIR__ . '/../assets/css/errors.css') ?>">
 </head>
 <body class="error-page" data-error-code="<?= $status ?>">
     <header class="error-header">
-        <a class="error-brand" href="<?= $base ?>/index.php" aria-label="Taylor's SportsHub home">
-            <strong>Taylor's</strong> <span>SportsHub</span>
+        <a class="brand-group" href="<?= $base ?>/index.php" aria-label="Taylor's SportsHub home">
+            <?= get_site_logo_html() ?>
+            <div class="brand-text">
+                <span class="brand-title">Taylor's</span>
+                <span class="brand-subtitle">SPORTS HUB</span>
+            </div>
         </a>
     </header>
     <main class="error-main">

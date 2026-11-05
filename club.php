@@ -13,11 +13,6 @@ if (!$club) {
     render_error_page(404);
 }
 
-// Fetch manager(s)
-$stmt = $db->prepare("SELECT u.name, u.email FROM club_managers cm INNER JOIN users u ON cm.user_id = u.id WHERE cm.club_id = :id");
-$stmt->execute([':id' => $club_id]);
-$managers = $stmt->fetchAll();
-
 // Fetch sessions
 $stmt = $db->prepare("SELECT * FROM sessions WHERE club_id = :id AND status = 'published' ORDER BY session_date ASC, start_time ASC");
 $stmt->execute([':id' => $club_id]);
