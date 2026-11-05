@@ -72,38 +72,47 @@ $page_css = $is_manager_route ? 'manager.css' : ($css_map[$current_page] ?? null
 
         <div class="nav-actions">
             <?php if ($current_user): ?>
+                <?php if ($is_any_manager): ?>
+                    <a href="<?= APP_BASE_PATH ?>/manager/sessions.php" class="btn-manage-club">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span>Manage club</span>
+                    </a>
+                <?php endif; ?>
+
                 <a href="<?= APP_BASE_PATH ?>/inbox.php" class="nav-inbox-btn <?= $current_page === 'inbox.php' ? 'active' : '' ?>" title="Inbox sample preview" aria-label="Inbox sample preview">
-                    <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
                 </a>
 
-                <div class="user-account">
-                  <button type="button" class="user-pill user-menu-pill" aria-label="Account menu" aria-expanded="false" aria-controls="account-menu">
-                    <div class="user-avatar-badge"><?= get_initials($current_user['name']) ?></div>
+                <div class="user-menu-pill" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false" aria-label="User menu for <?= e($current_user['name']) ?>">
+                    <div class="avatar-initials"><?= get_initials($current_user['name']) ?></div>
                     <span class="user-name-text"><?= e($current_user['name']) ?></span>
                     <svg class="dropdown-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                  </button>
-                    <div class="user-dropdown-menu" id="account-menu">
+
+                    <div class="user-dropdown" role="menu">
                         <div class="user-dropdown-header">
                             <strong><?= e($current_user['name']) ?></strong>
                             <span><?= e($current_user['email']) ?></span>
                         </div>
                         <div class="dropdown-divider"></div>
-                        <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="dropdown-link">My Activities</a>
-                        <a href="<?= APP_BASE_PATH ?>/inbox.php" class="dropdown-link">Inbox (Preview)</a>
+                        <a href="<?= APP_BASE_PATH ?>/my-activities.php" class="dropdown-item" role="menuitem">My Activities</a>
+                        <a href="<?= APP_BASE_PATH ?>/inbox.php" class="dropdown-item" role="menuitem">Inbox (Preview)</a>
                         <?php if ($is_any_manager): ?>
                             <div class="dropdown-divider"></div>
-                            <a href="<?= APP_BASE_PATH ?>/manager/sessions.php" class="dropdown-link manager-link">Manager Workbench ↗</a>
+                            <a href="<?= APP_BASE_PATH ?>/manager/sessions.php" class="dropdown-item admin-link" role="menuitem">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Manager Workspace
+                            </a>
                         <?php endif; ?>
                         <div class="dropdown-divider"></div>
-                        <form method="POST" action="<?= APP_BASE_PATH ?>/logout.php" class="logout-form">
+                        <form method="POST" action="<?= APP_BASE_PATH ?>/logout.php" style="margin: 0;">
                             <?= csrf_field() ?>
-                            <button type="submit" class="dropdown-link logout-btn">Sign out</button>
+                            <button type="submit" class="dropdown-item text-danger" role="menuitem" style="width:100%; border:0; background:none; font:inherit; text-align:left; cursor:pointer;">Sign out</button>
                         </form>
                     </div>
                 </div>
             <?php else: ?>
-                <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-nav-login">Sign in</a>
-                <a href="<?= APP_BASE_PATH ?>/register.php" class="btn-nav-signup">Sign up</a>
+                <a href="<?= APP_BASE_PATH ?>/login.php" class="btn-link">Log in</a>
+                <a href="<?= APP_BASE_PATH ?>/register.php" class="btn-primary">Sign up</a>
             <?php endif; ?>
 
             <!-- Mobile Hamburger Toggle Button -->

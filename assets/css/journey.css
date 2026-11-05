@@ -33,7 +33,7 @@ button:disabled { cursor: wait; opacity: .7; }
 .journey-subtitle, .journey-help { color: #61616b; }
 .journey-subtitle { font-size: 1rem; }
 .journey-help { font-size: .85rem; margin: .6rem 0; }
-.journey-columns { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.35fr); align-items: start; gap: 1.5rem; }
+.journey-columns { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 340px); align-items: start; gap: 1.5rem; }
 .journey-columns.review { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 .journey-card { min-width: 0; background: #fff; border: 1px solid #dddde5; border-radius: 18px; padding: 1.5rem; margin-bottom: 1.5rem; }
 .journey-card > .status-badge { margin-bottom: 1rem; }

@@ -99,9 +99,9 @@ $clubs = $stmt->fetchAll();
                                 <?= e(format_session_date($spotlight['session_date'])) ?> · <?= e(format_price($spotlight['price'])) ?> · <?= $spotlight_seats['seats_left'] ?> places left
                             </div>
                         </div>
-                        <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $spotlight['id'] ?>" class="spotlight-cta-btn" style="background: #fff; color: #1d1d1f; padding: 8px 16px; border-radius: 980px; text-decoration: none; font-size: 13.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                        <a href="<?= APP_BASE_PATH ?>/session-detail.php?id=<?= $spotlight['id'] ?>" class="hero-search-btn spotlight-cta-btn" aria-label="Explore session">
                             <span>Explore session</span>
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                            <svg class="hero-btn-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
                     </div>
                 </div>

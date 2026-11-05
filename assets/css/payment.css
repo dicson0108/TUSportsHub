@@ -4,47 +4,51 @@
 
 @import url("journey.css");
 
-/* DuitNow QR Card Presentation */
+/* DuitNow QR Card Presentation - Compact & Clean */
 .duitnow-qr-card {
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
-  padding: 24px;
-  margin: 1.5rem 0;
+  padding: 14px;
+  margin: 0;
   text-align: center;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .duitnow-qr-badge {
   display: inline-block;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: #c8102e;
   background: #fff2f2;
   border: 1px solid #fecdd3;
-  padding: 4px 12px;
+  padding: 2px 10px;
   border-radius: 980px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .duitnow-qr-image-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 16px;
-  max-width: 260px;
+  margin: 0 auto 8px;
+  max-width: 150px;
   background: #ffffff;
-  padding: 12px;
-  border-radius: 12px;
+  padding: 6px;
+  border-radius: 10px;
   border: 1px solid #f0f0f2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .duitnow-qr-img {
   width: 100%;
-  max-width: 230px;
+  max-width: 140px;
   height: auto;
   aspect-ratio: 1 / 1.15;
   object-fit: contain;
@@ -53,45 +57,49 @@
 
 .duitnow-qr-caption strong {
   display: block;
-  font-size: 14.5px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--text-main, #1d1d1f);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .duitnow-qr-caption p {
-  font-size: 13px;
-  color: var(--text-secondary, #424245);
-  line-height: 1.45;
+  font-size: 11px;
+  color: var(--text-secondary, #6e6e73);
+  line-height: 1.35;
   margin: 0;
-  max-width: 360px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 170px;
 }
 
-/* Payment split: Bank instructions left, QR code right (same row) */
+/* Payment split: DuitNow QR Left, Bank instructions Right (same row) */
 .payment-transfer-split {
   display: grid;
-  grid-template-columns: 1fr 230px;
+  grid-template-columns: 200px 1fr;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
   margin-bottom: 24px;
+}
+
+.payment-qr-col {
+  display: flex;
+}
+
+.payment-qr-col .duitnow-qr-card {
+  width: 100%;
 }
 
 .payment-instructions-col {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.payment-qr-col {
-  display: flex;
   justify-content: center;
 }
 
-.payment-qr-col .duitnow-qr-card {
-  margin: 0;
-  max-width: 100%;
+.payment-callout {
+  margin: 0 0 10px 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 @media (max-width: 720px) {
@@ -104,12 +112,22 @@
 .upload-dropzone {
   border: 2px dashed #d2d2d7;
   border-radius: 14px;
-  padding: 1.5rem;
-  background: #fbfbfd;
-  transition: all 0.2s ease;
+  padding: 24px;
+  text-align: center;
+  background: #fafafc;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.upload-dropzone:hover {
+.upload-dropzone:hover, .upload-dropzone.drag-over {
   border-color: #c8102e;
   background: #fff8f8;
+}
+
+.upload-dropzone label {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-main, #1d1d1f);
+  display: block;
+  margin-bottom: 4px;
 }

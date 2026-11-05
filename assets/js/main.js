@@ -31,17 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 3. User dropdown menu toggle & keyboard accessibility
-    const userMenuPill = document.querySelector('.user-account .user-pill');
-    const userDropdown = document.querySelector('.user-dropdown-menu');
+    const userMenuPill = document.querySelector('.user-menu-pill');
+    const userDropdown = document.querySelector('.user-dropdown') || document.querySelector('.user-dropdown-menu');
     if (userMenuPill && userDropdown) {
         userMenuPill.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isOpen = userDropdown.classList.contains('is-open');
+            const isOpen = userDropdown.classList.contains('show') || userDropdown.classList.contains('is-open');
+            userDropdown.classList.toggle('show');
             userDropdown.classList.toggle('is-open');
             userMenuPill.setAttribute('aria-expanded', !isOpen);
         });
-        document.addEventListener('click', (event) => {
-            if (event.target.closest('.user-account')) return;
+        document.addEventListener('click', () => {
+            userDropdown.classList.remove('show');
             userDropdown.classList.remove('is-open');
             userMenuPill.setAttribute('aria-expanded', 'false');
         });
@@ -122,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal-backdrop.show').forEach(m => m.classList.remove('show'));
-            if (userDropdown?.classList.contains('is-open')) {
+            if (userDropdown && (userDropdown.classList.contains('show') || userDropdown.classList.contains('is-open'))) {
+                userDropdown.classList.remove('show');
                 userDropdown.classList.remove('is-open');
                 userMenuPill.setAttribute('aria-expanded', 'false');
                 userMenuPill.focus();

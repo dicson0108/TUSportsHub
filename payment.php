@@ -63,10 +63,22 @@ require_once __DIR__ . "/includes/header.php";
         <section class="journey-card" aria-labelledby="pay-heading">
           <h2 id="pay-heading">Pay <?= format_price($reg["price_snapshot"]) ?></h2>
           
-          <!-- Bank Transfer Instructions on Left, DuitNow QR on Right (Side by Side on same line) -->
+          <!-- DuitNow QR on Left, Bank Transfer Instructions on Right (Side by Side on same line) -->
           <div class="payment-transfer-split">
+            <div class="payment-qr-col">
+              <div class="duitnow-qr-card">
+                <span class="duitnow-qr-badge">DuitNow National QR</span>
+                <div class="duitnow-qr-image-wrapper">
+                  <img src="<?= app_url('/' . ltrim($reg['duitnow_qr_path'] ?: 'assets/images/payment/duitnow-qr.webp', '/')) ?>" alt="DuitNow QR Code" class="duitnow-qr-img" width="140" height="160">
+                </div>
+                <div class="duitnow-qr-caption">
+                  <strong>Scan with Bank or E-Wallet</strong>
+                  <p>Supports Maybank, TNG, CIMB & all DuitNow apps.</p>
+                </div>
+              </div>
+            </div>
             <div class="payment-instructions-col">
-              <div class="journey-callout">
+              <div class="journey-callout payment-callout">
                 <strong>Bank transfer instructions</strong>
                 <p style="white-space:pre-line; margin-top: 6px;"><?= e(
                     $reg["payment_instructions_snapshot"] ?:
@@ -74,18 +86,6 @@ require_once __DIR__ . "/includes/header.php";
                 ) ?></p>
               </div>
               <p class="journey-help">These instructions were saved when you reserved. Keep your transfer receipt. A transfer alone does not submit it to SportsHub.</p>
-            </div>
-            <div class="payment-qr-col">
-              <div class="duitnow-qr-card">
-                <span class="duitnow-qr-badge">DuitNow National QR</span>
-                <div class="duitnow-qr-image-wrapper">
-                  <img src="<?= app_url('/' . ltrim($reg['duitnow_qr_path'] ?: 'assets/images/payment/duitnow-qr.webp', '/')) ?>" alt="DuitNow QR Code" class="duitnow-qr-img" width="180" height="205">
-                </div>
-                <div class="duitnow-qr-caption">
-                  <strong>Scan with Bank or E-Wallet</strong>
-                  <p>Supports Maybank, Touch 'n Go, CIMB & all DuitNow apps.</p>
-                </div>
-              </div>
             </div>
           </div>
 

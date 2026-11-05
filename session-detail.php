@@ -35,22 +35,24 @@ require_once __DIR__ . '/includes/header.php';
     <?php journey_feedback(); ?>
 
     <!-- Breadcrumb -->
-    <div class="session-detail-breadcrumb">
-        <span class="session-eyebrow">SPORTSHUB / SESSIONS</span>
-    </div>
+    <nav class="session-detail-breadcrumb" aria-label="Breadcrumb">
+        <a href="<?= app_url('/sessions.php') ?>">Explore sessions</a> / 
+        <a href="<?= app_url('/sessions.php?sport=' . urlencode($session['sport_type'])) ?>"><?= e($session['sport_type']) ?></a> / 
+        <span class="breadcrumb-current"><?= e($session['title']) ?></span>
+    </nav>
 
-    <!-- Header Titles -->
-    <h1 class="session-detail-title"><?= e($session['title']) ?></h1>
-    <div class="session-detail-subtitle">
-        <?= e($session['club_name']) ?> · Individual session
-    </div>
-
-    <!-- Two-Column UIUX Layout -->
+    <!-- Two-Column Layout (Matching 26TUEventManagement) -->
     <div class="session-detail-layout">
-        <!-- Left Main Column: Media & Explanations -->
+        <!-- Left Main Column: Media, Titles & Explanations -->
         <div class="session-detail-main">
             <div class="session-media-frame">
                 <img src="<?= e(get_session_cover_url($session)) ?>" alt="<?= e($session['title']) ?>">
+            </div>
+
+            <div class="session-eyebrow"><?= strtoupper(e($session['sport_type'])) ?> · <?= strtoupper(e($session['club_name'])) ?></div>
+            <h1 class="session-detail-title"><?= e($session['title']) ?></h1>
+            <div class="session-detail-subtitle">
+                <?= e($session['club_name']) ?> · Campus Sports Session
             </div>
 
             <div class="session-info-card">
