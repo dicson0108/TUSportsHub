@@ -153,7 +153,7 @@ require_once __DIR__ . '/includes/header.php';
                     <a href="<?= app_url('/my-activities.php') ?>" class="journey-button">
                         Keep Registration
                     </a>
-                    <button type="submit" class="journey-button primary" style="background: #c8102e; border-color: #c8102e; color: #fff;">
+                    <button type="submit" class="journey-button primary cancel-spot-button">
                         Request cancellation
                     </button>
                 </div>
@@ -168,7 +168,7 @@ require_once __DIR__ . '/includes/header.php';
                     <a href="<?= app_url('/my-activities.php') ?>" class="journey-button">
                         Keep Registration
                     </a>
-                    <button type="submit" class="journey-button primary" style="background: #c8102e; border-color: #c8102e; color: #fff;">
+                    <button type="submit" class="journey-button primary cancel-spot-button">
                         Yes, Cancel Spot
                     </button>
                 </div>
