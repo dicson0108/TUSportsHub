@@ -4,5 +4,4 @@ assets/uploads/*
 *.log
 Thumbs.db
 .DS_Store
-.archify/
 !assets/uploads/.htaccess
