@@ -46,7 +46,7 @@ require_once __DIR__ . '/../includes/header.php';
         <form method="POST" class="manager-confirm-actions">
             <?= csrf_field() ?>
             <a href="<?= app_url('/manager/sessions.php') ?>" class="manager-btn manager-btn-secondary">
-                Never mind
+                Nevermind
             </a>
             <button type="submit" class="manager-btn manager-btn-danger">
                 Confirm Close Signup
