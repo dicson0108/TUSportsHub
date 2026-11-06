@@ -6,7 +6,8 @@ const {execFileSync} = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const base = process.env.SPORTSHUB_URL || 'http://localhost/MyProject/27TUSportsHub';
+const base = process.env.SPORTSHUB_URL?.replace(/\/+$/, '');
+if (!base) throw new Error('Set SPORTSHUB_URL to your running application URL.');
 const out = path.join(__dirname,'../docs/ux-evidence');
 const fixture = (...args) => execFileSync(process.env.PHP_BINARY || 'php',[path.join(__dirname,'ux-fixtures.php'),...args],{encoding:'utf8'}).trim();
 const read = () => JSON.parse(fixture('read'));
@@ -14,7 +15,9 @@ let png;
 (async()=>{
  fs.mkdirSync(out,{recursive:true});
  const f=JSON.parse(fixture('create'));
- const browser=await chromium.launch({channel:process.env.BROWSER_CHANNEL || 'chrome',headless:true});
+ let browser;
+ try {
+ browser=await chromium.launch({channel:process.env.BROWSER_CHANNEL || 'chrome',headless:true});
  const specimenContext=await browser.newContext({viewport:{width:620,height:300}});
  const specimen=await specimenContext.newPage();
  await specimen.setContent('<div style="font:18px/1.6 system-ui;padding:24px;background:#f5f5f7"><h1 style="font-size:26px;color:#b20820">SYNTHETIC RECEIPT</h1><p>Test artwork · Not proof of settlement</p><p>Amount: RM 15.00<br>Reference: DEMO-UX-ONLY<br>No real transfer occurred</p></div>');
@@ -33,6 +36,9 @@ let png;
  };
  const post=async(page,url,data={},file)=>{
   const token=await page.locator('[name=csrf_token]').first().inputValue();
+  if(url.startsWith('/manager/review-receipt.php') && await page.locator('[name=receipt_id]').count()) {
+   data={receipt_id:await page.locator('[name=receipt_id]').inputValue(),...data};
+  }
   const response=await page.request.post(base+url,file ? {multipart:{csrf_token:token,...data,receipt:{name:'synthetic.png',mimeType:'image/png',buffer:png}}} : {form:{csrf_token:token,...data}});
   return response;
  };
@@ -47,7 +53,6 @@ let png;
    audits.push({name,width,violations:axe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)}))});
   }
  };
- try {
   student=await login('student'); manager=await login('manager'); outsider=await login('outsider');
   await go(student,`/session-detail.php?id=${f.sessions.paid}`);
   await clickSubmit(student,'form[action$="reserve.php"] button');
@@ -83,7 +88,7 @@ let png;
   const evidence=read().receipt_path;
   check('Direct upload directory is private',(await outsider.request.get(base+'/'+evidence)).status()===403);
   check('Other student cannot read evidence',(await outsider.request.get(base+`/evidence.php?registration_id=${rid}`)).status()===403);
-  check('Unappointed student cannot review receipts',(await outsider.request.get(base+`/manager/review-receipt.php?id=${rid}`)).status()===403);
+  check('Wrong-club manager cannot review receipts',(await outsider.request.get(base+`/manager/review-receipt.php?id=${rid}`)).status()===403);
   await go(manager,`/manager/review-receipt.php?id=${rid}`);
   await capture(manager,'review');
   await go(manager,`/manager/participants.php?session_id=${f.sessions.paid}`); await capture(manager,'participants');
@@ -200,5 +205,8 @@ let png;
   fs.writeFileSync(path.join(out,'after-audit.json'),JSON.stringify({checks,audits,errors},null,2));
   check('Axe finds no violations across captured journey states',audits.every(a=>a.violations.length===0));
   console.log(JSON.stringify({passed:checks.length,axeViolations:audits.reduce((n,a)=>n+a.violations.length,0),checks,audits,errors},null,2));
- } finally { await browser.close(); console.log(fixture('cleanup')); }
+ } finally {
+  try { if(browser) await browser.close(); }
+  finally { console.log(fixture('cleanup')); }
+ }
 })().catch(e=>{console.error(e);process.exitCode=1;});

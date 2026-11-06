@@ -65,7 +65,7 @@ No separate PHP/database installation, Composer, npm, or frontend build step is 
 
 ### 2. Place the project in the document root
 
-Clone or download this repository into a folder named `sportshub` inside your package's document root (`htdocs`). Common examples are:
+Clone or download this repository inside your package's document root (`htdocs`). Any project folder name works; these examples use `sportshub`:
 
 | Installation | Example project folder |
 | --- | --- |
@@ -84,29 +84,19 @@ Use the ports actually configured in your installation. See the [XAMPP Windows g
 
 ### 3. Configure the database connection
 
-Open [config/db.php](config/db.php) and set `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`, and `DB_PORT` for your local database. Use the credentials configured in your XAMPP/MAMP installation and a dedicated development database name.
+Set `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`, and `DB_PORT` in the environment used by Apache and CLI PHP. Defaults in [config/db.php](config/db.php) suit a standard local XAMPP installation. Use your package's database credentials and a dedicated development database name; keep private values outside tracked source files. If you edit the defaults locally instead, do not commit your credentials.
 
 XAMPP commonly uses MySQL port `3306`; MAMP's default MySQL port is `8889`. Confirm the actual port in your package settings. The web-server port in the browser URL is separate from this database port.
 
-The current connection does not read `DB_PORT`. To use the configured port, including MAMP's default, replace the `$dsn` assignment inside `get_db_connection()` with:
-
-```php
-$dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';charset=utf8mb4';
-```
+The connection reads `DB_PORT` directly. For MAMP's default database port, set it to `8889` in both Apache's and CLI PHP's environments. The application does not load `.env` files automatically.
 
 Initial setup needs permission to create the database and tables and load demonstration records. Existing installations also need the permissions required by the receipt-history migration. No manual database creation or SQL import is needed when these permissions are available.
 
-### 4. Set the error-page paths
+### 4. Check Apache path handling
 
-Normal application links detect the installation prefix automatically. For a project folder named `sportshub`, update [.htaccess](.htaccess) to use:
+Application links detect the installation prefix automatically. [.htaccess](.htaccess) uses a relative rewrite target for missing pages, so no project folder paths need editing. Enable Apache's `mod_rewrite` and allow `.htaccess` overrides for this directory to use the branded missing-page handler. Without rewriting, Apache handles missing URLs itself. Application permission/errors use the PHP error pages; errors raised directly by Apache use its configured responses.
 
-```apache
-ErrorDocument 403 /sportshub/403.php
-ErrorDocument 404 /sportshub/404.php
-ErrorDocument 500 /sportshub/500.php
-```
-
-If you choose a different folder name, change `/sportshub/` in these three paths to match it. Do not include the hostname or port in an `ErrorDocument` path.
+For aliases or reverse proxies whose public URL differs from the document-root layout, set `APP_BASE_PATH` in the PHP environment to the public prefix (for example `/sportshub`, or `/` for the site root). CLI PHP otherwise defaults to the site root.
 
 Keep [assets/uploads/.htaccess](assets/uploads/.htaccess) in place and ensure Apache honours it. It blocks direct access to financial uploads; authorised access is provided through [evidence.php](evidence.php).
 
@@ -158,17 +148,17 @@ Add your package's PHP executable directory to the terminal's `PATH` if `php` is
 
 ### PHP suites
 
-Run the end-to-end state/helper suite through the disposable-database runner:
+Run all helper, public-rendering, and receipt-migration checks:
 
 ```sh
-php -d zend.assertions=1 -d assert.exception=1 tests/run-existing.php test_e2e.php
+php -d zend.assertions=1 -d assert.exception=1 -d assert.active=1 tests/run.php
 ```
 
-The runner creates and drops a separate test database, so the test database account needs permission for both operations. Keep assertions enabled and use the runner rather than executing the seed-dependent test files directly.
+The runner creates and drops a separate test database, so the test database account needs permission for both operations. It rebases fixture dates relative to the current time, without changing demonstration seed files. Assertions must be enabled; individual suites reject direct execution.
 
-Other suites are `test_m3.php`, `test_m4.php`, `test_m5.php`, `test_m6.php`, and `test_receipt_history.php`. Replace the last filename in the command to run one of them.
+To run one suite, append `test_portability.php`, `test_helpers.php`, or `test_receipt_history.php` to that command.
 
-These PHP suites cover public-page rendering, reservation/capacity helpers, manager scope, review and cancellation states, refunds, and receipt-history migration. Browser tests provide real HTTP-handler and concurrent-reservation coverage.
+`test_portability.php` checks root/nested installations, CLI paths, explicit URL prefixes and database environment overrides. `test_helpers.php` covers email validation, manager scope, CSRF helpers, every seat-occupying state, full/missing sessions, expiry, cancellation eligibility, and public rendering. `test_receipt_history.php` covers legacy evidence backfill, idempotency, and retained decisions. Workflow checks execute real HTTP handlers in the browser suites; the redundant SQL-only milestone and misleadingly named PHP end-to-end tests have been removed.
 
 ### Browser suites
 
@@ -185,7 +175,7 @@ PowerShell example for XAMPP on port 80:
 ```powershell
 $env:NODE_PATH = (Resolve-Path ../sportshub-test-tools/node_modules).Path
 $env:SPORTSHUB_URL = 'http://localhost/sportshub'
-node tests/noted-gaps.cjs
+node tests/regressions.cjs
 node tests/ux-journey.cjs
 ```
 
@@ -194,15 +184,15 @@ macOS shell example for MAMP on port 8888:
 ```sh
 export NODE_PATH="$PWD/../sportshub-test-tools/node_modules"
 export SPORTSHUB_URL='http://localhost:8888/sportshub'
-node tests/noted-gaps.cjs
+node tests/regressions.cjs
 node tests/ux-journey.cjs
 ```
 
-Set `SPORTSHUB_URL` to the URL you use in your browser if your package, port, or project folder differs from these examples. The same commands work in a Linux shell with the appropriate XAMPP URL.
+`SPORTSHUB_URL` is required: set it to the URL you use in your browser, including your package's port and project folder. No developer-specific URL is assumed. The same commands work in a Linux shell with the appropriate XAMPP URL.
 
-Run the browser suites sequentially; they share a disposable-fixture state file. They create generated test accounts and records and clean them up after execution. Browser requests can also run the application's normal overdue-reservation expiry checks.
+Run the browser suites sequentially; they share a disposable-fixture state file. They create generated test accounts, two clubs (including a manager from another club), and records, then clean them up even if browser launch fails. Use a local development installation: browser requests can also run the application's normal overdue-reservation expiry checks. If a process is forcibly terminated, run `php tests/ux-fixtures.php cleanup` before retrying. Set `PHP_BINARY` if the PHP executable is not on `PATH`; `BROWSER_CHANNEL` defaults to `chrome`.
 
-- `noted-gaps.cjs` checks targeted handler, receipt-history, keyboard-navigation, responsive-layout, and styling regressions.
+- `regressions.cjs` checks receipt history, stale decisions, keyboard navigation, responsive layout, portable missing-page routing, immutable published terms, invalid/missing CSRF, wrong-club managers, self-review/refund denial, forged/oversized uploads, invalid refund amounts/proof, and financial rebooking restrictions. Rejected actions must leave database state unchanged; valid actions verify the handlers still work. Exact color/spacing comparisons have been removed.
 - `ux-journey.cjs` checks registration, upload, review, cancellation, refunds, access boundaries, and final-place concurrency. It also runs axe checks and writes local screenshots/results to `docs/ux-evidence/`.
 
 Finite automated checks do not establish complete security, accessibility, usability, or concurrency coverage. Real bank transfers and real-world organiser workflows are not exercised by these suites.

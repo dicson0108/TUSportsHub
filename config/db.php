@@ -2,11 +2,12 @@
 require_once __DIR__ . '/app.php';
 require_once __DIR__ . '/setup.php';
 
-define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'tu_sportshub');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_PORT', 3306);
+// Environment overrides keep each installation's credentials out of Git.
+define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
+define('DB_NAME', getenv('DB_NAME') ?: 'tu_sportshub');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') === false ? '' : getenv('DB_PASS'));
+define('DB_PORT', (int)(getenv('DB_PORT') ?: 3306));
 
 function get_db_connection(): PDO {
     static $pdo = null;

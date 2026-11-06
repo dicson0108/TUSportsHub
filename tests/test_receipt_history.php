@@ -1,11 +1,11 @@
 <?php
-// Run only through run-existing.php, which supplies a disposable database.
-if (PHP_SAPI !== 'cli' || !isset($scratch) || !str_starts_with($scratch, 'tu_sportshub_ux_legacy_')) {
-    throw new RuntimeException('Use tests/run-existing.php test_receipt_history.php');
+// Run only through run.php, which supplies a disposable database.
+if (PHP_SAPI !== 'cli' || !isset($scratch) || !str_starts_with($scratch, 'tu_sportshub_test_')) {
+    throw new RuntimeException('Use tests/run.php test_receipt_history.php');
 }
 $db->exec('DELETE FROM payment_receipts');
 $db->exec("UPDATE registrations SET receipt_path=NULL");
-$db->exec("UPDATE registrations SET receipt_path='assets/uploads/receipts/legacy.png', status='payment_rejected', receipt_uploaded_at='2026-11-01 10:00:00', rejection_reason='Legacy unreadable reference' WHERE id=2");
+$db->exec("UPDATE registrations SET receipt_path='assets/uploads/receipts/legacy.png', status='payment_rejected', receipt_uploaded_at=DATE_SUB(NOW(),INTERVAL 1 HOUR), rejection_reason='Legacy unreadable reference' WHERE id=2");
 initialize_receipt_history($db);
 initialize_receipt_history($db);
 $rows = $db->query('SELECT * FROM payment_receipts WHERE registration_id=2')->fetchAll();

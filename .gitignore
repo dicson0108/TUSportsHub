@@ -5,3 +5,8 @@ assets/uploads/*
 Thumbs.db
 .DS_Store
 !assets/uploads/.htaccess
+# Private environment files and generated browser evidence
+.env
+.env.*
+!.env.example
+docs/ux-evidence/

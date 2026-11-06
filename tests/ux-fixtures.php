@@ -1,5 +1,5 @@
 <?php
-// CLI-only disposable fixtures for tests/ux-journey.cjs. Never touches seeded users/sessions.
+// CLI-only disposable fixtures for both browser suites. Never edits seeded users/sessions.
 if (PHP_SAPI !== "cli") {
     http_response_code(404);
     exit();
@@ -30,6 +30,11 @@ if ($action === "create") {
         $suffix = bin2hex(random_bytes(5));
         $q->execute(["UX Fixture " . $suffix, "ux-fixture-" . $suffix]);
         $club = (int) $db->lastInsertId();
+        $q->execute(["UX Other Club " . $suffix, "ux-other-club-" . $suffix]);
+        $other_club = (int) $db->lastInsertId();
+        $db->prepare("INSERT INTO club_managers (club_id,user_id,appointed_by) VALUES (?,?,?)")->execute([
+            $other_club, $users['outsider']['id'], $users['manager']['id'],
+        ]);
         $db->prepare("INSERT INTO club_managers (club_id,user_id,appointed_by) VALUES (?,?,?)")->execute([
             $club,
             $users["manager"]["id"],
@@ -52,15 +57,20 @@ if ($action === "create") {
         $fixture = [
             "users" => $users,
             "club" => $club,
+            "other_club" => $other_club,
             "sessions" => $sessions,
         ];
+        // Persist cleanup IDs before commit so a failed write cannot orphan fixtures.
+        if (file_put_contents($state_file, json_encode($fixture), LOCK_EX) === false) {
+            throw new RuntimeException('Could not save UX fixture state');
+        }
         $db->commit();
-        file_put_contents($state_file, json_encode($fixture));
         echo json_encode($fixture);
     } catch (Throwable $e) {
         if ($db->inTransaction()) {
             $db->rollBack();
         }
+        if (file_exists($state_file)) unlink($state_file);
         throw $e;
     }
 } else {
@@ -122,7 +132,7 @@ if ($action === "create") {
         }
     } elseif ($action === "review-start") {
         $db->prepare(
-            "UPDATE sessions SET session_date=CURDATE(),start_time=TIME(DATE_SUB(NOW(),INTERVAL 1 MINUTE)),end_time=TIME(DATE_ADD(NOW(),INTERVAL 1 HOUR)) WHERE id=?",
+            "UPDATE sessions SET session_date=DATE(DATE_SUB(NOW(),INTERVAL 1 MINUTE)),start_time=TIME(DATE_SUB(NOW(),INTERVAL 1 MINUTE)),end_time=TIME(DATE_ADD(NOW(),INTERVAL 1 HOUR)) WHERE id=?",
         )->execute([$f["sessions"]["review"]]);
     } elseif ($action === "race-capacity") {
         $db->prepare("UPDATE sessions SET capacity=1 WHERE id=?")->execute([$f["sessions"]["race"]]);
@@ -150,7 +160,7 @@ if ($action === "create") {
                 @unlink(__DIR__ . "/../" . $p);
             }
         }
-        $db->prepare("DELETE FROM clubs WHERE id=?")->execute([$f["club"]]);
+        $db->prepare("DELETE FROM clubs WHERE id IN (?,?)")->execute([$f["club"], $f['other_club'] ?? $f['club']]);
         $db->prepare("DELETE FROM users WHERE id IN (?,?,?)")->execute($ids);
         unlink($state_file);
         echo "Fixtures removed";
