@@ -7,9 +7,9 @@ if (PHP_SAPI !== 'cli') {
 if ((int)ini_get('zend.assertions') !== 1 || !(bool)ini_get('assert.exception') || !(bool)ini_get('assert.active')) {
     throw new RuntimeException('Run php -d zend.assertions=1 -d assert.exception=1 -d assert.active=1 tests/run.php');
 }
-$names = array_slice($argv, 1) ?: ['test_portability.php', 'test_helpers.php', 'test_receipt_history.php'];
+$names = array_slice($argv, 1) ?: ['test_portability.php', 'test_csrf.php', 'test_helpers.php', 'test_receipt_history.php'];
 foreach ($names as $name) {
-    if (!in_array($name, ['test_portability.php', 'test_helpers.php', 'test_receipt_history.php'], true)) {
+    if (!in_array($name, ['test_portability.php', 'test_csrf.php', 'test_helpers.php', 'test_receipt_history.php'], true)) {
         throw new RuntimeException('Unknown test');
     }
 }

@@ -1,14 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
-
-function start_session_safe(): void {
-    if (session_status() === PHP_SESSION_NONE) {
-        ini_set('session.cookie_httponly', '1');
-        ini_set('session.use_only_cookies', '1');
-        ini_set('session.cookie_samesite', 'Lax');
-        session_start();
-    }
-}
+require_once __DIR__ . '/csrf.php';
 
 // Student email validation - student accounts must use @sd.taylors.edu.my
 function is_valid_student_email(string $email): bool {
@@ -94,25 +86,4 @@ function is_club_manager(int $club_id, int $user_id): bool {
     $stmt = $db->prepare("SELECT 1 FROM club_managers WHERE club_id = :club_id AND user_id = :user_id LIMIT 1");
     $stmt->execute([':club_id' => $club_id, ':user_id' => $user_id]);
     return (bool) $stmt->fetchColumn();
-}
-
-// CSRF tokens
-function csrf_token(): string {
-    start_session_safe();
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    return $_SESSION['csrf_token'];
-}
-
-function csrf_field(): string {
-    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') . '">';
-}
-
-function verify_csrf_token(?string $token): bool {
-    start_session_safe();
-    if (empty($token) || empty($_SESSION['csrf_token'])) {
-        return false;
-    }
-    return hash_equals($_SESSION['csrf_token'], $token);
 }

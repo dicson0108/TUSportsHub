@@ -133,7 +133,7 @@ Managers cannot approve their own payment or record their own refund; another au
 | `reserve.php`, `payment.php`, `upload-receipt.php`, `cancel-registration.php` | Registration and payment-evidence journey. |
 | `my-activities.php` | The signed-in student's registration status and history. |
 | `manager/` | Club-scoped session, participant, review, and refund operations. |
-| `includes/` | Shared authentication, branding, navigation, error handling, and helpers. |
+| `includes/` | Shared authentication, CSRF/session helpers (`csrf.php`), branding, navigation, error handling, and helpers. |
 | `config/` | Application paths, database connection, setup, and migrations. |
 | `database/` | Schema, demonstration seed data, and receipt-history migration. |
 | `assets/css/`, `assets/js/`, `assets/images/` | Frontend styles, interactions, and imagery. |
@@ -156,7 +156,7 @@ php -d zend.assertions=1 -d assert.exception=1 -d assert.active=1 tests/run.php
 
 The runner creates and drops a separate test database, so the test database account needs permission for both operations. It rebases fixture dates relative to the current time, without changing demonstration seed files. Assertions must be enabled; individual suites reject direct execution.
 
-To run one suite, append `test_portability.php`, `test_helpers.php`, or `test_receipt_history.php` to that command.
+To run one suite, append `test_portability.php`, `test_csrf.php`, `test_helpers.php`, or `test_receipt_history.php` to that command. CSRF checks can also run without a database: `php -d zend.assertions=1 -d assert.exception=1 -d assert.active=1 tests/test_csrf.php`.
 
 `test_portability.php` checks root/nested installations, CLI paths, explicit URL prefixes and database environment overrides. `test_helpers.php` covers email validation, manager scope, CSRF helpers, every seat-occupying state, full/missing sessions, expiry, cancellation eligibility, and public rendering. `test_receipt_history.php` covers legacy evidence backfill, idempotency, and retained decisions. Workflow checks execute real HTTP handlers in the browser suites; the redundant SQL-only milestone and misleadingly named PHP end-to-end tests have been removed.
 
